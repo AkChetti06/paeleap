@@ -27,7 +27,7 @@ Open the URL shown by Streamlit. The default runs without an API key but produce
 Source: [Alibaba Wan T2I API reference](https://www.alibabacloud.com/help/en/model-studio/text-to-image-v2-api-reference).
 
 ## Optional LLM captions
-Set `TEXT_API_KEY`, `TEXT_BASE_URL` (full OpenAI-compatible **/v1** base path), and `TEXT_MODEL`. Select **LLM API 生成**. Without a configured text provider, the app explicitly falls back to the offline copy template. Captions must be reviewed for factual accuracy before publishing.
+Set `TEXT_API_KEY`, `TEXT_BASE_URL` (full OpenAI-compatible **/v1** base path), and `TEXT_MODEL`. Select **LLM API 生成**. LLM mode requires a configured text provider and reports errors explicitly; it never substitutes an offline template. Captions must be reviewed for factual accuracy before publishing.
 
 ## Constraints and report
 - Week 2: **one promotional post**, not a full style-template library (Week 3), image-to-video (Week 4), or full post generator (Week 5).
@@ -107,7 +107,24 @@ The app does not verify attraction facts or publish to Xiaohongshu. Demo images 
 ## v5 UI changes (Week 2)
 - Removed the provider-configuration and Week 1 evidence accordions and the two explanatory captions under generation controls.
 - Studio/Preview headings no longer use numeric prefixes.
-- Visual direction is suggested based on selected attraction/category and remains fully overridable. Selecting a new attraction or category resets the initial suggestion; other field changes preserve manual style choice.
-- Generated image and formatted Xiaohongshu post display together by default. Use the pencil **Edit post** control to edit title, caption and hashtags, then **Done editing** to return to the visual preview. Downloads reflect edits.
+- Visual direction is suggested based on selected attraction/category and remains fully overridable. Changing the attraction, category or story angle updates the suggestion; ordinary reruns and audience changes preserve manual style choice.
+- The generated image and always-editable title, caption and hashtags display together. There is no edit button. Downloads reflect edits.
 - The image remains a clearly identified demo placeholder or illustrative AI-generated concept (not a verified photograph).
 # paeleap
+
+
+## Week 2 generation improvements
+
+- Chinese AI captions request a concrete, truthful title, natural short paragraphs, useful viewing suggestions, and 4–6 relevant unique hashtags. The brief is context, not verified factual evidence; no live facts are retrieved.
+- Both caption languages share strict JSON validation. Missing credentials, failed requests and invalid responses raise errors without template substitution. Offline templates remain an explicit selection.
+- Style recommendations consider category, destination and night/family story angles. Manual selection stays available.
+- `.env` loads explicitly from the application folder without overriding existing environment variables. Credentials are never included in post downloads; raw SDK/server error bodies are not shown. `.streamlit/secrets.toml` is ignored as well.
+- Cloudflare FLUX.1-schnell REST integration matches the [official model contract](https://developers.cloudflare.com/workers-ai/models/flux-1-schnell/): bearer authentication, prompt up to 2048 characters, four steps, Base64 image output. This model does not expose width/height parameters in that contract; a requested portrait composition is not a guaranteed output aspect ratio.
+- Automated tests cover mocked API responses, caption validation, safe errors, recommendations and bilingual editable UI behavior. Streamlit 1.50 AppTest requires a test-only radio adapter for its single segmented language widget; the production UI keeps the segmented control.
+- Live Cloudflare, Hugging Face, Alibaba Wan and text-model calls have not been exercised. Test success does not establish account permissions, credits, model availability or generated-content quality.
+
+## Editorial UI reference
+
+The Streamlit interface follows the supplied desktop/mobile Figma screenshots: ivory `#f8f6f1`, sand `#eae4d9`, clay `#a34f30`, charcoal `#33332f`, sage `#879384`, Cormorant Garamond headings, DM Sans body and Noto Sans SC Chinese text. Presentation is isolated in `studio.css`; generation functions and `.env` handling are unchanged. Native controls remain keyboard accessible and title, caption and hashtags stay directly editable. Existing destination presets, manual style selection, fallback controls, exports and evaluation remain available.
+
+Streamlit differences: native fields use focus/blur submission rather than true contenteditable text; long titles scroll within their single-line field. Native widgets, column stacking and image dimensions prevent pixel-identical desktop/mobile layout. Font loading needs Google Fonts access, with local serif/sans fallbacks. Actual image dimensions are preserved rather than cropping to the reference's 4:5 frame. The photographed lake is reference artwork, not a bundled generated result. Caption download is retained instead of claiming a clipboard copy succeeded. No fabricated percentage progress, cancellation, clipboard/download-success toast or image-only retry is added: those reference states would require additional application behavior. Native loading/error feedback and previous-result preservation remain in place. CSS uses Streamlit widget hooks, which may need review after framework upgrades.

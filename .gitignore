@@ -1,13 +1,9 @@
 .env
+.env.*
+!.env.example
+.streamlit/secrets.toml
 .venv/
 __pycache__/
 .pytest_cache/
-outputs/
-
-.env
-.env.*
-!.env.example
-.venv/
-__pycache__/
 outputs/
 .DS_Store
