@@ -154,11 +154,12 @@ def test_bilingual_ui_manual_style_and_editable_fields(monkeypatch,tmp_path):
  import dotenv
  monkeypatch.setattr(dotenv,"load_dotenv",lambda **kwargs:None)
  # AppTest 1.50 cannot serialize the single segmented control; adapt only in tests.
- monkeypatch.setattr(st,'segmented_control',lambda label,options,default=None,**kw:st.radio(label,options,index=options.index(default),**kw))
+ monkeypatch.setattr(st,'segmented_control',lambda label,options,default=None,**kw:st.radio(label,options,index=options.index(st.session_state.get(kw.get('key'),default)),**kw))
  monkeypatch.setattr(engine,'save_output',lambda *a,**k:tmp_path)
  monkeypatch.setattr(engine,'provider_status',lambda *a,**k:{'cloudflare':False,'huggingface':False,'alibaba_wan':False})
  app=AppTest.from_file(str(Path(__file__).resolve().parents[1]/'app.py')).run()
  assert not app.exception
+ assert app.radio(key='language').value=='English'
  app.selectbox(key='visual_style_choice').select('Traditional Editorial').run()
  assert app.selectbox(key='visual_style_choice').value=='Traditional Editorial'
  app.button[0].click().run()
@@ -171,6 +172,12 @@ def test_bilingual_ui_manual_style_and_editable_fields(monkeypatch,tmp_path):
  assert not app.exception
  assert app.text_input(key='draft_title').value=='Edited title'
  assert all('Edit post' not in b.label for b in app.button)
+ assert app.radio(key='language').value=='中文'
+ app.run()
+ assert app.radio(key='language').value=='中文'
+ app.radio(key='language').set_value('English').run()
+ assert not app.exception
+ assert app.radio(key='language').value=='English'
 
 
 def test_env_loading_preserves_environment_and_git_exclusions(tmp_path,monkeypatch):
