@@ -8,6 +8,7 @@ from pathlib import Path
 
 import streamlit as st
 from dotenv import load_dotenv
+from ui_banner import render_banner
 from engine import (ATTRACTIONS, STYLES, TASKS, plan, localized_copy,
                     placeholder, generate_wan_image, generate_hf_image, generate_with_fallback, provider_status, save_output, recommend_style, safe_error)
 
@@ -49,11 +50,11 @@ with bar_left:
 with bar_right:
     lang=st.segmented_control('Language / 语言',['English','中文'],format_func=lambda v:'EN' if v=='English' else '中文',default='English',key='language',label_visibility='collapsed') or 'English'
 t=COPY[lang]
-st.markdown(f'''<div class="hero"><div class="hero-label">{escape(t['eyebrow'])}</div><div class="hero-title">{escape(t['headline'])}</div><div class="hero-sub">{escape(t['subhead'])}</div><div class="edition">TRAVEL NOTES / 001</div></div>''',unsafe_allow_html=True)
+st.markdown(render_banner(t, lang), unsafe_allow_html=True)
 
 left,right=st.columns([0.84,1.16],gap='large')
 with left:
-    st.markdown(f'<div class="panel-title"><span>01</span>{escape(t["workspace"])}</div><div class="panel-sub">{escape(t["workspace_sub"])}</div>',unsafe_allow_html=True)
+    st.markdown(f'<div class="heading-box"><div class="panel-title"><span>01</span>{escape(t["workspace"])}</div><div class="panel-sub">{escape(t["workspace_sub"])}</div></div>',unsafe_allow_html=True)
     with st.container(border=True, key='brief_card'):
         names=list(ATTRACTIONS)
         display={a:(ATTRACTIONS[a].get('name_en',a)+' · '+a) if lang=='English' else a for a in names}
@@ -106,7 +107,7 @@ if clicked:
             st.warning('Previous successful post remains below. / 下方保留的是上次成功生成的笔记。')
 
 with right:
-    st.markdown(f'<div class="panel-title"><span>02</span>{escape(t["preview"])}</div><div class="panel-sub">{escape(t["preview_sub"])}</div>',unsafe_allow_html=True)
+    st.markdown(f'<div class="heading-box"><div class="panel-title"><span>02</span>{escape(t["preview"])}</div><div class="panel-sub">{escape(t["preview_sub"])}</div></div>',unsafe_allow_html=True)
     with st.container(border=False, key='preview_stage'):
         st.markdown('<div class="preview-label">'+('REDNOTE · POST PREVIEW' if lang=='English' else '小红书 · 图文预览')+'</div>',unsafe_allow_html=True)
         if 'result' not in st.session_state:
