@@ -24,55 +24,37 @@ COPY={
   'demo':'免费预览 · 非 AI 图片','hf':'Hugging Face · 有限免费额度','cloudflare':'Cloudflare Workers AI · 每日免费额度','wan':'阿里云 Wan · 付费 API','rule':'本地文案模板 · 免费','llm':'LLM API · 需配置密钥','api_note':'Cloudflare 有每日免费额度，Hugging Face 额度可能用完。真实生成需配置 API 密钥。','notice':'本原型仅用于研究测试；生成图片不是现场实拍，发布前必须人工核实事实。','expand':'为什么这样设计？· 第一周研究依据','evidence':'**20 篇参考笔记**：风景区 7 篇、文博场所 7 篇、研学场所 6 篇，为定向样本，并非全平台热度排行榜。核心结构是**来访理由 → 可跟随顺序 → 可信证据**。风景区重路线，文博重藏品，研学重任务与成果。','image':'AI 概念图片 — 非现场实拍','placeholder':'离线演示占位图 — 非 AI 生成图片','download_image':'↓  下载图片','download_copy':'↓  下载文案','download_json':'↓  下载 JSON','prompt':'图片提示词','review':'内容质量检查','review_note':'发布前检查地标外观、路线、活动信息和文案是否准确。占位图不能用于 AI 图像质量评估。','score':'加权评估分数','metric1':'视觉质量 · 25%','metric2':'地标准确性 · 25%','metric3':'风格一致性 · 20%','metric4':'成本效率 · 15%','metric5':'集成性能 · 15%','eval_download':'↓  导出评估','done':'生成完成','loc_note':'文案语言将跟随界面语言。切换语言后需重新生成对应文案。','config_error':'请先在 .env 中配置对应的 API 密钥。','category_map':{'风景区':'风景区','文博场所':'文博场所','研学场所':'研学场所'},'source':'笔记预览','edit':'✎ 编辑笔记','save_edit':'✓ 完成编辑','features':'研究驱动  ·  双语支持  ·  多模型支持','provider_status':'接口配置状态','configured':'已配置 · 未验证','missing':'未配置','fallback':'自动备用接口（可选）','fallback_none':'不使用备用接口','fallback_help':'仅主接口失败时调用备用接口，可能产生费用。','active_backend':'实际使用图片接口','fallback_used':'已使用备用接口'}
 }
 
-st.markdown('''<style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap');
-html,body,[class*="css"], [data-testid="stApp"] {font-family:'DM Sans',system-ui,sans-serif;}
-.stApp {background: #f7f5f0;color:#28332f;}
-.block-container {max-width:1320px;padding-top:1.6rem;padding-bottom:3rem;}
-header[data-testid="stHeader"] {background:transparent;}
-[data-testid="stToolbar"] {visibility:hidden;}
-h1,h2,h3 {color:#203d35;letter-spacing:-.025em;}
-.hero {position:relative;border-radius:27px;background:linear-gradient(115deg,#163e35 0%,#235444 62%,#36765a 100%);padding:45px 54px;color:#fff;overflow:hidden;margin-bottom:25px;box-shadow:0 14px 34px rgba(26,65,50,.14);}
-.hero:after {content:'✳';font-size:350px;position:absolute;right:-10px;top:-160px;color:rgba(255,255,255,.065);transform:rotate(-22deg);pointer-events:none;}
-.hero-label {color:#c6dfce;font-size:11px;letter-spacing:2.2px;font-weight:700;margin-bottom:14px;}
-.hero-title {font-family:'Playfair Display',Georgia,serif;color:#fff;font-size:clamp(34px,4vw,60px);line-height:1.08;letter-spacing:-1px;margin:0 0 14px;max-width:850px;}
-.hero-sub {color:#e3eee7;max-width:700px;font-size:15px;line-height:1.8;margin:0 0 26px;}
-.hero-pill {border:1px solid rgba(255,255,255,.26);background:rgba(255,255,255,.09);padding:9px 15px;border-radius:99px;color:#e3f1e9;font-size:11px;letter-spacing:1.2px;display:inline-block;}
-.panel-title {font-size:21px;font-weight:700;color:#1b3b30;margin:8px 0 0;letter-spacing:-.6px;}
-.panel-sub {font-size:13px;color:#74857c;margin-bottom:17px;}
-.small-overline {font-size:11px;color:#5d856e;font-weight:700;letter-spacing:1.6px;margin-bottom:8px;}
-.stButton>button[kind="primary"] {background:#d28b4b!important;color:#fff!important;border:0;border-radius:13px!important;font-weight:700;min-height:50px;box-shadow:0 8px 18px rgba(210,139,75,.19);}
-.stButton>button[kind="primary"]:hover {background:#ba7538!important;color:#fff!important;}
-.stDownloadButton>button {background:white;border:1px solid #dce6de;border-radius:11px;font-weight:600;color:#245244;}
-[data-testid="stVerticalBlockBorderWrapper"] {background:#fff;border:1px solid #e5ebe5!important;border-radius:22px!important;box-shadow:0 5px 24px rgba(26,49,35,.035);}
-[data-testid="stTextInput"] input, [data-testid="stSelectbox"] div[data-baseweb="select"]>div {background:#fbfcf9;border-color:#dfe6dc;border-radius:11px;}
-[data-testid="stImage"] img {border-radius:16px;}
-.preview-placeholder {height:420px;border-radius:16px;background:radial-gradient(ellipse at 75% 30%,#c9d9c8,#eff1e7 60%,#f7f4e9);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;color:#537963;text-align:center;padding:30px;}
-.placeholder-symbol {font-size:75px;opacity:.6;line-height:1;}
-.preview-placeholder strong {color:#2c5644;font-size:19px;}
-.xhs-post {background:white;border:1px solid #f0ece8;border-radius:0 0 17px 17px;padding:20px 22px 16px;box-shadow:0 3px 14px rgba(30,25,20,.035);line-height:1.7;}
-.xhs-title {font-size:20px;font-weight:800;color:#202525;margin-bottom:15px;}
-.xhs-caption {font-size:14px;line-height:1.9;color:#383c3a;white-space:normal;overflow-wrap:anywhere;}
-.xhs-tags {font-size:14px;line-height:2;padding-top:13px;}
-.xhs-meta {border-top:1px solid #f1f1f1;margin-top:14px;padding-top:12px;color:#9da6a0;font-size:11px;}
-.step-line {display:flex;gap:8px;flex-wrap:wrap;margin-top:15px;}
-.step-pill {font-size:11px;color:#567365;background:#e8f0e8;border-radius:100px;padding:7px 12px;font-weight:700;}
-[data-testid="stCaptionContainer"] {color:#73857a;}
-@media(max-width:700px){.hero{padding:30px 24px;border-radius:19px}.hero-title{font-size:36px}.preview-placeholder{height:290px}}
-</style>''',unsafe_allow_html=True)
+# Presentation only: generation and credential handling remain unchanged.
+COPY['English'].update(eyebrow='A LITTLE WANDER. A GREAT STORY.', headline='Turn places into stories.',
+    subhead='Your next RedNote travel post, thoughtfully written and beautifully imagined.',
+    workspace='Start with a place', workspace_sub='Set the scene. We’ll help you find the story.',
+    preview='Your story, taking shape', preview_sub='Edit the title, caption or hashtags directly. No extra steps, just your own voice.',
+    name='Tourist attraction', scene='Category', audience='Target audience', angle='Creative angle',
+    picture='Image provider', copy_mode='Caption mode', generate='Generate post ✦',
+    no_result='Your next escape, imagined.', no_result_sub='Add a place and choose your direction. Your image and story will appear here.',
+    download_image='↓  Download image', download_copy='↓  Save caption')
+COPY['English']['category_map']={'风景区':'Scenic','文博场所':'Museum & heritage','研学场所':'Study tour'}
+COPY['中文'].update(eyebrow='灵感始于远方，故事由你书写', headline='让每个目的地，都有好故事。',
+    subhead='从一个地名开始，用 AI 创作有温度的小红书旅行图文。',
+    workspace='从一个目的地开始', workspace_sub='告诉我们你的灵感，其余交给创作。',
+    preview='故事，正在发生', preview_sub='直接编辑标题、正文与话题标签，让文字更像你。',
+    name='景点名称', scene='景点类别', audience='目标受众', angle='创作角度',
+    picture='图片来源', copy_mode='文案模式', generate='生成图文 ✦',
+    no_result='想象下一次出发。', no_result_sub='添加景点，选择创作方向，你的图片与故事将在这里出现。')
+st.markdown('<style>' + (Path(__file__).parent / 'studio.css').read_text() + '</style>', unsafe_allow_html=True)
 
 bar_left,bar_right=st.columns([5,1.3],vertical_alignment='center')
 with bar_left:
-    st.markdown('<div style="font-weight:800;color:#2c5b47;letter-spacing:2px;font-size:14px">✦ PAELEAP <span style="font-weight:500;color:#9aad9d"> / CREATOR STUDIO</span></div>',unsafe_allow_html=True)
+    st.markdown('<div class="brand"><span>＊</span> PAELEAP STUDIO</div>',unsafe_allow_html=True)
 with bar_right:
-    lang=st.segmented_control('Language / 语言',['English','中文'],default='English',key='language',label_visibility='collapsed') or 'English'
+    lang=st.segmented_control('Language / 语言',['English','中文'],format_func=lambda v:'EN' if v=='English' else '中文',default='English',key='language',label_visibility='collapsed') or 'English'
 t=COPY[lang]
-st.markdown(f'''<div class="hero"><div class="hero-label">{escape(t['eyebrow'])}</div><div class="hero-title">{escape(t['headline'])}</div><div class="hero-sub">{escape(t['subhead'])}</div><div class="hero-pill">{escape(t['features'])}</div></div>''',unsafe_allow_html=True)
+st.markdown(f'''<div class="hero"><div class="hero-label">{escape(t['eyebrow'])}</div><div class="hero-title">{escape(t['headline'])}</div><div class="hero-sub">{escape(t['subhead'])}</div><div class="edition">TRAVEL NOTES / 001</div></div>''',unsafe_allow_html=True)
 
-left,right=st.columns([0.89,1.11],gap='large')
+left,right=st.columns([0.84,1.16],gap='large')
 with left:
-    with st.container(border=True):
-        st.markdown(f'<div class="small-overline">STUDIO</div><div class="panel-title">{escape(t["workspace"])}</div><div class="panel-sub">{escape(t["workspace_sub"])}</div>',unsafe_allow_html=True)
+    st.markdown(f'<div class="panel-title"><span>01</span>{escape(t["workspace"])}</div><div class="panel-sub">{escape(t["workspace_sub"])}</div>',unsafe_allow_html=True)
+    with st.container(border=True, key='brief_card'):
         names=list(ATTRACTIONS)
         display={a:(ATTRACTIONS[a].get('name_en',a)+' · '+a) if lang=='English' else a for a in names}
         display['custom']=t['custom']
@@ -80,7 +62,7 @@ with left:
         attraction=st.text_input(t['name'],value=chosen if chosen!='custom' else '',placeholder='e.g. 杭州西湖 / West Lake',key='custom_name' if chosen=='custom' else f'name_{chosen}')
         found=ATTRACTIONS.get(attraction,{})
         categories=list(TASKS)
-        category=st.selectbox(t['scene'],categories,index=categories.index(found.get('category','风景区')),format_func=lambda v:t['category_map'][v])
+        category=st.radio(t['scene'],categories,index=categories.index(found.get('category','风景区')),format_func=lambda v:t['category_map'][v],horizontal=True,key='category')
         styles=list(STYLES)
         audience=st.text_input(t['audience'],value=t['audience_default'])
         angle=st.text_input(t['angle'],placeholder=t['angle_placeholder'])
@@ -97,7 +79,10 @@ with left:
         img_mode=st.selectbox(t['picture'],mode_values,format_func=lambda v:t[v],index=(1 if provider_status()['cloudflare'] else 2 if provider_status()['huggingface'] else 3 if provider_status()['alibaba_wan'] else 0))
         fallback_choice=st.selectbox(t['fallback'],['none']+[key for key in ['cloudflare','hf','wan'] if key!=img_mode],format_func=lambda v:t['fallback_none'] if v=='none' else t[v],help=t['fallback_help'])
         copy_mode=st.selectbox(t['copy_mode'],['rule','llm'],format_func=lambda v:t[v])
-        clicked=st.button(t['generate'],type='primary',use_container_width=True)
+        st.divider()
+        clicked=st.button(t['generate'],type='primary',use_container_width=True,disabled=not attraction.strip())
+        st.caption('One image, a title, a caption, and a little inspiration.' if lang=='English' else '一次生成封面、标题、正文与话题标签。')
+    st.markdown('<div class="human-note">＊ &nbsp; '+('A starting point, never a substitute for you.<small>Make the words your own. Edit directly in the preview.</small>' if lang=='English' else 'AI 提供灵感，你保留自己的声音。<small>直接编辑预览中的标题和正文，添上你的独家体验。</small>')+'</div>',unsafe_allow_html=True)
 
 if clicked:
     try:
@@ -121,17 +106,19 @@ if clicked:
             st.warning('Previous successful post remains below. / 下方保留的是上次成功生成的笔记。')
 
 with right:
-    with st.container(border=True):
-        st.markdown(f'<div class="small-overline">PREVIEW</div><div class="panel-title">{escape(t["preview"])}</div><div class="panel-sub">{escape(t["preview_sub"])}</div>',unsafe_allow_html=True)
+    st.markdown(f'<div class="panel-title"><span>02</span>{escape(t["preview"])}</div><div class="panel-sub">{escape(t["preview_sub"])}</div>',unsafe_allow_html=True)
+    with st.container(border=False, key='preview_stage'):
+        st.markdown('<div class="preview-label">'+('REDNOTE · POST PREVIEW' if lang=='English' else '小红书 · 图文预览')+'</div>',unsafe_allow_html=True)
         if 'result' not in st.session_state:
             st.markdown(f'<div class="preview-placeholder"><div class="placeholder-symbol">✧</div><strong>{escape(t["no_result"])}</strong><div>{escape(t["no_result_sub"])}</div><div class="step-line"><span class="step-pill">{escape(t["tag1"])}</span><span class="step-pill">{escape(t["tag2"])}</span><span class="step-pill">{escape(t["tag3"])}</span></div></div>',unsafe_allow_html=True)
         else:
             p,copy,img,backend,elapsed,folder,result_lang,fallback_note=st.session_state['result']
+            st.markdown('<div class="post-masthead"><span class="avatar">p.</span><div>PAELEAP 旅行手记<small>'+escape(p['attraction'])+'</small></div><span class="post-menu">···</span></div>',unsafe_allow_html=True)
             st.image(img,caption=t['placeholder'] if backend=='placeholder' else t['image'],use_container_width=True)
             # Always-visible editable post fields; values persist across Streamlit reruns.
-            st.text_input('Title / 标题',key='draft_title')
-            st.text_area('Caption / 正文',key='draft_caption',height=220)
-            st.text_input('Hashtags / 话题标签',key='draft_hashtags')
+            st.text_input('Title / 标题',key='draft_title',label_visibility='collapsed')
+            st.text_area('Caption / 正文',key='draft_caption',height=280,label_visibility='collapsed')
+            st.text_area('Hashtags / 话题标签',key='draft_hashtags',height=85,label_visibility='collapsed')
             final_copy={**copy,'title':st.session_state['draft_title'],'caption':st.session_state['draft_caption'],
                         'hashtags':st.session_state['draft_hashtags'].split(),
                         'edited_after_generation':any([st.session_state['draft_title']!=copy['title'],st.session_state['draft_caption']!=copy['caption'],st.session_state['draft_hashtags']!=' '.join(copy['hashtags'])])}
@@ -146,7 +133,7 @@ with right:
             st.download_button(t['download_json'],json.dumps({'plan':p,'post':final_copy,'backend':backend,'language':result_lang,'source_copy':copy},ensure_ascii=False,indent=2),file_name='paeleap_post.json',mime='application/json',use_container_width=True)
             with st.expander(t['prompt']):st.code(p['image_prompt'],language='text')
 
-st.info(t['notice'])
+st.markdown('<div class="footer"><span>PAELEAP STUDIO / '+('MADE FOR EXPLORING' if lang=='English' else '为探索而生')+'</span><span>'+escape(t['notice'])+'</span></div>',unsafe_allow_html=True)
 if 'result' in st.session_state:
     with st.expander(t['review']):
         st.caption(t['review_note'])
