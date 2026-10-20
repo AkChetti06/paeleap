@@ -1,0 +1,8 @@
+# Keep the editorial palette consistent with the custom studio CSS.
+[theme]
+base = "light"
+primaryColor = "#a34f30"
+backgroundColor = "#f8f6f1"
+secondaryBackgroundColor = "#eae4d9"
+textColor = "#33332f"
+font = "sans serif"

@@ -92,3 +92,50 @@ hr{border-color:var(--line)!important}
 @keyframes destination-reel{0%,30%{opacity:1;visibility:visible;transform:translateX(0)}33.333%,96%{opacity:0;visibility:hidden;transform:translateX(-28px)}97%{opacity:0;visibility:hidden;transform:translateX(28px)}100%{opacity:1;visibility:visible;transform:translateX(0)}}
 @media(prefers-reduced-motion:reduce){.destination-slide{animation:none;opacity:0;visibility:hidden}.destination-slide:first-child{opacity:1;visibility:visible}}
 @media(max-width:760px){.heading-box{padding:18px;min-height:112px}.destination-hero{min-height:470px;align-items:flex-start}.hero-copy{width:100%;padding:28px 24px}.destination-hero .hero-title{font-size:42px;max-width:85%}.destination-hero .hero-sub{max-width:90%;font-size:12px}.destination-images{inset:100px 0 0}.destination-images:after{background:linear-gradient(180deg,#eae4d9 0%,rgba(234,228,217,.8) 25%,transparent 65%)}.destination-slide figcaption{right:12px;bottom:65px}.destination-slide figcaption b{font-size:24px}}
+
+/* This studio intentionally uses a light palette, including with a dark OS preference.
+   Pair explicit foregrounds with the existing light surfaces; color-scheme alone
+   does not override Streamlit's theme-generated widget colors. */
+:root{color-scheme:only light}
+[data-testid="stApp"], [data-testid="stAppViewContainer"], [data-testid="stMain"]{
+  color-scheme:only light;background-color:var(--ivory);color:var(--charcoal);
+}
+[data-testid="stWidgetLabel"], [data-testid="stWidgetLabel"] p,
+[data-testid="stMarkdownContainer"], [data-testid="stMetric"],
+[data-testid="stRadio"] label, .post-masthead{color:var(--charcoal)}
+[data-testid="stTextInput"] input,[data-testid="stTextArea"] textarea,
+[data-baseweb="select"]>div{
+  color:var(--charcoal)!important;caret-color:var(--clay);color-scheme:only light;
+}
+input::placeholder,textarea::placeholder{color:#77756d!important;opacity:1}
+[data-baseweb="select"] svg{color:var(--charcoal)!important;fill:currentColor}
+/* BaseWeb dropdowns render outside the app container in a portal. */
+[data-baseweb="popover"],[data-baseweb="menu"],[role="listbox"]{
+  color-scheme:only light;background-color:#fff!important;color:var(--charcoal)!important;
+}
+[role="option"]{background-color:#fff!important;color:var(--charcoal)!important}
+[role="option"]:hover,[role="option"][aria-selected="true"]{background-color:var(--sand)!important}
+.stButton>button:not([kind="primary"]),.stDownloadButton>button{
+  color:var(--charcoal)!important;background-color:var(--ivory)!important;border-color:var(--line)!important;
+}
+.stButton>button:disabled,.stDownloadButton>button:disabled{
+  color:#77756d!important;background-color:#e7e2da!important;
+}
+.st-key-language button{color:var(--charcoal)!important}
+.st-key-language button[aria-pressed="true"]{color:var(--charcoal)!important;background-color:#fff!important}
+[data-testid="stExpander"]{background:var(--ivory);border-color:var(--line);color:var(--charcoal)}
+[data-testid="stExpander"] summary{background:var(--ivory)!important;color:var(--charcoal)!important}
+[data-testid="stExpander"] summary:hover{background:var(--sand)!important;color:var(--charcoal)!important}
+[data-testid="stCode"],[data-testid="stCode"] pre,[data-testid="stCode"] code{
+  background:var(--sand)!important;color:var(--charcoal)!important;
+}
+/* Retain semantic status backgrounds, but keep their text readable in light mode. */
+[data-testid="stAlert"]{background-color:#f5e7dd;color:var(--charcoal)}
+[data-testid="stAlert"] [data-testid="stMarkdownContainer"]{color:var(--charcoal)}
+/* Higher-specificity preview tags must retain the editorial accent. */
+.st-key-preview_stage textarea[aria-label="Hashtags / 话题标签"]{color:var(--clay)!important}
+/* Button labels are Markdown descendants; preserve the white-on-clay action. */
+.stButton>button[kind="primary"] [data-testid="stMarkdownContainer"]{color:inherit!important}
+[data-testid="stCaptionContainer"], [data-testid="stCaptionContainer"] p{
+  color:#66645c!important;opacity:1;
+}
