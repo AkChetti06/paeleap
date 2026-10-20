@@ -26,10 +26,7 @@ def render_banner(t, lang):
             f'<a href="https://creativecommons.org/licenses/{license_id}/" target="_blank" rel="noopener noreferrer">CC {license_id.upper()}</a>'
             f' · {"画面裁切" if lang == "中文" else "display cropped"}</small></figcaption></figure>'
         )
-    pause = '暂停轮播' if lang == '中文' else 'Pause slideshow'
     return (f'<section class="hero destination-hero" aria-label="Hangzhou destination showcase">'
-            f'<input class="carousel-pause" type="checkbox" id="pause-destinations">'
-            f'<label class="carousel-control" for="pause-destinations">Ⅱ {pause}</label>'
             f'<div class="destination-images">{"".join(slides)}</div>'
             f'<div class="hero-copy"><div class="hero-label">{escape(t["eyebrow"])}</div>'
             f'<div class="hero-title">{escape(t["headline"])}</div>'

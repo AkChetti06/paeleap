@@ -8,24 +8,23 @@ import requests
 from PIL import Image, ImageDraw, ImageFont
 
 STYLES = {
- 'Scenic & Cinematic': 'wide landscape framing, natural soft light, balanced composition, restrained atmospheric mist, serene realistic colors',
- 'Traditional & Heritage': 'architectural detail, historically respectful documentary framing, accurate forms, natural heritage colors',
- 'Modern & Neon': 'night light, architectural geometry, reflections, crisp high-contrast contemporary photography',
+ 'Cinematic Landscape': 'wide landscape framing, natural soft light, balanced composition, restrained atmospheric mist, serene realistic colors',
+ 'Traditional Editorial': 'architectural detail, historically respectful documentary framing, accurate forms, natural heritage colors',
+ 'Cyberpunk Neon': 'night light, architectural geometry, reflections, crisp high-contrast contemporary photography',
  'Vibrant & Playful': 'energetic composition, vivid color accents, playful but plausible visual storytelling',
- 'Warm & Authentic': 'natural candid photography, warm ambient light, human scale, restrained everyday realism',
- 'Minimalist & Luxury': 'calm negative space, refined composition, soft light and uncluttered restrained tones',
 }
 ATTRACTIONS = {
- '杭州西湖': dict(category='风景区', style='Scenic & Cinematic', features='湖面、岸边树木、远山与柔和自然光', name_en='West Lake, Hangzhou', concept='沿湖观景与悠闲步行', refs='Top 2 / Top 3 / Top 4'),
- '杭州良渚古城遗址公园': dict(category='风景区',style='Scenic & Cinematic',features='遗址公园的草地、水域和开阔自然空间',name_en='Liangzhu Archaeological Ruins Park',concept='以清晰顺序组织园区参观',refs='Top 3'),
- '杭州西溪湿地': dict(category='风景区',style='Scenic & Cinematic',features='湿地水道、林木与自然景观',name_en='Xixi Wetland',concept='轻松的一日游路线构思',refs='Top 2 / Top 6'),
- '浙江省博物馆': dict(category='文博场所',style='Traditional & Heritage',features='真实博物馆空间、展品陈列与建筑细节；不要虚构具体文物',name_en='Zhejiang Provincial Museum',concept='围绕一个展览主题介绍看点',refs='Top 10 / Top 11'),
- '杭州宋城': dict(category='研学场所',style='Vibrant & Playful',features='传统主题建筑、游客互动、文化体验空间；不要杜撰真实活动',name_en='Songcheng, Hangzhou',concept='以任务、互动和可见成果设计研学介绍',refs='Top 18'),
+ '杭州西湖': dict(category='自然风光', style='Cinematic Landscape', features='湖面、岸边树木、远山与柔和自然光', name_en='West Lake, Hangzhou', concept='沿湖观景与悠闲步行', refs='Top 2 / Top 3 / Top 4'),
+ '杭州良渚古城遗址公园': dict(category='自然风光',style='Cinematic Landscape',features='遗址公园的草地、水域和开阔自然空间',name_en='Liangzhu Archaeological Ruins Park',concept='以清晰顺序组织园区参观',refs='Top 3'),
+ '杭州西溪湿地': dict(category='自然风光',style='Cinematic Landscape',features='湿地水道、林木与自然景观',name_en='Xixi Wetland',concept='轻松的一日游路线构思',refs='Top 2 / Top 6'),
+ '浙江省博物馆': dict(category='人文历史',style='Traditional Editorial',features='真实博物馆空间、展品陈列与建筑细节；不要虚构具体文物',name_en='Zhejiang Provincial Museum',concept='围绕一个展览主题介绍看点',refs='Top 10 / Top 11'),
+ '杭州宋城': dict(category='娱乐体验',style='Vibrant & Playful',features='传统主题建筑、游客互动、文化体验空间；不要杜撰真实活动',name_en='Songcheng, Hangzhou',concept='探索主题建筑与文化体验',refs='Top 18'),
 }
 TASKS = {
- '风景区':'首图给出值得去的理由；正文按可跟随顺序列出建议体验；提醒路线/交通/时令需核实。参考 Top 2/3/4。',
- '文博场所':'围绕看什么和为什么，建议重点对象清单、逐件短解释及楼层/服务核实提示。参考 Top 8/11/13。',
- '研学场所':'先描述参与任务，再说明工具和步骤，最后说明可记录的成果；不声称活动实际存在。参考 Top 16/17/19。',
+ '自然风光':'首图给出值得去的理由；正文按可跟随顺序列出建议体验；提醒路线/交通/时令需核实。参考 Top 2/3/4。',
+ '人文历史':'围绕看什么和为什么，建议重点对象清单、逐件短解释及楼层/服务核实提示。参考 Top 8/11/13。',
+ '娱乐体验':'介绍体验主题与建议参与方式，提醒核实实际项目、预约与演出安排，不虚构活动。',
+ '城市探索':'围绕街区氛围、建筑与城市观察提出探索建议；不虚构店铺、夜景灯光、路线或营业时间。',
 }
 
 def plan(attraction, category=None, style=None, audience='首次到访游客', visit_reason=''):
@@ -34,8 +33,8 @@ def plan(attraction, category=None, style=None, audience='首次到访游客', v
     visit_reason=visit_reason.strip()[:180]
     if not attraction or len(attraction)>100: raise ValueError('请输入1–100字的景点名称')
     found=ATTRACTIONS.get(attraction, {})
-    category=category or found.get('category','风景区')
-    style=style or found.get('style','Scenic & Cinematic')
+    category=category or found.get('category','自然风光')
+    style=style or recommend_style(attraction, category)
     if category not in TASKS or style not in STYLES: raise ValueError('无效的类型或视觉风格')
     features=found.get('features','以用户提供或经核实的景点外观资料为准，不自行添加建筑或活动')
     concept=visit_reason.strip() or found.get('concept','值得了解的参观体验')
@@ -52,9 +51,11 @@ def plan(attraction, category=None, style=None, audience='首次到访游客', v
 def fallback_copy(p):
     place=p['attraction']
     variants={
-      '风景区':(f'{place}｜第一次来可以这样规划🌿',f'想去{place}，先想好最期待看到什么。\n\n① 从入口及主要观景点开始了解场地。\n② 按实际步道和官方导览安排游览顺序，留出慢慢拍照的时间。\n③ 出发前确认开放信息、交通、天气和季节变化。\n\n这是一份行程灵感，不是已核验的实时攻略。'),
-      '文博场所':(f'{place}｜从重点展品开始逛🏛️',f'第一次参观{place}，不妨先找到自己感兴趣的展览主题。\n\n① 查看馆方当天公布的展览与重点藏品。\n② 给每件重点展品留一点时间，看看背后的故事。\n③ 结合馆内指引安排楼层与参观顺序。\n\n开放时间、展品与讲解安排请以馆方公告为准。'),
-      '研学场所':(f'{place}｜把参观变成探索任务📒',f'去{place}时，可以尝试用小任务让观察更有目的。\n\n① 出发前先设一个观察问题。\n② 参观时记录看到的材料、步骤或文化线索。\n③ 回来后整理一张观察卡，分享自己的收获。\n\n以上为建议的自助学习方式，不代表景区实际提供这些活动。')}
+      '自然风光':(f'{place}｜第一次来可以这样规划🌿',f'想去{place}，先想好最期待看到什么。\n\n① 从入口及主要观景点开始了解场地。\n② 按实际步道和官方导览安排游览顺序，留出慢慢拍照的时间。\n③ 出发前确认开放信息、交通、天气和季节变化。\n\n这是一份行程灵感，不是已核验的实时攻略。'),
+      '人文历史':(f'{place}｜从重点展品开始逛🏛️',f'第一次参观{place}，不妨先找到自己感兴趣的展览主题。\n\n① 查看馆方当天公布的展览与重点藏品。\n② 给每件重点展品留一点时间，看看背后的故事。\n③ 结合馆内指引安排楼层与参观顺序。\n\n开放时间、展品与讲解安排请以馆方公告为准。'),
+      '娱乐体验':(f'{place}｜把参观变成探索任务📒',f'去{place}时，可以尝试用小任务让观察更有目的。\n\n① 出发前先设一个观察问题。\n② 参观时记录看到的材料、步骤或文化线索。\n③ 回来后整理一张观察卡，分享自己的收获。\n\n以上为建议的自助学习方式，不代表景区实际提供这些活动。')}
+    variants['娱乐体验']=(f'{place}｜给周末一点新体验✨',f'想换一种方式探索{place}？可以从感兴趣的体验主题开始。\n\n先查看官方公布的项目与预约要求，再按自己的兴趣选择参与方式，留出休息和记录感受的时间。\n\n实际开放项目、演出与费用请以官方公告为准。')
+    variants['城市探索']=(f'{place}｜换个角度看城市🌆',f'把{place}当作一次城市观察的起点。\n\n留意街区建筑、公共空间与日常细节，用官方地图规划适合自己的步行顺序。夜间出行前确认交通、安全与开放信息。\n\n这是探索建议，不是已核验的路线；配图为概念示意。')
     title,caption=variants[p['category']]
     if p.get('reason') and p['reason'] != ATTRACTIONS.get(place,{}).get('concept','值得了解的参观体验'):
         caption = f"本篇主题：{p['reason']}。\n\n" + caption
@@ -66,15 +67,8 @@ def recommend_style(attraction, category, angle=''):
     """Suggest only; the UI preserves the user's manual choice between contexts."""
     if category not in TASKS:
         raise ValueError('Invalid category / 无效的类型')
-    if any(word in angle.lower() for word in ('夜景', '霓虹', 'night', 'neon')) and category == '风景区':
-        return 'Modern & Neon'
-    if any(word in angle.lower() for word in ('亲子', '家庭', 'family', 'children')):
-        return 'Warm & Authentic'
-    found = ATTRACTIONS.get(attraction, {})
-    if found.get('category') == category:
-        return found['style']
-    return {'风景区': 'Scenic & Cinematic', '文博场所': 'Traditional & Heritage',
-            '研学场所': 'Vibrant & Playful'}[category]
+    return {'自然风光': 'Cinematic Landscape', '人文历史': 'Traditional Editorial',
+            '娱乐体验': 'Vibrant & Playful', '城市探索': 'Cyberpunk Neon'}[category]
 
 
 def safe_error(exc):
@@ -212,10 +206,12 @@ def generate_hf_image(p, token, model='black-forest-labs/FLUX.1-schnell'):
 def english_copy(p):
     name=ATTRACTIONS.get(p['attraction'],{}).get('name_en',p['attraction'])
     messages={
-        '风景区':(f'{name} | A simple first-visit idea 🌿',f'Planning a visit to {name}? Here is a starting point for your day.\n\n① Decide what scenery or experience interests you most.\n② Plan a sensible walking order using the official visitor map.\n③ Check current access details, weather and transport before leaving.\n\nThis is travel inspiration, not a verified first-hand guide.'),
-        '文博场所':(f'{name} | Explore the highlights 🏛️',f'Curious about {name}? Build your visit around a theme you want to understand.\n\n① Check the museum’s current exhibitions and featured objects.\n② Pause at a few highlights and read their interpretation.\n③ Use on-site directions to plan your route.\n\nConfirm exhibition details and opening arrangements with the venue.'),
-        '研学场所':(f'{name} | Turn a visit into discovery 📒',f'Bring a simple learning goal to {name}.\n\n① Choose one thing to observe before arriving.\n② Record interesting details and steps during your visit.\n③ Make a small observation card afterwards.\n\nThese are suggested self-guided tasks, not claims about actual scheduled activities.'),
+        '自然风光':(f'{name} | A simple first-visit idea 🌿',f'Planning a visit to {name}? Here is a starting point for your day.\n\n① Decide what scenery or experience interests you most.\n② Plan a sensible walking order using the official visitor map.\n③ Check current access details, weather and transport before leaving.\n\nThis is travel inspiration, not a verified first-hand guide.'),
+        '人文历史':(f'{name} | Explore the highlights 🏛️',f'Curious about {name}? Build your visit around a theme you want to understand.\n\n① Check the museum’s current exhibitions and featured objects.\n② Pause at a few highlights and read their interpretation.\n③ Use on-site directions to plan your route.\n\nConfirm exhibition details and opening arrangements with the venue.'),
+        '娱乐体验':(f'{name} | Turn a visit into discovery 📒',f'Bring a simple learning goal to {name}.\n\n① Choose one thing to observe before arriving.\n② Record interesting details and steps during your visit.\n③ Make a small observation card afterwards.\n\nThese are suggested self-guided tasks, not claims about actual scheduled activities.'),
     }
+    messages['娱乐体验']=(f'{name} | Try a new experience ✨',f'Explore {name} through an experience that interests you. Check the official programme and booking requirements, choose activities at your own pace, and leave time to rest. Confirm actual availability, schedules and fees with the venue.')
+    messages['城市探索']=(f'{name} | A fresh view of the city 🌆',f'Use {name} as a starting point for noticing architecture, public spaces and everyday details. Plan a manageable walk with an official map. Check transport, access and safety before an evening visit. This is exploration inspiration, not a verified route; visuals are illustrative.')
     title,caption=messages[p['category']]
     if p.get('reason') and p['reason'] != ATTRACTIONS.get(p['attraction'],{}).get('concept','值得了解的参观体验'):
         caption = f"Creative angle: {p['reason']}.\n\n" + caption

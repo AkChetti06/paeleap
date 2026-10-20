@@ -5,7 +5,7 @@ from engine import plan,fallback_copy,placeholder,save_output
 
 def test_west_lake_plan():
  p=plan('杭州西湖')
- assert p['category']=='风景区' and p['style']=='Scenic & Cinematic'
+ assert p['category']=='自然风光' and p['style']=='Cinematic Landscape'
  assert 'no captions' in p['image_prompt']
 
 def test_all_scenarios():
@@ -119,10 +119,10 @@ def test_caption_parser_rejects_invalid_fields():
 
 def test_style_recommendations_and_override():
  from engine import recommend_style
- assert recommend_style('自定义','文博场所')=='Traditional & Heritage'
- assert recommend_style('杭州西湖','风景区','夜景摄影')=='Modern & Neon'
- assert recommend_style('杭州宋城','研学场所','亲子探索')=='Warm & Authentic'
- assert plan('杭州西湖',style='Minimalist & Luxury')['style']=='Minimalist & Luxury'
+ assert recommend_style('自定义','人文历史')=='Traditional Editorial'
+ assert recommend_style('杭州西湖','自然风光','夜景摄影')=='Cinematic Landscape'
+ assert recommend_style('杭州宋城','娱乐体验','亲子探索')=='Vibrant & Playful'
+ assert plan('杭州西湖',style='Traditional Editorial')['style']=='Traditional Editorial'
 
 
 def test_cloudflare_error_categories_and_malformed_responses(monkeypatch):
@@ -159,14 +159,14 @@ def test_bilingual_ui_manual_style_and_editable_fields(monkeypatch,tmp_path):
  monkeypatch.setattr(engine,'provider_status',lambda *a,**k:{'cloudflare':False,'huggingface':False,'alibaba_wan':False})
  app=AppTest.from_file(str(Path(__file__).resolve().parents[1]/'app.py')).run()
  assert not app.exception
- app.selectbox(key='visual_style_choice').select('Minimalist & Luxury').run()
- assert app.selectbox(key='visual_style_choice').value=='Minimalist & Luxury'
+ app.selectbox(key='visual_style_choice').select('Traditional Editorial').run()
+ assert app.selectbox(key='visual_style_choice').value=='Traditional Editorial'
  app.button[0].click().run()
  assert not app.exception
  assert app.text_input(key='draft_title').value
  app.text_input(key='draft_title').set_value('Edited title').run()
  assert app.text_input(key='draft_title').value=='Edited title'
- assert app.selectbox(key='visual_style_choice').value=='Minimalist & Luxury'
+ assert app.selectbox(key='visual_style_choice').value=='Traditional Editorial'
  app.radio[0].set_value('中文').run()
  assert not app.exception
  assert app.text_input(key='draft_title').value=='Edited title'
@@ -188,3 +188,17 @@ def test_env_loading_preserves_environment_and_git_exclusions(tmp_path,monkeypat
  for name in ['.env','.env.production','.streamlit/secrets.toml']:
   assert subprocess.run(['git','check-ignore','-q',name],cwd=root).returncode==0
  assert subprocess.run(['git','ls-files','--error-unmatch','.env'],cwd=root,capture_output=True).returncode!=0
+
+
+def test_reference_category_style_mapping():
+ from engine import TASKS, recommend_style, localized_copy
+ expected={'自然风光':'Cinematic Landscape','人文历史':'Traditional Editorial',
+           '娱乐体验':'Vibrant & Playful','城市探索':'Cyberpunk Neon'}
+ assert set(TASKS)==set(expected)
+ for category,style in expected.items():
+  assert recommend_style('自定义',category)==style
+  p=plan('自定义',category=category)
+  assert p['style']==style
+  for lang in ['中文','English']:
+   assert localized_copy(p,lang)['caption']
+ assert plan('杭州西湖',category='城市探索',style='Traditional Editorial')['style']=='Traditional Editorial'
