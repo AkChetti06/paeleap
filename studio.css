@@ -62,7 +62,7 @@ hr{border-color:var(--line)!important}
 
 .st-key-language [data-testid="stButtonGroup"]{background:var(--sand);border-radius:30px;padding:3px}
 .st-key-language button{border:0!important;border-radius:24px!important;background:transparent!important;font-size:11px!important}
-.st-key-language button[aria-pressed="true"]{background:#fff!important;color:var(--charcoal)!important}
+.st-key-language button:is([kind="segmented_controlActive"],[aria-pressed="true"]){background:#fff!important;color:var(--charcoal)!important}
 /* Join native widgets into a continuous post while retaining focusable controls. */
 .st-key-preview_stage>div>div[data-testid="stVerticalBlock"]{gap:0}
 .st-key-preview_stage [data-testid="stImage"],.st-key-preview_stage [data-testid="stImage"]>div{width:100%!important}
@@ -122,7 +122,13 @@ input::placeholder,textarea::placeholder{color:#77756d!important;opacity:1}
   color:#77756d!important;background-color:#e7e2da!important;
 }
 .st-key-language button{color:var(--charcoal)!important}
-.st-key-language button[aria-pressed="true"]{color:var(--charcoal)!important;background-color:#fff!important}
+/* Streamlit marks selected segments by kind, rather than aria-pressed.
+   Explicit colors preserve the indicator with either Streamlit theme setting. */
+.st-key-language button:is([kind="segmented_controlActive"],[aria-pressed="true"]){
+  color:var(--charcoal)!important;background-color:#fff!important;
+  box-shadow:0 1px 3px #33332f26;
+}
+.st-key-language button [data-testid="stMarkdownContainer"]{color:inherit!important}
 [data-testid="stExpander"]{background:var(--ivory);border-color:var(--line);color:var(--charcoal)}
 [data-testid="stExpander"] summary{background:var(--ivory)!important;color:var(--charcoal)!important}
 [data-testid="stExpander"] summary:hover{background:var(--sand)!important;color:var(--charcoal)!important}
