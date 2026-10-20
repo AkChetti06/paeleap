@@ -9,9 +9,9 @@ from pathlib import Path
 import streamlit as st
 from dotenv import load_dotenv
 from engine import (ATTRACTIONS, STYLES, TASKS, plan, localized_copy,
-                    placeholder, generate_wan_image, generate_hf_image, generate_with_fallback, provider_status, save_output)
+                    placeholder, generate_wan_image, generate_hf_image, generate_with_fallback, provider_status, save_output, recommend_style, safe_error)
 
-load_dotenv()
+load_dotenv(dotenv_path=Path(__file__).resolve().parent / '.env', override=False)
 st.set_page_config(page_title='PAELEAP | Creator Studio',page_icon='✦',layout='wide',initial_sidebar_state='collapsed')
 
 COPY={
@@ -82,17 +82,16 @@ with left:
         categories=list(TASKS)
         category=st.selectbox(t['scene'],categories,index=categories.index(found.get('category','风景区')),format_func=lambda v:t['category_map'][v])
         styles=list(STYLES)
-        recommendations={'风景区':'Scenic & Cinematic','文博场所':'Traditional & Heritage','研学场所':'Vibrant & Playful'}
-        recommendation=found.get('style') if found.get('category')==category else recommendations[category]
-        # Reset to a sensible suggestion only when category or chosen destination changes.
-        selection_context=(chosen,category)
+        audience=st.text_input(t['audience'],value=t['audience_default'])
+        angle=st.text_input(t['angle'],placeholder=t['angle_placeholder'])
+        recommendation=recommend_style(attraction, category, angle)
+        # A changed brief suggests a fresh style; ordinary reruns preserve manual overrides.
+        selection_context=(attraction,category,angle)
         if st.session_state.get('style_context')!=selection_context:
             st.session_state['visual_style_choice']=recommendation
             st.session_state['style_context']=selection_context
         st.caption(f'✦ {t["recommend"]}: **{recommendation}** · {t["style_custom"]}')
         style=st.selectbox(t['style'],styles,key='visual_style_choice')
-        audience=st.text_input(t['audience'],value=t['audience_default'])
-        angle=st.text_input(t['angle'],placeholder=t['angle_placeholder'])
         st.markdown('<div style="height:2px"></div>',unsafe_allow_html=True)
         mode_values=['demo','cloudflare','hf','wan']
         img_mode=st.selectbox(t['picture'],mode_values,format_func=lambda v:t[v],index=(1 if provider_status()['cloudflare'] else 2 if provider_status()['huggingface'] else 3 if provider_status()['alibaba_wan'] else 0))
@@ -116,7 +115,10 @@ if clicked:
             st.session_state['draft_title']=copy['title']
             st.session_state['draft_caption']=copy['caption']
             st.session_state['draft_hashtags']=' '.join(copy['hashtags'])
-    except Exception as exc:st.error(str(exc))
+    except Exception as exc:
+        st.error(safe_error(exc))
+        if 'result' in st.session_state:
+            st.warning('Previous successful post remains below. / 下方保留的是上次成功生成的笔记。')
 
 with right:
     with st.container(border=True):
