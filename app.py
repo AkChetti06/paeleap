@@ -45,11 +45,20 @@ COPY['English']['category_map']={'自然风光':'Nature & Scenery','人文历史
 COPY['中文']['category_map']={name:name for name in TASKS}
 st.markdown('<style>' + (Path(__file__).parent / 'studio.css').read_text() + '</style>', unsafe_allow_html=True)
 
+def keep_language_selected():
+    # Native segments can be toggled off; retain the last language in that case.
+    selected = st.session_state.get('language')
+    if selected in COPY:
+        st.session_state['last_language'] = selected
+    else:
+        st.session_state['language'] = st.session_state.get('last_language', 'English')
+
+
 bar_left,bar_right=st.columns([5,1.3],vertical_alignment='center')
 with bar_left:
     st.markdown('<div class="brand"><span>＊</span> PAELEAP STUDIO</div>',unsafe_allow_html=True)
 with bar_right:
-    lang=st.segmented_control('Language / 语言',['English','中文'],format_func=lambda v:'EN' if v=='English' else '中文',default='English',key='language',label_visibility='collapsed') or 'English'
+    lang=st.segmented_control('Language / 语言',['English','中文'],format_func=lambda v:'EN' if v=='English' else '中文',default=None if 'language' in st.session_state else 'English',key='language',label_visibility='collapsed',on_change=keep_language_selected) or 'English'
 t=COPY[lang]
 st.markdown(render_banner(t, lang), unsafe_allow_html=True)
 

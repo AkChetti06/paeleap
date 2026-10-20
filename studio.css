@@ -33,9 +33,6 @@ header[data-testid="stHeader"]{background:transparent}
 .stButton>button:disabled{background:#e7e2da!important;color:#77756d!important}
 button:focus-visible{outline:2px solid var(--terracotta)!important;outline-offset:3px}
 .stDownloadButton>button{background:transparent;border:1px solid var(--line);border-radius:8px;min-height:46px;color:var(--charcoal);font-size:12px}
-[data-testid="stSegmentedControl"]{background:var(--sand);border-radius:30px;padding:3px}
-[data-testid="stSegmentedControl"] button{border:0!important;background:transparent;border-radius:24px;font-size:11px}
-[data-testid="stSegmentedControl"] button[aria-pressed="true"]{background:#fff!important;color:var(--charcoal)!important}
 .post-masthead{display:flex;gap:10px;align-items:center;background:#fff;padding:14px 16px;border-radius:12px 12px 0 0;font-size:11px;margin-bottom:-16px}
 .avatar{display:grid;place-items:center;background:#e7ede4;border-radius:50%;width:30px;height:30px;font-family:Georgia,serif;font-size:21px;color:#5c715d}
 .post-masthead small{display:block;color:#77756d;font-size:9px;margin-top:3px}
@@ -60,9 +57,20 @@ button:focus-visible{outline:2px solid var(--terracotta)!important;outline-offse
 hr{border-color:var(--line)!important}
 @media(max-width:760px){.block-container{padding:20px}.hero{padding:28px 0 24px}.hero-title{font-size:42px}.edition{display:none}.panel-title{font-size:27px}.st-key-brief_card{padding:18px!important}.st-key-preview_stage{padding:20px 16px!important}.footer{flex-direction:column;gap:10px}.footer>span:last-child{text-align:left}.preview-placeholder{min-height:320px}}
 
-.st-key-language [data-testid="stButtonGroup"]{background:var(--sand);border-radius:30px;padding:3px}
-.st-key-language button{border:0!important;border-radius:24px!important;background:transparent!important;font-size:11px!important}
-.st-key-language button:is([kind="segmented_controlActive"],[aria-pressed="true"]){background:#fff!important;color:var(--charcoal)!important}
+/* Style the native selected state so the pill follows Streamlit reruns. */
+.st-key-language [data-testid="stButtonGroup"]{background:#eae4d9;border-radius:30px;padding:3px}
+.st-key-language button{
+  border:0!important;border-radius:24px!important;background:transparent!important;
+  color:#33332f!important;font-size:11px!important;font-weight:600!important;
+  transition:background-color 160ms ease,color 160ms ease,box-shadow 160ms ease;
+}
+.st-key-language button:is([kind="segmented_controlActive"],[aria-pressed="true"]){
+  background:#a34f30!important;color:#fff!important;box-shadow:0 1px 3px #33332f26;
+}
+.st-key-language button [data-testid="stMarkdownContainer"],
+.st-key-language button [data-testid="stMarkdownContainer"] p{color:inherit!important;font-weight:inherit!important}
+.st-key-language button:focus-visible{outline:2px solid #33332f!important;outline-offset:2px}
+@media(prefers-reduced-motion:reduce){.st-key-language button{transition:none}}
 /* Join native widgets into a continuous post while retaining focusable controls. */
 .st-key-preview_stage>div>div[data-testid="stVerticalBlock"]{gap:0}
 .st-key-preview_stage [data-testid="stImage"],.st-key-preview_stage [data-testid="stImage"]>div{width:100%!important}
@@ -121,14 +129,6 @@ input::placeholder,textarea::placeholder{color:#77756d!important;opacity:1}
 .stButton>button:disabled,.stDownloadButton>button:disabled{
   color:#77756d!important;background-color:#e7e2da!important;
 }
-.st-key-language button{color:var(--charcoal)!important}
-/* Streamlit marks selected segments by kind, rather than aria-pressed.
-   Explicit colors preserve the indicator with either Streamlit theme setting. */
-.st-key-language button:is([kind="segmented_controlActive"],[aria-pressed="true"]){
-  color:var(--charcoal)!important;background-color:#fff!important;
-  box-shadow:0 1px 3px #33332f26;
-}
-.st-key-language button [data-testid="stMarkdownContainer"]{color:inherit!important}
 [data-testid="stExpander"]{background:var(--ivory);border-color:var(--line);color:var(--charcoal)}
 [data-testid="stExpander"] summary{background:var(--ivory)!important;color:var(--charcoal)!important}
 [data-testid="stExpander"] summary:hover{background:var(--sand)!important;color:var(--charcoal)!important}
