@@ -134,3 +134,22 @@ Streamlit differences: native fields use focus/blur submission rather than true 
 `.streamlit/config.toml` sets the default light theme and matches the editorial ivory, sand, charcoal and clay palette. `studio.css` explicitly pairs widget text with light backgrounds, including dropdown portals, editable post fields, download buttons and expanders, and declares `color-scheme: only light` for native browser controls. The banner keeps its existing white photo credits and charcoal headings. No generation, credential-loading or secret-storage behavior changes.
 
 Start Streamlit from the repository root so it discovers `.streamlit/config.toml`. Reboot the Community Cloud app after merging if the theme is not picked up. Existing browser theme preferences can differ from the default; select the custom app theme if needed. Browser extensions that forcibly recolor pages are outside the app's control. Verification includes the full automated suite and a local browser check with `--theme.base dark` deliberately overriding the base; OS-level dark preference emulation was not available in the browser tooling.
+
+## Local Wuzhen iteration — 21 October 2026
+
+Run `streamlit run week2_app.py --server.address 127.0.0.1 --server.port 8502` from the repository folder.
+The original `app.py` is retained for comparison; the new entry point reuses its styles and image-provider engine.
+
+- `data/wuzhen_xizha.json`: source URLs, fact IDs, aliases and information boundaries.
+- `prompts/ancient_town_v2.txt`: reviewed Ancient Town V2 model instructions.
+- `template_engine.py`: keyword matching, independent two-version copy and image state, validated model response and provenance export.
+- The main form takes only a place name and keywords. Unknown places stop with a missing-data message. Unsupported keywords are shown for review and are not inserted into offline copy.
+- Default is explicitly labelled offline rule-based preview (not AI output). LLM mode requires configuration and a separate opt-in. No live accounts were used during local development.
+- Images are requested separately. An image failure cannot delete successful copy or edits. A changed brief is marked stale until regenerated.
+- TXT exports contain publishable copy only; JSON includes original copy, edited copy, the fact sheet and source labels. Downloads are the durable record; browser session state is not permanent storage.
+- Natural scenery and theme park rules are shown as planned structure only. This iteration enables the Wuzhen ancient-town case, not all three categories or video generation.
+- UI language for this focused local entry point is Chinese. The original bilingual entry point remains available.
+
+### Beginner workflow refinement
+
+`week2_app.py` now exposes place + selectable focus topics, friendly version names, one-click title suggestions and a selected-version TXT download. Each version retains independent edits when switching. Regeneration explicitly offers to keep edits or replace both versions. Technical prompts and JSON export are confined to the developer-record expander. This local entry point is offline-only and does not load keys or invoke text/image APIs; image status is clearly shown as not connected. The original provider engine remains available for a later integration stage.

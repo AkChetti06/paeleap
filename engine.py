@@ -167,7 +167,7 @@ def generate_wan_image(p, key, base_url, model='wan2.6-t2i'):
     from dashscope.aigc.image_generation import ImageGeneration
     from dashscope.api_entities.dashscope_response import Message
     dashscope.base_http_api_url=base_url.rstrip('/')
-    rsp=ImageGeneration.call(model=model, api_key=key, messages=[Message(role='user',content=[{'text':p['image_prompt']}])], n=1,size='960*1280',prompt_extend=True,watermark=False)
+    rsp=ImageGeneration.call(model=model, api_key=key, messages=[Message(role='user',content=[{'text':p['image_prompt']}])], n=1,size='1152*1536',prompt_extend=True,watermark=False)
     if rsp.status_code != 200:
         raise RuntimeError(f'Wan API调用失败 (HTTP {rsp.status_code})，请检查权限、额度和模型。')
     try:
