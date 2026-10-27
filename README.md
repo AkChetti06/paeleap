@@ -59,4 +59,112 @@ The configured [Cloudflare FLUX.1-schnell model](https://developers.cloudflare.c
 - Reboot after dependency/secrets changes. Test one generation in each language, all three categories, editing/downloads and the video button using your configured accounts.
 - Check account permissions, quota, generated-content accuracy and MP4 playback. Live image/text services require credentials and are not exercised by unit tests.
 
-Original generation snapshots are written to `outputs/`; edits are reflected in downloads, while source variants remain in JSON. Community Cloud storage is ephemeral: download results before a restart. Image and caption generation are committed together only on success. A failed video keeps the image and captions available; retrying video makes fresh image calls.
+Cloudflare is now supported alongside Hugging Face, Alibaba Wan and the offline demo.
+
+1. Create/sign into [Cloudflare](https://dash.cloudflare.com/). Open **Workers AI** and choose **Use REST API**. Create the **Workers AI API Token** and copy your **Account ID**. Follow [Cloudflare's guide](https://developers.cloudflare.com/workers-ai/get-started/rest-api/).
+2. In Terminal inside this project: `cp .env.example .env` (skip if `.env` already exists), then `open -e .env` on macOS.
+3. Add `CLOUDFLARE_ACCOUNT_ID=...` and `CLOUDFLARE_API_TOKEN=...`; save. Don't publish `.env`.
+4. Install with `python -m pip install -r requirements.txt` and start with `python -m streamlit run app.py`.
+5. Choose **Cloudflare Workers AI** in the image engine menu and create a post.
+
+The app uses `@cf/black-forest-labs/flux-1-schnell`, with four diffusion steps. Its API returns a Base64 image in JSON. Free tier currently has a **10,000 neurons/day shared allowance**, not unlimited generations; eligibility, capacity and account restrictions still apply. Verify current terms at https://developers.cloudflare.com/workers-ai/platform/pricing/.
+
+### Provider status and fallback
+The new **Provider configuration** expander reports whether credentials are **present**, not whether accounts have credit or API access. The **Automatic fallback** selector defaults to **No fallback**, so no alternative provider is invoked without your consent. You can explicitly select another configured provider. This may consume paid credits. Offline demo remains a non-AI placeholder and is never automatically substituted after a failed live request. Do not present it as generated output.
+
+### Troubleshooting
+- HTTP 401/403: check account ID and Workers AI token permission.
+- HTTP 402: billing/credit restriction; review dashboard.
+- HTTP 429: request rate or daily quota limit; try later.
+- Hugging Face HTTP 402: your inference credits have run out; select Cloudflare instead.
+- If the provider reports a problem but your current post preview persists, that preview is the **previous successful output**.
+
+The project remains a **Week 2 mini-project prototype**, not a verified travel-guide publisher. Generated imagery is labeled illustrative, and location claims require review. Live API requests could not be tested without user credentials.
+
+## Week 2 refinement — v4 (20 October 2026)
+
+- Offline captions now use the **audience** and optional **story angle** inputs, instead of ignoring them. Their output is explicitly a *template*, not an AI caption.
+- After generation, the **title, caption and hashtags are editable** in the preview; text and JSON downloads include the edited version. `source_copy` in the JSON preserves the original generator output for comparison.
+- Selecting LLM caption mode **without credentials gives an explicit configuration error**, not an unannounced template fallback.
+- Added tests for personalized offline copy and missing-credential handling (10 passing unit tests).
+- Existing external image providers remain available but were **not tested against live accounts** in this environment; local tests mock API responses.
+- The project is still a **Week 2 one-post mini-project**, not a production-ready publisher.
+
+### How to demo for Week 2
+
+1. Install requirements; create `.env` locally using `.env.example` (do not share it).
+2. Start `python -m streamlit run app.py`.
+3. Select 杭州西湖, set the audience and a story angle. Start with offline image and caption modes.
+4. Generate the draft, edit it in the right pane, and download the text and JSON.
+5. Optionally select an image provider **only if a token/quota has been configured**; record API success or failure in the report.
+6. Use the resulting screenshot, saved manifest, and your own manual review observations in your Week 2 mini-project report.
+
+### Remaining limitations
+
+The app does not verify attraction facts or publish to Xiaohongshu. Demo images are visibly marked placeholders. Changing copy in the browser updates downloads, but not the original `outputs/` snapshot, which remains useful for documenting the initial generation. Visual/manual scoring is subjective, and provider tests are mocked rather than live.
+
+## v5 UI changes (Week 2)
+- Removed the provider-configuration and Week 1 evidence accordions and the two explanatory captions under generation controls.
+- Studio/Preview headings no longer use numeric prefixes.
+- Visual direction is suggested based on selected attraction/category and remains fully overridable. Changing the attraction, category or story angle updates the suggestion; ordinary reruns and audience changes preserve manual style choice.
+- The generated image and always-editable title, caption and hashtags display together. There is no edit button. Downloads reflect edits.
+- The image remains a clearly identified demo placeholder or illustrative AI-generated concept (not a verified photograph).
+# paeleap
+
+
+## Week 2 generation improvements
+
+- Chinese AI captions request a concrete, truthful title, natural short paragraphs, useful viewing suggestions, and 4–6 relevant unique hashtags. The brief is context, not verified factual evidence; no live facts are retrieved.
+- Both caption languages share strict JSON validation. Missing credentials, failed requests and invalid responses raise errors without template substitution. Offline templates remain an explicit selection.
+- Style recommendations consider category, destination and night/family story angles. Manual selection stays available.
+- `.env` loads explicitly from the application folder without overriding existing environment variables. Credentials are never included in post downloads; raw SDK/server error bodies are not shown. `.streamlit/secrets.toml` is ignored as well.
+- Cloudflare FLUX.1-schnell REST integration matches the [official model contract](https://developers.cloudflare.com/workers-ai/models/flux-1-schnell/): bearer authentication, prompt up to 2048 characters, four steps, Base64 image output. This model does not expose width/height parameters in that contract; a requested portrait composition is not a guaranteed output aspect ratio.
+- Automated tests cover mocked API responses, caption validation, safe errors, recommendations and bilingual editable UI behavior. Streamlit 1.50 AppTest requires a test-only radio adapter for its single segmented language widget; the production UI keeps the segmented control.
+- Live Cloudflare, Hugging Face, Alibaba Wan and text-model calls have not been exercised. Test success does not establish account permissions, credits, model availability or generated-content quality.
+
+## Editorial UI reference
+
+The Streamlit interface follows the supplied desktop/mobile Figma screenshots: ivory `#f8f6f1`, sand `#eae4d9`, clay `#a34f30`, charcoal `#33332f`, sage `#879384`, Cormorant Garamond headings, DM Sans body and Noto Sans SC Chinese text. Presentation is isolated in `studio.css`; generation functions and `.env` handling are unchanged. Native controls remain keyboard accessible and title, caption and hashtags stay directly editable. Existing destination presets, manual style selection, fallback controls, exports and evaluation remain available.
+
+Streamlit differences: native fields use focus/blur submission rather than true contenteditable text; long titles scroll within their single-line field. Native widgets, column stacking and image dimensions prevent pixel-identical desktop/mobile layout. Font loading needs Google Fonts access, with local serif/sans fallbacks. Actual image dimensions are preserved rather than cropping to the reference's 4:5 frame. The photographed lake is reference artwork, not a bundled generated result. Caption download is retained instead of claiming a clipboard copy succeeded. No fabricated percentage progress, cancellation, clipboard/download-success toast or image-only retry is added: those reference states would require additional application behavior. Native loading/error feedback and previous-result preservation remain in place. CSS uses Streamlit widget hooks, which may need review after framework upgrades.
+
+## Consistent light appearance
+
+`.streamlit/config.toml` sets the default light theme and matches the editorial ivory, sand, charcoal and clay palette. `studio.css` explicitly pairs widget text with light backgrounds, including dropdown portals, editable post fields, download buttons and expanders, and declares `color-scheme: only light` for native browser controls. The banner keeps its existing white photo credits and charcoal headings. No generation, credential-loading or secret-storage behavior changes.
+
+Start Streamlit from the repository root so it discovers `.streamlit/config.toml`. Reboot the Community Cloud app after merging if the theme is not picked up. Existing browser theme preferences can differ from the default; select the custom app theme if needed. Browser extensions that forcibly recolor pages are outside the app's control. Verification includes the full automated suite and a local browser check with `--theme.base dark` deliberately overriding the base; OS-level dark preference emulation was not available in the browser tooling.
+
+## Local Wuzhen iteration — 21 October 2026
+
+Run `streamlit run week2_app.py --server.address 127.0.0.1 --server.port 8502` from the repository folder.
+The original `app.py` is retained for comparison; the new entry point reuses its styles and image-provider engine.
+
+- `data/wuzhen_xizha.json`: source URLs, fact IDs, aliases and information boundaries.
+- `prompts/ancient_town_v2.txt`: reviewed Ancient Town V2 model instructions.
+- `template_engine.py`: keyword matching, independent two-version copy and image state, validated model response and provenance export.
+- The main form takes only a place name and keywords. Unknown places stop with a missing-data message. Unsupported keywords are shown for review and are not inserted into offline copy.
+- Default is explicitly labelled offline rule-based preview (not AI output). LLM mode requires configuration and a separate opt-in. No live accounts were used during local development.
+- Images are requested separately. An image failure cannot delete successful copy or edits. A changed brief is marked stale until regenerated.
+- TXT exports contain publishable copy only; JSON includes original copy, edited copy, the fact sheet and source labels. Downloads are the durable record; browser session state is not permanent storage.
+- Natural scenery and theme park rules are shown as planned structure only. This iteration enables the Wuzhen ancient-town case, not all three categories or video generation.
+- UI language for this focused local entry point is Chinese. The original bilingual entry point remains available.
+
+### Beginner workflow refinement
+
+`week2_app.py` now exposes place + selectable focus topics, friendly version names, one-click title suggestions and a selected-version TXT download. Each version retains independent edits when switching. Regeneration explicitly offers to keep edits or replace both versions. Technical prompts and JSON export are confined to the developer-record expander. This local entry point is offline-only and does not load keys or invoke text/image APIs; image status is clearly shown as not connected. The original provider engine remains available for a later integration stage.
+
+## Detailed inputs — local offline iteration (27 October 2026)
+
+Local entry point: `week2_app.py`. The existing columns, menus, CSS and provider engine are unchanged.
+
+- `input_fields.render_input_fields()` renders only the input controls and returns a serializable detailed brief, or `None` while required information is missing. A menu/layout implementation can call this function inside its own page container.
+- `promotional_brief.py` owns category options, validated case highlights, brief validation and deterministic copy rules. It contains no API clients. `template_engine.generate_drafts(brief, mode='offline')` dispatches detailed briefs to these rules; detailed briefs reject other modes.
+- Category filters a single place selector. A name field appears only for a custom place. The mentor's natural landscape, museum and study-tour categories are included alongside ancient towns and theme parks. Museums, study-tour bases and other unlisted places require a user-written introduction and `name｜description` highlights; no new researched venue data is claimed.
+- Tone changes expression, purpose changes structure, audience changes the reader's observation task, and the primary highlight controls the headline and first highlight. Only 1–3 selected highlights are used. Learning stage and visit duration are conditional; activity promotion requires activity name, time, location and participation method.
+- Supplemental facts are included verbatim as supplemental information. They are not interpreted as free-form writing instructions. User-supplied facts and activity information are marked as unverified in the brief/JSON record.
+- The brief includes `schema_version`, `attraction`, `category`, `text_style`, `purpose`, `audience`, `learning_stage`, `visit_duration`, `highlights`, `primary_fact_id`, `supplement`, `event`, `facts` and source IDs. Output keeps the existing two-version structure and export contract.
+- `week2_result` retains the generated brief and copy. Input changes mark it stale without replacing edits. Changing inputs also cancels an older pending regeneration request. For future multi-page integration, the menu owner should preserve widget input state across Streamlit page cleanup; this iteration validates the existing single-page entry point only.
+
+Validation: `.venv/bin/python -m pytest -q` (46 tests), plus local browser checks of choice-driven copy, edited TXT download, desktop/narrow viewports and console health. Validation used offline generation only; no live model API calls or deployment were performed.
+
+The local Week 3 screen ends at the TXT save button; the image placeholder, content-check section and developer-record panel have been removed. Source/provenance data remain in the internal brief.
