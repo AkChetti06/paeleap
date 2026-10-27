@@ -10,17 +10,17 @@ header[data-testid="stHeader"]{background:transparent}
 .hero{position:relative;border-top:1px solid var(--line);padding:40px 0 28px;margin-top:12px;margin-bottom:4px}
 .hero-label{font-size:10px;color:var(--clay);margin-bottom:12px}
 .hero-title{font-family:'Cormorant Garamond','Noto Sans SC',Georgia,serif;font-size:clamp(36px,4.6vw,64px);font-weight:400;line-height:1.05;letter-spacing:-1px}
-.hero-sub{color:#77756d;font-size:13px;line-height:1.7;margin-top:14px;max-width:760px}
-.edition{position:absolute;right:0;bottom:37px;color:#77756d;font-size:9px}
+.hero-sub{color:var(--muted,#77756d);font-size:13px;line-height:1.7;margin-top:14px;max-width:760px}
+.edition{position:absolute;right:0;bottom:37px;color:var(--muted,#77756d);font-size:9px}
 .panel-title{font-family:'Cormorant Garamond','Noto Sans SC',Georgia,serif;font-size:28px;line-height:1.3;margin:0 0 6px}
 .panel-title>span{font-family:'DM Sans',sans-serif;font-size:11px;color:var(--clay);margin-right:12px;vertical-align:middle}
-.panel-sub{color:#77756d;font-size:12px;line-height:1.6;min-height:30px;margin-bottom:16px}
-.st-key-brief_card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:24px!important}
-.st-key-preview_stage{background:#eeeae2;border-radius:12px;padding:26px max(24px,calc((100% - 400px)/2))!important}
-.preview-label{font-size:9px;color:#77756d;margin-bottom:14px;letter-spacing:.3px}
+.panel-sub{color:var(--muted,#77756d);font-size:12px;line-height:1.6;min-height:30px;margin-bottom:16px}
+.st-key-brief_card{background:var(--surface,#fff);border:1px solid var(--line);border-radius:12px;padding:24px!important}
+.st-key-preview_stage{background:var(--preview-surface,#eeeae2);border-radius:12px;padding:26px max(24px,calc((100% - 400px)/2))!important}
+.preview-label{font-size:9px;color:var(--muted,#77756d);margin-bottom:14px;letter-spacing:.3px}
 [data-testid="stWidgetLabel"] p{font-size:13px!important;font-weight:500}
-[data-testid="stCaptionContainer"]{color:#77756d;font-size:11px;line-height:1.6}
-[data-testid="stTextInput"] input,[data-testid="stTextArea"] textarea,[data-baseweb="select"]>div{background:#fff!important;border-radius:8px!important;font-size:13px!important}
+[data-testid="stCaptionContainer"]{color:var(--muted,#77756d);font-size:11px;line-height:1.6}
+[data-testid="stTextInput"] input,[data-testid="stTextArea"] textarea,[data-baseweb="select"]>div{background:var(--surface,#fff)!important;border-radius:8px!important;font-size:13px!important}
 [data-baseweb="input"],[data-baseweb="textarea"],[data-baseweb="select"]>div{border:1px solid var(--line)!important;box-shadow:none!important}
 [data-baseweb="input"]:focus-within,[data-baseweb="textarea"]:focus-within,[data-baseweb="select"]:focus-within{border-color:var(--clay)!important;outline:2px solid #c7744d55!important}
 .st-key-category [role="radiogroup"]{gap:6px}
@@ -30,53 +30,46 @@ header[data-testid="stHeader"]{background:transparent}
 .st-key-category p{font-size:11px!important}
 .stButton>button[kind="primary"]{background:var(--clay)!important;color:#fff!important;border:0;border-radius:8px;min-height:46px;font-weight:600;box-shadow:none}
 .stButton>button[kind="primary"]:hover{background:#843e27!important}
-.stButton>button:disabled{background:#e7e2da!important;color:#77756d!important}
+.stButton>button:disabled{background:#e7e2da!important;color:var(--muted,#77756d)!important}
 button:focus-visible{outline:2px solid var(--terracotta)!important;outline-offset:3px}
 .stDownloadButton>button{background:transparent;border:1px solid var(--line);border-radius:8px;min-height:46px;color:var(--charcoal);font-size:12px}
-.post-masthead{display:flex;gap:10px;align-items:center;background:#fff;padding:14px 16px;border-radius:12px 12px 0 0;font-size:11px;margin-bottom:-16px}
+.post-masthead{display:flex;gap:10px;align-items:center;background:var(--surface,#fff);padding:14px 16px;border-radius:12px 12px 0 0;font-size:11px;margin-bottom:-16px}
 .avatar{display:grid;place-items:center;background:#e7ede4;border-radius:50%;width:30px;height:30px;font-family:Georgia,serif;font-size:21px;color:#5c715d}
-.post-masthead small{display:block;color:#77756d;font-size:9px;margin-top:3px}
+.post-masthead small{display:block;color:var(--muted,#77756d);font-size:9px;margin-top:3px}
 .post-menu{margin-left:auto}
 .st-key-preview_stage [data-testid="stImage"] img{border-radius:0;display:block}
-.st-key-preview_stage [data-testid="stImage"]{background:white}
+.st-key-preview_stage [data-testid="stImage"]{background:var(--surface,#fff)}
 .st-key-preview_stage [data-testid="stImage"] [data-testid="stCaptionContainer"]{padding:4px 12px;font-size:10px}
-.st-key-preview_stage [data-testid="stTextInput"],.st-key-preview_stage [data-testid="stTextArea"]{background:#fff;padding:0 16px}
+.st-key-preview_stage [data-testid="stTextInput"],.st-key-preview_stage [data-testid="stTextArea"]{background:var(--surface,#fff);padding:0 16px}
 .st-key-preview_stage [data-baseweb="input"],.st-key-preview_stage [data-baseweb="textarea"]{border-color:transparent!important;border-radius:0!important}
 .st-key-preview_stage [data-testid="stTextInput"] input{font-size:19px!important;font-weight:600;padding:14px 0}
 .st-key-preview_stage [data-testid="stTextArea"] textarea{line-height:1.95;padding:8px 0;font-size:13px!important;resize:vertical}
-.st-key-preview_stage [data-testid="stTextArea"]:has(textarea[aria-label="Hashtags / 话题标签"]) textarea{color:var(--clay);font-size:11px!important}
-.preview-placeholder{min-height:460px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:24px;color:#77756d;gap:18px;background:var(--ivory);border-radius:12px;font-size:13px}
+.st-key-preview_stage [data-testid="stTextArea"]:has(textarea:is([aria-label="Hashtags"],[aria-label="话题标签"])) textarea{color:var(--clay);font-size:11px!important}
+.preview-placeholder{min-height:460px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:24px;color:var(--muted,#77756d);gap:18px;background:var(--ivory);border-radius:12px;font-size:13px}
 .preview-placeholder strong{font-family:'Cormorant Garamond','Noto Sans SC',Georgia,serif;font-size:28px;font-weight:400;color:var(--charcoal)}
 .placeholder-symbol{color:var(--sage);font-size:70px}
 .step-line{display:flex;gap:14px;font-size:9px;color:var(--sage)}
 .human-note{font-size:12px;margin:22px 6px;color:var(--charcoal);line-height:1.8}
-.human-note small{display:block;font-size:11px;color:#77756d;padding-left:23px}
-.footer{display:flex;justify-content:space-between;gap:32px;border-top:1px solid var(--line);margin-top:32px;padding-top:22px;color:#77756d;font-size:10px;line-height:1.7}
+.human-note small{display:block;font-size:11px;color:var(--muted,#77756d);padding-left:23px}
+.footer{display:flex;justify-content:space-between;gap:32px;border-top:1px solid var(--line);margin-top:32px;padding-top:22px;color:var(--muted,#77756d);font-size:10px;line-height:1.7}
 .footer>span:last-child{max-width:550px;text-align:right}
 [data-testid="stAlert"]{border-radius:10px}
 hr{border-color:var(--line)!important}
 @media(max-width:760px){.block-container{padding:20px}.hero{padding:28px 0 24px}.hero-title{font-size:42px}.edition{display:none}.panel-title{font-size:27px}.st-key-brief_card{padding:18px!important}.st-key-preview_stage{padding:20px 16px!important}.footer{flex-direction:column;gap:10px}.footer>span:last-child{text-align:left}.preview-placeholder{min-height:320px}}
 
-/* Style the native selected state so the pill follows Streamlit reruns. */
-.st-key-language [data-testid="stButtonGroup"]{background:#eae4d9;border-radius:30px;padding:3px}
-.st-key-language button{
-  border:0!important;border-radius:24px!important;background:transparent!important;
-  color:#33332f!important;font-size:11px!important;font-weight:600!important;
-  transition:background-color 160ms ease,color 160ms ease,box-shadow 160ms ease;
-}
-.st-key-language button:is([kind="segmented_controlActive"],[aria-pressed="true"]){
-  background:#a34f30!important;color:#fff!important;box-shadow:0 1px 3px #33332f26;
-}
-.st-key-language button [data-testid="stMarkdownContainer"],
-.st-key-language button [data-testid="stMarkdownContainer"] p{color:inherit!important;font-weight:inherit!important}
-.st-key-language button:focus-visible{outline:2px solid #33332f!important;outline-offset:2px}
-@media(prefers-reduced-motion:reduce){.st-key-language button{transition:none}}
+/* Accessible single-choice segments: native checked state is the only source of truth. */
+.st-key-language [role="radiogroup"]{display:flex;flex-direction:row;flex-wrap:nowrap;gap:3px;background:var(--sand);border-radius:30px;padding:3px;width:max-content}
+.st-key-language [role="radiogroup"] label{margin:0;padding:7px 14px;min-width:48px;min-height:36px;box-sizing:border-box;justify-content:center;border-radius:24px;background:transparent;color:var(--charcoal);cursor:pointer}
+.st-key-language [role="radiogroup"] label>div:first-child{display:none}
+.st-key-language [role="radiogroup"] label:has(input:checked){background:#a34f30;color:#fff;box-shadow:0 1px 3px #33332f26}
+.st-key-language [role="radiogroup"] label p{font-size:11px!important;font-weight:600!important;color:inherit!important;white-space:nowrap}
+.st-key-language [role="radiogroup"] label:has(input:focus-visible){outline:2px solid var(--charcoal);outline-offset:2px}
 /* Join native widgets into a continuous post while retaining focusable controls. */
 .st-key-preview_stage>div>div[data-testid="stVerticalBlock"]{gap:0}
 .st-key-preview_stage [data-testid="stImage"],.st-key-preview_stage [data-testid="stImage"]>div{width:100%!important}
 .st-key-preview_stage [data-testid="stImage"] img{width:100%!important;height:auto}
 .st-key-preview_stage [data-testid="stTextInput"]{padding-top:8px}
-.st-key-preview_stage [data-testid="stTextArea"]:has(textarea[aria-label="Hashtags / 话题标签"]){border-radius:0 0 12px 12px;padding-bottom:10px;margin-bottom:16px}
+.st-key-preview_stage [data-testid="stTextArea"]:has(textarea:is([aria-label="Hashtags"],[aria-label="话题标签"])){border-radius:0 0 12px 12px;padding-bottom:10px;margin-bottom:16px}
 .st-key-preview_stage [data-testid="stCaptionContainer"]{margin:8px 0}
 /* Warm editorial heading panels and a client-side, five-second destination reel. */
 .heading-box{background:linear-gradient(110deg,#eae4d9,#e4e7de);border:1px solid #d7d2c5;border-left:4px solid var(--sage);border-radius:14px;padding:22px 24px;margin:4px 0 20px;min-height:120px;box-sizing:border-box}
@@ -101,33 +94,31 @@ hr{border-color:var(--line)!important}
 @media(prefers-reduced-motion:reduce){.destination-slide{animation:none;opacity:0;visibility:hidden}.destination-slide:first-child{opacity:1;visibility:visible}}
 @media(max-width:760px){.heading-box{padding:18px;min-height:112px}.destination-hero{min-height:470px;align-items:flex-start}.hero-copy{width:100%;padding:28px 24px}.destination-hero .hero-title{font-size:42px;max-width:85%}.destination-hero .hero-sub{max-width:90%;font-size:12px}.destination-images{inset:100px 0 0}.destination-images:after{background:linear-gradient(180deg,#eae4d9 0%,rgba(234,228,217,.8) 25%,transparent 65%)}.destination-slide figcaption{right:12px;bottom:65px}.destination-slide figcaption b{font-size:24px}}
 
-/* This studio intentionally uses a light palette, including with a dark OS preference.
-   Pair explicit foregrounds with the existing light surfaces; color-scheme alone
-   does not override Streamlit's theme-generated widget colors. */
-:root{color-scheme:only light}
+/* Pair widget foregrounds and surfaces in both Streamlit themes. */
+:root{color-scheme:inherit}
 [data-testid="stApp"], [data-testid="stAppViewContainer"], [data-testid="stMain"]{
-  color-scheme:only light;background-color:var(--ivory);color:var(--charcoal);
+  color-scheme:inherit;background-color:var(--ivory);color:var(--charcoal);
 }
 [data-testid="stWidgetLabel"], [data-testid="stWidgetLabel"] p,
 [data-testid="stMarkdownContainer"], [data-testid="stMetric"],
 [data-testid="stRadio"] label, .post-masthead{color:var(--charcoal)}
 [data-testid="stTextInput"] input,[data-testid="stTextArea"] textarea,
 [data-baseweb="select"]>div{
-  color:var(--charcoal)!important;caret-color:var(--clay);color-scheme:only light;
+  color:var(--charcoal)!important;caret-color:var(--clay);color-scheme:inherit;
 }
-input::placeholder,textarea::placeholder{color:#77756d!important;opacity:1}
+input::placeholder,textarea::placeholder{color:var(--muted,#77756d)!important;opacity:1}
 [data-baseweb="select"] svg{color:var(--charcoal)!important;fill:currentColor}
 /* BaseWeb dropdowns render outside the app container in a portal. */
 [data-baseweb="popover"],[data-baseweb="menu"],[role="listbox"]{
-  color-scheme:only light;background-color:#fff!important;color:var(--charcoal)!important;
+  color-scheme:inherit;background-color:var(--surface,#fff)!important;color:var(--charcoal)!important;
 }
-[role="option"]{background-color:#fff!important;color:var(--charcoal)!important}
+[role="option"]{background-color:var(--surface,#fff)!important;color:var(--charcoal)!important}
 [role="option"]:hover,[role="option"][aria-selected="true"]{background-color:var(--sand)!important}
 .stButton>button:not([kind="primary"]),.stDownloadButton>button{
   color:var(--charcoal)!important;background-color:var(--ivory)!important;border-color:var(--line)!important;
 }
 .stButton>button:disabled,.stDownloadButton>button:disabled{
-  color:#77756d!important;background-color:#e7e2da!important;
+  color:var(--muted,#77756d)!important;background-color:#e7e2da!important;
 }
 [data-testid="stExpander"]{background:var(--ivory);border-color:var(--line);color:var(--charcoal)}
 [data-testid="stExpander"] summary{background:var(--ivory)!important;color:var(--charcoal)!important}
@@ -139,9 +130,26 @@ input::placeholder,textarea::placeholder{color:#77756d!important;opacity:1}
 [data-testid="stAlert"]{background-color:#f5e7dd;color:var(--charcoal)}
 [data-testid="stAlert"] [data-testid="stMarkdownContainer"]{color:var(--charcoal)}
 /* Higher-specificity preview tags must retain the editorial accent. */
-.st-key-preview_stage textarea[aria-label="Hashtags / 话题标签"]{color:var(--clay)!important}
+.st-key-preview_stage textarea:is([aria-label="Hashtags"],[aria-label="话题标签"]){color:var(--clay)!important}
 /* Button labels are Markdown descendants; preserve the white-on-clay action. */
 .stButton>button[kind="primary"] [data-testid="stMarkdownContainer"]{color:inherit!important}
 [data-testid="stCaptionContainer"], [data-testid="stCaptionContainer"] p{
-  color:#66645c!important;opacity:1;
+  color:var(--muted,#66645c)!important;opacity:1;
 }
+
+/* The original editorial light palette is unchanged. Dark mode uses the same
+   spacing, typography and components with accessible paired surfaces. */
+:root{color-scheme:light;--surface:#fff;--preview-surface:#eeeae2;--muted:#77756d}
+:root:has(.studio-theme-dark){color-scheme:dark;--ivory:#181916;--sand:#282a25;--surface:#22241f;--preview-surface:#242620;--charcoal:#f1eee7;--muted:#c4c1b8;--clay:#c7744d;--line:#55594d}
+:root:has(.studio-theme-dark) .heading-box{background:linear-gradient(110deg,#282a25,#30372b);border-color:var(--line)}
+:root:has(.studio-theme-dark) .heading-box .panel-title{color:var(--charcoal)}
+:root:has(.studio-theme-dark) .heading-box .panel-sub{color:var(--muted)}
+:root:has(.studio-theme-dark) .st-key-category label:has(input:checked){background:#513329;color:#fff;border-color:#c7744d}
+:root:has(.studio-theme-dark) [data-testid="stAlert"]{background:#3e2b23}
+:root:has(.studio-theme-dark) .stButton>button[kind="primary"]{background:#a34f30!important}
+/* Streamlit's newer radio markup wraps the hidden input in a span. */
+.st-key-language [data-testid="stRadioOption"]>div>div>div:not([data-testid]),
+.st-key-category [data-testid="stRadioOption"]>div>div>div:not([data-testid]){display:none}
+.st-key-language [role="radiogroup"] label [data-testid="stMarkdownContainer"]{color:inherit!important}
+.st-key-language [role="radiogroup"] label *{color:inherit!important}
+.st-key-language [role="radiogroup"] label:has(input:checked) *{color:#fff!important}
