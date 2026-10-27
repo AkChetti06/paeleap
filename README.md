@@ -153,3 +153,19 @@ The original `app.py` is retained for comparison; the new entry point reuses its
 ### Beginner workflow refinement
 
 `week2_app.py` now exposes place + selectable focus topics, friendly version names, one-click title suggestions and a selected-version TXT download. Each version retains independent edits when switching. Regeneration explicitly offers to keep edits or replace both versions. Technical prompts and JSON export are confined to the developer-record expander. This local entry point is offline-only and does not load keys or invoke text/image APIs; image status is clearly shown as not connected. The original provider engine remains available for a later integration stage.
+
+## Detailed inputs — local offline iteration (27 October 2026)
+
+Local entry point: `week2_app.py`. The existing columns, menus, CSS and provider engine are unchanged.
+
+- `input_fields.render_input_fields()` renders only the input controls and returns a serializable detailed brief, or `None` while required information is missing. A menu/layout implementation can call this function inside its own page container.
+- `promotional_brief.py` owns category options, validated case highlights, brief validation and deterministic copy rules. It contains no API clients. `template_engine.generate_drafts(brief, mode='offline')` dispatches detailed briefs to these rules; detailed briefs reject other modes.
+- Category filters a single place selector. A name field appears only for a custom place. The mentor's natural landscape, museum and study-tour categories are included alongside ancient towns and theme parks. Museums, study-tour bases and other unlisted places require a user-written introduction and `name｜description` highlights; no new researched venue data is claimed.
+- Tone changes expression, purpose changes structure, audience changes the reader's observation task, and the primary highlight controls the headline and first highlight. Only 1–3 selected highlights are used. Learning stage and visit duration are conditional; activity promotion requires activity name, time, location and participation method.
+- Supplemental facts are included verbatim as supplemental information. They are not interpreted as free-form writing instructions. User-supplied facts and activity information are marked as unverified in the brief/JSON record.
+- The brief includes `schema_version`, `attraction`, `category`, `text_style`, `purpose`, `audience`, `learning_stage`, `visit_duration`, `highlights`, `primary_fact_id`, `supplement`, `event`, `facts` and source IDs. Output keeps the existing two-version structure and export contract.
+- `week2_result` retains the generated brief and copy. Input changes mark it stale without replacing edits. Changing inputs also cancels an older pending regeneration request. For future multi-page integration, the menu owner should preserve widget input state across Streamlit page cleanup; this iteration validates the existing single-page entry point only.
+
+Validation: `.venv/bin/python -m pytest -q` (42 tests), plus local browser checks of choice-driven copy, edited TXT download, desktop/narrow viewports and console health. No live model API calls, push or deployment were performed.
+
+The local Week 3 screen ends at the TXT save button; the image placeholder, content-check section and developer-record panel have been removed. Source/provenance data remain in the internal brief.

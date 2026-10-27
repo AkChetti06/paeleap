@@ -85,7 +85,8 @@ def test_simple_ui_preserves_edits_and_never_calls_api(monkeypatch):
     monkeypatch.setattr(template_engine, 'generate_drafts', offline_only)
     app = AppTest.from_file(str(Path(__file__).resolve().parents[1] / 'week2_app.py')).run()
     assert not app.exception
-    assert len(app.selectbox) == 1 and not app.checkbox
+    assert app.selectbox(key='text_style').value == '简洁'
+    assert app.selectbox(key='copy_purpose').value == '种草推荐'
     app.button(key='generate_v2').click().run()
     assert not app.exception
     app.text_input(key='title_A').set_value('保留这个修改').run()
@@ -94,13 +95,13 @@ def test_simple_ui_preserves_edits_and_never_calls_api(monkeypatch):
     app.radio(key='active_version').set_value('B').run()
     assert app.text_input(key='title_B').value
     app.button(key='use_title_B_1').click().run()
-    assert app.text_input(key='title_B').value == '蓝印花布与老邮局：认识西栅的两个角度'
+    assert app.text_input(key='title_B').value == app.session_state['week2_result']['copy']['suggested_titles'][1]
     app.radio(key='active_version').set_value('A').run()
     assert app.text_input(key='title_A').value == '保留这个修改'
     assert app.text_area(key='caption_A').value == '手动编辑正文'
     assert app.text_input(key='tags_A').value == '#我的标签'
     app.session_state['focus_choices'] = ['老邮局']
-    app.text_input(key='keywords').set_value('文化').run()
+    app.text_area(key='keywords').set_value('').run()
     app.button(key='generate_v2').click().run()
     assert app.session_state['pending_brief']['primary_fact_id'] == 'F04'
     assert app.text_input(key='title_A').value == '保留这个修改'
@@ -110,6 +111,7 @@ def test_simple_ui_preserves_edits_and_never_calls_api(monkeypatch):
     app.button(key='replace_edits').click().run()
     assert not app.exception
     assert '老邮局' in app.text_input(key='title_A').value
+    app.selectbox(key='example').select('其他场所（填写资料）').run()
     app.text_input(key='place').set_value('未知').run()
     assert app.button(key='generate_v2').disabled
 
@@ -159,11 +161,13 @@ def test_switching_cases_keeps_edits_and_updates_topics_and_versions():
     app = AppTest.from_file(str(Path(__file__).resolve().parents[1] / 'week2_app.py')).run()
     app.button(key='generate_v2').click().run()
     app.text_input(key='title_A').set_value('保留西栅标题').run()
-    for name, topic, label in [('杭州西湖', '苏堤', '观景建议版'), ('杭州宋城', '宋城千古情', '看点介绍版')]:
+    for name, topic, category in [('杭州西湖', '苏堤', '自然景观'), ('杭州宋城', '宋城千古情', '主题乐园')]:
         app.radio(key='active_version').set_value('A').run()
+        app.selectbox(key='input_category').select(category).run()
         app.selectbox(key='example').select(name).run()
         assert not app.exception
-        assert app.text_input(key='place').value == name
+        assert app.selectbox(key='example').value == name
+        assert not any(w.key == 'place' for w in app.text_input)
         assert topic in app.session_state['focus_choices']
         # Merely selecting another case never overwrites the previous result.
         old_title = app.text_input(key='title_A').value
@@ -172,7 +176,7 @@ def test_switching_cases_keeps_edits_and_updates_topics_and_versions():
         app.button(key='replace_edits').click().run()
         assert not app.exception and name in app.text_input(key='title_A').value
         app.radio(key='active_version').set_value('B').run()
-        assert label in str(app.radio(key='active_version').options)
+        assert '读者引导版' in str(app.radio(key='active_version').options)
         app.text_input(key='title_B').set_value('我的' + name + '版本').run()
         app.radio(key='active_version').set_value('A').run()
         app.radio(key='active_version').set_value('B').run()

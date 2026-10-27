@@ -127,6 +127,11 @@ def parse_drafts(raw, brief):
 
 
 def generate_drafts(brief, mode='offline', config=None):
+    if brief.get('schema_version') == 'detailed_inputs_v1':
+        if mode != 'offline':
+            raise ValueError('详细输入原型仅支持离线预览。')
+        from promotional_brief import detailed_drafts
+        return detailed_drafts(brief)
     if mode == 'offline':
         return offline_drafts(brief)
     if mode != 'llm':
