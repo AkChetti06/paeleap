@@ -191,7 +191,8 @@ def test_saved_outputs(tmp_path):
 
 def test_simple_bilingual_ui_edits_and_video(monkeypatch,tmp_path):
  from streamlit.testing.v1 import AppTest
- import engine,streamlit as st,dotenv
+ import engine,streamlit as st,dotenv,studio_state
+ monkeypatch.setattr(studio_state,'save_caption_output',lambda *a:tmp_path)
  from PIL import Image
  monkeypatch.setattr(dotenv,'load_dotenv',lambda **kw:None)
  calls=[]
@@ -211,27 +212,35 @@ def test_simple_bilingual_ui_edits_and_video(monkeypatch,tmp_path):
  assert app.radio(key='language').value=='English'
  assert app.radio(key='category').options==['Ancient Town','Natural Scenery','Theme Park']
  assert app.radio(key='language').options==['EN','中文']
- app.button[0].click().run()
- assert not app.exception and len(app.tabs)==3
+ app.button(key='generate_caption').click().run()
+ assert not app.exception and not app.text_area
+ app.radio(key='workspace').set_value('preview').run()
  app.text_input(key='draft_0_title').set_value('Edited title').run()
  assert app.text_input(key='draft_0_title').value=='Edited title'
  app.radio(key='language').set_value('中文').run()
  assert not app.exception and len(app.warning)==1
  assert app.text_input(key='draft_0_title').value=='Edited title'
+ app.radio(key='workspace').set_value('text').run()
  assert app.selectbox(key='destination').value=='west_lake'
  assert app.selectbox(key='destination').options[0]=='杭州西湖'
  assert app.radio(key='category').options==['古镇','自然风光','主题乐园']
  assert app.selectbox(key='visual_style_choice').options==['电影感风光','传统人文纪实','赛博朋克霓虹','活力趣味']
- app.button[0].click().run()
+ app.button(key='generate_caption').click().run()
  assert calls[-1]['language']=='中文'
+ app.radio(key='workspace').set_value('preview').run()
  assert app.text_input(key='draft_0_title').value=='中文 0'
+ app.radio(key='workspace').set_value('image').run()
+ app.button(key='generate_image').click().run()
+ app.radio(key='workspace').set_value('preview').run()
  app.button(key='generate_video').click().run()
  assert not app.exception and (tmp_path/'slideshow.mp4').exists()
+ app.radio(key='workspace').set_value('text').run()
  # A failed new generation retains the prior editable output.
  def fail(*a,**kw):raise engine.CaptionError('Text service unavailable')
  monkeypatch.setattr(engine,'generate_caption_variants',fail)
- app.button[0].click().run()
+ app.button(key='generate_caption').click().run()
  assert not app.exception and len(app.error)==1
+ app.radio(key='workspace').set_value('preview').run()
  assert app.text_input(key='draft_0_title').value=='中文 0'
 
 
@@ -301,7 +310,8 @@ def test_form_values_survive_translation_and_manual_style(monkeypatch):
 def test_server_secrets_used_without_provider_controls(monkeypatch,tmp_path):
  from streamlit.testing.v1 import AppTest
  from PIL import Image
- import engine,dotenv
+ import engine,dotenv,studio_state
+ monkeypatch.setattr(studio_state,'save_caption_output',lambda *a:tmp_path)
  monkeypatch.setattr(dotenv,'load_dotenv',lambda **kw:None)
  for name in ['CLOUDFLARE_ACCOUNT_ID','CLOUDFLARE_API_TOKEN','TEXT_API_KEY','TEXT_BASE_URL']:
   monkeypatch.delenv(name,raising=False)
@@ -321,9 +331,12 @@ def test_server_secrets_used_without_provider_controls(monkeypatch,tmp_path):
  app.secrets.update(dict(CLOUDFLARE_ACCOUNT_ID='a'*32,CLOUDFLARE_API_TOKEN='test-cf-secret',
                         TEXT_API_KEY='test-text-secret',TEXT_BASE_URL='https://text.example/v1'))
  app.run()
- app.button[0].click().run()
+ app.button(key='generate_caption').click().run()
+ assert not app.exception and len(calls)==0
+ app.radio(key='workspace').set_value('image').run()
+ app.button(key='generate_image').click().run()
  assert not app.exception and len(calls)==1
- assert len(app.selectbox)==2
+ assert len(app.selectbox)==1
  assert 'test-cf-secret' not in str(app.session_state['result'])
  assert 'test-text-secret' not in str(app.session_state['result'])
 
