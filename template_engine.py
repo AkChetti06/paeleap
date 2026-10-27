@@ -2,7 +2,17 @@
 import json
 import re
 from pathlib import Path
-from engine import CaptionError, generate_with_fallback, safe_error
+from engine import CaptionError, safe_error
+
+def generate_with_fallback(*args, **kwargs):
+    # The team engine may omit the legacy image dispatcher. Keep offline text
+    # independent of it; image callers must provide a configured generator.
+    import engine
+    generate = getattr(engine, 'generate_with_fallback', None)
+    if generate is None:
+        raise ValueError('当前原型尚未接通图片生成。')
+    return generate(*args, **kwargs)
+
 
 ROOT = Path(__file__).resolve().parent
 TEMPLATES = {

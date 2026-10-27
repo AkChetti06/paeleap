@@ -7,6 +7,7 @@ import tempfile
 from pathlib import Path
 from datetime import datetime
 from io import BytesIO
+from urllib.parse import urlparse
 import requests
 from PIL import Image, ImageOps
 

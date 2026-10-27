@@ -118,7 +118,7 @@ def test_simple_ui_preserves_edits_and_never_calls_api(monkeypatch):
 
 def test_wan_payload_uses_valid_pixel_area_without_live_request(monkeypatch):
     import types
-    import dashscope.aigc.image_generation as api
+    api = pytest.importorskip('dashscope.aigc.image_generation')
     import engine
     from PIL import Image
     from io import BytesIO

@@ -165,6 +165,6 @@ Local entry point: `week2_app.py`. The existing columns, menus, CSS and provider
 - The brief includes `schema_version`, `attraction`, `category`, `text_style`, `purpose`, `audience`, `learning_stage`, `visit_duration`, `highlights`, `primary_fact_id`, `supplement`, `event`, `facts` and source IDs. Output keeps the existing two-version structure and export contract.
 - `week2_result` retains the generated brief and copy. Input changes mark it stale without replacing edits. Changing inputs also cancels an older pending regeneration request. For future multi-page integration, the menu owner should preserve widget input state across Streamlit page cleanup; this iteration validates the existing single-page entry point only.
 
-Validation: `.venv/bin/python -m pytest -q` (42 tests), plus local browser checks of choice-driven copy, edited TXT download, desktop/narrow viewports and console health. No live model API calls, push or deployment were performed.
+Validation: `.venv/bin/python -m pytest -q` (46 tests), plus local browser checks of choice-driven copy, edited TXT download, desktop/narrow viewports and console health. Validation used offline generation only; no live model API calls or deployment were performed.
 
 The local Week 3 screen ends at the TXT save button; the image placeholder, content-check section and developer-record panel have been removed. Source/provenance data remain in the internal brief.
