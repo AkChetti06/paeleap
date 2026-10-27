@@ -168,3 +168,22 @@ Local entry point: `week2_app.py`. The existing columns, menus, CSS and provider
 Validation: `.venv/bin/python -m pytest -q` (46 tests), plus local browser checks of choice-driven copy, edited TXT download, desktop/narrow viewports and console health. Validation used offline generation only; no live model API calls or deployment were performed.
 
 The local Week 3 screen ends at the TXT save button; the image placeholder, content-check section and developer-record panel have been removed. Source/provenance data remain in the internal brief.
+
+
+### Combined offline preview
+
+Run `.venv/bin/python -m streamlit run app.py --server.port 8514` on `week-3-combined`.
+The existing gallery and Caption / Image / Preview navigation now use the detailed
+input fields and deterministic offline copy in Caption. Preview retains editing
+and downloads. Inputs survive workspace changes; regenerating edited drafts
+requires explicit replacement. Image generation is disabled in this preview.
+The interface language toggle remains available; input labels and choices switch between English and Chinese; offline
+copy currently remains Chinese. No model API is called, even with configured credentials.
+Validation: 51 tests pass, including offline generation, workspace persistence,
+custom-place validation, edit protection and generation failure preservation.
+
+The combined workflow retains the original gallery dimensions and animation.
+Forms and previews use natural height rather than nested fixed-height scroll panels;
+narrow screens stack the content. Next/Back buttons connect Caption, Photo and Preview.
+Local image uploads are optional, limited to 20 MB / 25 megapixels, removable, and
+labelled as uploads. Uploaded images are not AI-generated. No model API is used.

@@ -33,13 +33,15 @@ def render_results(workspace, field, label, t, lang):
                         escape(attraction) + '</small></div></div>', unsafe_allow_html=True)
         if workspace in ('image', 'preview'):
             if image is not None:
-                st.image(image, caption=t['image'], use_container_width=True)
+                st.image(image, caption=label('Uploaded photo', '本地上传配图') if result.get('image_source') == 'local_upload' else t['image'], width='stretch')
             else:
-                st.caption(label('No image yet. Generate one in Image.', '暂无图片，请前往图片工作区生成。'))
+                st.caption(label('No image yet; generation is disabled in this offline preview.', '暂无图片；当前离线预览未连接图片生成。'))
         if workspace in ('text', 'preview'):
             if variants:
                 source = variants[index]
-                if text_plan.get('language') != lang:
+                if result.get('copy_source') == 'local_template_not_llm' and lang != '中文':
+                    st.caption('Offline drafts currently remain in Chinese; switching interface language does not translate them.')
+                elif text_plan.get('language') != lang:
                     st.warning(label('This draft keeps its original language. Generate Caption to create an English draft.',
                                      '此草稿保留原语言。点击生成文案以创建中文草稿。'))
                 if workspace == 'preview':
@@ -55,13 +57,13 @@ def render_results(workspace, field, label, t, lang):
                     st.text(caption)
                     st.text(hashtags)
                 st.download_button(t['download_copy'], title + '\n\n' + caption + '\n\n' + hashtags,
-                                   f'caption_{index + 1}.txt', key=f'download_{index}', use_container_width=True)
+                                   f'caption_{index + 1}.txt', key=f'download_{index}', width='stretch')
             else:
                 st.caption(label('No caption yet. Generate one in Caption.', '暂无文案，请前往文案工作区生成。'))
         if workspace in ('image', 'preview') and image is not None:
             bio = BytesIO()
             image.save(bio, format='PNG')
-            st.download_button(t['download_image'], bio.getvalue(), 'paeleap_visual.png', 'image/png', use_container_width=True)
+            st.download_button(t['download_image'], bio.getvalue(), 'paeleap_visual.png', 'image/png', width='stretch')
         if workspace == 'image' and image is not None:
             with st.expander(t['prompt']):
                 st.code(image_plan.get('image_prompt', ''), language='text')
@@ -78,5 +80,5 @@ def render_results(workspace, field, label, t, lang):
             st.download_button(t['download_json'], json.dumps(dict(
                 plan=text_plan or image_plan, text_plan=text_plan, image_plan=image_plan,
                 variants=edited, source_variants=variants, selected_variant=index,
-                backend='cloudflare' if image is not None else None, review_required=True),
-                ensure_ascii=False, indent=2), 'paeleap_post.json', 'application/json', use_container_width=True)
+                backend=result.get('image_source', 'cloudflare') if image is not None else None, review_required=True),
+                ensure_ascii=False, indent=2), 'paeleap_post.json', 'application/json', width='stretch')

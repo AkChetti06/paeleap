@@ -1,0 +1,36 @@
+/* Keep the original gallery size, palette and motion; let content breathe. */
+html{-webkit-font-smoothing:antialiased}
+.st-key-brief_card,.st-key-copy_results_card{min-width:0;padding:24px!important}
+.st-key-preview_stage{padding:24px!important;max-width:780px;margin-inline:auto}
+.st-key-preview_stage>div>div[data-testid="stVerticalBlock"]{gap:1rem!important}
+.post-masthead{margin-bottom:0!important;border-radius:12px;padding:16px}
+.st-key-preview_stage [data-testid="stTextInput"],
+.st-key-preview_stage [data-testid="stTextArea"]{padding:10px 16px;border-radius:10px}
+.st-key-preview_stage [data-testid="stTextInput"] input{font-size:18px!important;padding:10px 0}
+.st-key-workspace [role="radiogroup"] label{min-height:46px}
+.st-key-language [role="radiogroup"] label{min-height:44px;min-width:52px}
+.st-key-language{min-width:148px}
+[data-testid="stText"]{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.75}
+h1,h2,h3,h4{overflow-wrap:anywhere;text-wrap:balance}
+.footer{flex-wrap:wrap}
+@media(max-width:900px){
+ [data-testid="stHorizontalBlock"]:has(.st-key-brief_card){flex-direction:column}
+ [data-testid="stHorizontalBlock"]:has(.st-key-brief_card)>[data-testid="stColumn"]{width:100%!important;flex:1 1 100%!important}
+}
+@media(max-width:760px){
+ .st-key-brief_card,.st-key-copy_results_card{padding:16px!important}
+ .st-key-preview_stage{padding:16px!important}
+ .st-key-language{min-width:0}
+ .st-key-workflow_next button,.st-key-workflow_back button{min-height:48px;white-space:normal}
+}
+
+/* The two caption actions always share a baseline, including narrow screens. */
+.st-key-caption_actions [data-testid="stHorizontalBlock"]{flex-direction:row;flex-wrap:nowrap;align-items:stretch;gap:16px}
+.st-key-caption_actions [data-testid="stColumn"]{min-width:0!important;flex:1 1 0!important;width:0!important}
+.st-key-caption_actions button{min-height:52px;height:100%;white-space:normal}
+.st-key-caption_actions button p{line-height:1.4}
+@media(max-width:760px){
+ .st-key-caption_actions [data-testid="stHorizontalBlock"]{gap:10px}
+ .st-key-caption_actions button{height:56px;padding:8px}
+ .st-key-caption_actions button p{font-size:13px!important}
+}
