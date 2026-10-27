@@ -1,64 +1,63 @@
-# Paeleap C1 — Week 2 Tourism Promotion Mini-Project
+# PAELEAP Xiaohongshu Post Generator
 
-Based on the three Week 1 documents: tourist attraction and API research, curated 20 Xiaohongshu reference posts (7 scenic / 7 museum / 6 study-tour), and visual-task classification. **The curated sample is not a platform-wide viral ranking.**
+Streamlit tourism studio with editable bilingual captions, Cloudflare concept imagery and a local slideshow video. It does not verify travel facts or publish posts.
 
-## What this does
-Enter an attraction name → choose content task and visual style → generate a proposed image prompt → generate one Chinese promotional title, caption, and hashtags → optionally call **Wan 2.6 text-to-image** → display, score manually, and download a post. The interface works completely offline with an **explicitly marked placeholder**, and supports real cloud image generation after setup.
+## Run locally
 
-## Run
+Use Python 3.11 or 3.12 and run from this repository:
 
-```bash
-cd paeleap-c1-week2
-python3 -m venv .venv
-source .venv/bin/activate  # Windows: .venv\\Scripts\\activate
-pip install -r requirements.txt
-cp .env.example .env    # Windows: copy .env.example .env
-streamlit run app.py
+```sh
+python -m pip install -r requirements.txt
+cp .env.example .env
+# Fill in .env locally; never commit credentials.
+python -m streamlit run app.py
 ```
 
-Open the URL shown by Streamlit. The default runs without an API key but produces **no AI image**; do not show the placeholder as generated output.
+Required server settings (environment variables take precedence over Streamlit secrets):
 
-## Real Alibaba Wan setup
-1. Obtain a Model Studio API key and a workspace-specific endpoint from **the same region**. China (Beijing) and Singapore keys/endpoints are not interchangeable.
-2. In `.env`, set `DASHSCOPE_API_KEY`, `DASHSCOPE_BASE_URL` and optionally `IMAGE_MODEL=wan2.6-t2i`.
-3. Switch image mode to **Alibaba Wan 真实生成** in the sidebar. The app calls `dashscope.aigc.image_generation.ImageGeneration.call`, then downloads the returned temporary image URL. Each successful call may incur charges.
-4. Check your region's model availability, dimensions, price and quota in the console before running. Do not commit your `.env` file.
+- `CLOUDFLARE_ACCOUNT_ID`: the 32-character account ID.
+- `CLOUDFLARE_API_TOKEN`: token with Workers AI access for that account.
+- `TEXT_API_KEY`, `TEXT_BASE_URL`: the existing OpenAI-compatible chat-completions integration.
+- `TEXT_MODEL`: text model name, default `qwen-plus`.
 
-Source: [Alibaba Wan T2I API reference](https://www.alibabacloud.com/help/en/model-studio/text-to-image-v2-api-reference).
+Cloudflare credentials never enter widgets, prompts, downloads or result state. Provider response bodies and SDK exception details are not displayed. `.env` and `.streamlit/secrets.toml` are git-ignored. Do not paste credentials into attraction names or keywords.
 
-## Optional LLM captions
-Set `TEXT_API_KEY`, `TEXT_BASE_URL` (full OpenAI-compatible **/v1** base path), and `TEXT_MODEL`. Select **LLM API 生成**. LLM mode requires a configured text provider and reports errors explicitly; it never substitutes an offline template. Captions must be reviewed for factual accuracy before publishing.
+## Operator workflow
 
-## Constraints and report
-- Week 2: **one promotional post**, not a full style-template library (Week 3), image-to-video (Week 4), or full post generator (Week 5).
-- Follow **reason → sequence → evidence**, but never falsely claim an AI image is real evidence.
-- Stored outputs: `outputs/<timestamp>/visual.png`, `post.json`, and `post.txt`.
-- Evaluate quality, landmark accuracy, style consistency, cost efficiency, and integration on your Week 1 25/25/20/15/15 rubric. These are user-assigned scores, not benchmark results.
-- `python -m pytest -q` runs unit tests (no API charges).
+1. Select EN or 中文 with the visible language control.
+2. Choose a destination or enter your own attraction. Select a category and visual direction, and optionally set the audience, creative angle and keywords.
+3. Generate an image and three caption variants; edit each title, caption and hashtags in its tab. Download a caption, PNG or JSON containing all edited variants.
+4. Optionally create a short video. This reuses the cover, requests two more images from Cloudflare and assembles a silent 9-second portrait slideshow. Download the MP4.
+5. Review imagery, captions and factual claims before publishing. The optional quality review and export remain available.
 
-## Suggested Week 2 report headings
-Objective · Week 1 evidence used · Prototype architecture · API configuration · Screenshots/results · Evaluation and limitations · Week 3 transition.
+The EN | 中文 control uses a native single-choice radio styled as adjacent segments, so there is always one active language. Stable destination, category and style IDs and durable form state preserve selections across translated labels and reruns. Predefined destination names and untouched audience defaults translate; user-entered text is never translated. A language change preserves existing caption edits and shows a reminder to regenerate. New outputs use the selected language; existing drafts retain their original language. Keywords are unverified context, not factual evidence. Captions prohibit invented visits, prices, hours, events and routes. Human review is still needed because model compliance cannot be guaranteed. Missing credentials, invalid text JSON or repeated variants produce errors; no placeholder or template is substituted. Successful drafts survive generation failures.
 
-**Important**: demo fallback uses generic guidance, not validated visit times, transit, exhibit availability or precise routes. Generated images are illustrative only; place-specific claims and any planned publication require human review and authorized factual material.
+## Category recommendations
 
-## Version 2 — bilingual studio + free testing
+| Category | Internal style | Palette | Template focus |
+| --- | --- | --- | --- |
+| 古镇 / Ancient Town | Traditional Editorial | Warm ochre, muted terracotta, ink gray | Respectful heritage illustration |
+| 自然风光 / Natural Scenery | Cinematic Landscape | Sage green, lake blue, soft ivory | Serene landscape illustration |
+| 主题乐园 / Theme Park | Vibrant & Playful | Coral red, sunny yellow, sky blue | Playful illustration without invented rides or mascots |
 
-The updated UI includes a full **English / 中文** language toggle, polished creator-studio styling, and caption generation in the selected language. Switching the language does not automatically translate an earlier generated result: click Generate again to produce a new caption.
+`CATEGORY_CONFIG` in `engine.py` is the single source for category labels, validation, recommended style, palette and template. All four original visual directions remain manually selectable, including Cyberpunk Neon. Each style has an English and Simplified Chinese display name. Category templates and palettes remain category-specific when a style is overridden. There is no image-provider fallback. `app.py` handles UI and server settings; `engine.py` owns generation, response validation, rendering and output snapshots; `studio.css` and `ui_banner.py` handle presentation. The original editorial panels, category cards, responsive columns, banner, typography and light palette remain. Dark mode uses paired foregrounds and surfaces inferred from Streamlit context, with the configured theme as a first-render fallback.
 
-### Free real image generation (Hugging Face)
+## Video prerequisites and limits
 
-1. Create a Hugging Face account: https://huggingface.co/join
-2. Create an access token at https://huggingface.co/settings/tokens with Inference Providers permission.
-3. Copy `.env.example` to `.env`, set `HF_TOKEN=...` and restart Streamlit.
-4. Select **Hugging Face · free starter credits** as your image engine.
-5. If the default `HF_IMAGE_MODEL` is unavailable, pick a currently hosted text-to-image model at https://huggingface.co/models?pipeline_tag=text-to-image and update the environment variable.
+`imageio-ffmpeg>=0.6,<0.7` supplies a local FFmpeg executable on supported wheel platforms, including standard Linux Community Cloud environments. The renderer needs a working H.264 (`libx264`) encoder, writable temporary storage and enough CPU to encode 720×960 at 24 fps. It uses one encoder thread and a 120-second timeout; temporary images are cleaned up. If your platform has no bundled executable, install FFmpeg and set server-side `IMAGEIO_FFMPEG_EXE` to its absolute path. No MoviePy or system package is required on platforms with a bundled binary.
 
-**Important:** Hugging Face free accounts currently receive **US$0.10 in monthly inference credits**, subject to change. There is no guarantee the chosen image model will fit your credit balance or be available in your region. The demo option remains entirely free and works without any API key, but is explicitly a non-AI placeholder. Alibaba Wan remains available for later model testing.
+The slideshow is image sequencing, not generative scene motion; there is no audio. Video generation makes two additional image API calls and consumes extra quota. Shared category style, palette and scene context encourage consistency, but separate images can differ in geometry or content. The original PNG retains its returned dimensions; the video fits images into a portrait canvas without stretching or cropping.
 
-The prototype does not automatically publish on Xiaohongshu or present invented itineraries and AI concept visuals as genuine travel photos. Generated copy should be reviewed against current official site information.
+The configured [Cloudflare FLUX.1-schnell model](https://developers.cloudflare.com/workers-ai/models/flux-1-schnell/) accepts prompt and steps and returns a Base64 image. This integration uses four steps. Its contract does not provide text generation, video generation, seed locking, reference-image consistency controls or width/height selection. Portrait composition in the prompt is not an aspect-ratio guarantee. Captions continue to use the separate text API. No claims of live API verification or free/unlimited usage are made.
 
+## Testing and deployment checklist
 
-## Version 3: Cloudflare Workers AI
+- Install dependencies and run `python -m pytest -q` (mocked provider contracts, language/UI edits, errors, category mapping and real local MP4 encoding/decoding).
+- Run `python -m pip check` and start Streamlit locally; check narrow/wide layouts and both themes.
+- In Streamlit Community Cloud, choose `app.py`, Python 3.11/3.12 and repository `requirements.txt`.
+- Add the required settings to **App settings → Secrets**, using TOML strings, e.g. `TEXT_MODEL = "qwen-plus"`. Never commit the real secrets file.
+- Reboot after dependency/secrets changes. Test one generation in each language, all three categories, editing/downloads and the video button using your configured accounts.
+- Check account permissions, quota, generated-content accuracy and MP4 playback. Live image/text services require credentials and are not exercised by unit tests.
 
 Cloudflare is now supported alongside Hugging Face, Alibaba Wan and the offline demo.
 

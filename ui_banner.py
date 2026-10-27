@@ -20,13 +20,13 @@ def render_banner(t, lang):
         name = cn if lang == '中文' else en
         slides.append(
             f'<figure class="destination-slide slide-{index}">'
-            f'<img src="{image}" alt="{escape(en + " / " + cn)}" referrerpolicy="no-referrer">'
-            f'<figcaption><b>{escape(name)}</b><span>HANGZHOU / 杭州 · {index+1:02d} / 03</span>'
-            f'<small><a href="{source}" target="_blank" rel="noopener noreferrer">{escape(author)} · Wikimedia Commons</a> · '
+            f'<img src="{image}" alt="{escape(name)}" referrerpolicy="no-referrer">'
+            f'<figcaption><b>{escape(name)}</b><span>{"杭州" if lang == "中文" else "HANGZHOU"} · {index+1:02d} / 03</span>'
+            f'<small><a href="{source}" target="_blank" rel="noopener noreferrer">{escape(author)} · {"维基共享资源" if lang == "中文" else "Wikimedia Commons"}</a> · '
             f'<a href="https://creativecommons.org/licenses/{license_id}/" target="_blank" rel="noopener noreferrer">CC {license_id.upper()}</a>'
             f' · {"画面裁切" if lang == "中文" else "display cropped"}</small></figcaption></figure>'
         )
-    return (f'<section class="hero destination-hero" aria-label="Hangzhou destination showcase">'
+    return (f'<section class="hero destination-hero" aria-label="{"杭州景点展示" if lang == "中文" else "Hangzhou destination showcase"}">'
             f'<div class="destination-images">{"".join(slides)}</div>'
             f'<div class="hero-copy"><div class="hero-label">{escape(t["eyebrow"])}</div>'
             f'<div class="hero-title">{escape(t["headline"])}</div>'

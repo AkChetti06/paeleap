@@ -1,33 +1,34 @@
 # C1 — Week 2 Mini-Project Report (Draft Template)
 
 ## Objective
-Generate **one** promotional post from the name of a tourist attraction, using the Week 1 research as background.
+Generate a promotional image, a three-frame slideshow and three editable Xiaohongshu caption variants from a tourism brief.
 
 ## Selected location and creative brief
 - Attraction: [enter]
-- Target audience: [enter]
-- Category and visual direction: [enter]
-- Story angle: [enter]
+- Optional keywords: [enter]
+- Category: [古镇 / Ancient Town, 自然风光 / Natural Scenery, or 主题乐园 / Theme Park]
+- Output language: [English or Chinese]
+- Recommended / selected visual direction and category palette: [enter from downloaded brief]
 
 ## Prototype method
-The Streamlit prototype converts the attraction name and selected creative brief into a prompt and promotional copy. It can generate local template text without API use, or request real LLM-generated text with a configured API. For visuals it offers an explicitly marked non-AI demo placeholder, Cloudflare Workers AI, Hugging Face, or Alibaba Wan.
+The Streamlit prototype uses one recommended visual direction, palette and template per category, with manual visual direction selection retained. Cloudflare Workers AI is the sole image provider. The existing OpenAI-compatible text API generates three distinct caption variants. Local FFmpeg assembles the cover and two additional generated images into a silent 9-second slideshow. No alternate image provider or automatic template substitution is used.
 
 ## Evidence to add from an actual run
-- Screenshot of input settings: [insert]
-- Screenshot of output preview: [insert]
-- Generated title and caption: [insert from actual output]
-- Actual text source (template or LLM): [enter]
-- Actual image source (placeholder or provider): [enter]
-- Actual model / API response and run duration, if tested: [enter]
-- Any prompt revisions or manual edits: [enter]
+- Screenshot of the brief and previews: [insert]
+- Generated and edited captions: [insert actual output]
+- Downloaded PNG, MP4 and JSON: [attach]
+- API model and run duration, if tested: [enter; do not include credentials]
+- Language/category checks: [enter]
+- Generation failures or rendering limitations: [enter]
 
 ## Manual review
-Record your own assessment of visual quality, landmark accuracy, style consistency, cost efficiency, and integration using the app's 25/25/20/15/15 weighted rubric. **Do not score a placeholder as an AI-generated visual.** Verify any published travel claims against authorized sources.
+Assess visual quality, landmark accuracy, style consistency, cost efficiency and integration with the app's weighted review rubric. Verify travel claims against authorized sources. Label generated visuals as illustrative, not actual photographs or evidence of a visit.
 
 ## Limitations and next steps
-Week 2 validates a single-post workflow rather than content quality at scale. Generative results need human review, API models may require credits, and live provider operation is not proven by mocked unit tests. In Week 3 the image workflow can be extended into a text-to-image workspace and a three-style template library.
+Shared art direction encourages visual consistency but cannot guarantee identical scenery across generated images. The video is a slideshow, not generated motion. Facts and model-generated captions need human review. Local tests do not establish live API access, quota or content quality. Community Cloud storage is ephemeral; download results.
 
 ## Test record
-- Local unit tests: 10 passed on 20 October 2026.
-- Live API integration: not verified in this testing environment.
-- Human content assessment: pending actual run and review.
+- Automated tests: [record current `python -m pytest -q` result]
+- Real local FFmpeg encode/decode test: [record result]
+- Live API integration: [record actual result or not verified]
+- Human content assessment: [record actual review or pending]
