@@ -1,10 +1,25 @@
 """Offline image planning UI; all choices feed image_brief, no provider calls."""
 import hashlib
-import json
-from pathlib import Path
 import streamlit as st
-from image_brief import LIBRARY, VISUAL_STYLES, OPTIONS, DEFAULTS, build_image_brief, context_fingerprint
+from image_brief import VISUAL_STYLES, DEFAULTS, build_image_brief
 from local_photo import decode_photo, clear_photo_if_removed, remove_photo
+
+
+# Friendly choices map to complete visual instructions; hidden legacy controls are ignored.
+STYLE_LABELS = {'natural': ('自然照片', 'Natural photo'), 'heritage': ('水墨海报', 'Ink poster'), 'experience': ('旅行拼贴', 'Travel collage')}
+MOODS = {
+    'auto': ('帮我搭配', 'Match for me', {'light': 'auto', 'palette': 'auto'}),
+    'fresh': ('清新明亮', 'Fresh & bright', {'light': 'soft', 'palette': 'cool'}),
+    'warm': ('温暖柔和', 'Warm & soft', {'light': 'golden', 'palette': 'warm'}),
+    'calm': ('安静自然', 'Calm & natural', {'light': 'overcast', 'palette': 'natural'}),
+}
+SIZES = {'3:4': ('竖图 · 小红书封面', 'Portrait · cover'), '1:1': ('方图 · 图文配图', 'Square · post'), '16:9': ('横图 · 宽幅展示', 'Landscape · wide')}
+
+def simple_selections(style, mood, ratio, has_photo=False, use_portrait=False):
+    return {**DEFAULTS, **MOODS[mood][2], 'ratio': ratio,
+            'mode': 'reference' if has_photo else 'concept',
+            'people': 'portrait' if use_portrait else 'none',
+            'treatment': {'natural': 'subtle', 'heritage': 'ink', 'experience': 'cutout'}[style]}
 
 
 def selected_caption(state):
@@ -26,48 +41,39 @@ def render_image_workspace(field, label, lang):
     result=st.session_state.setdefault('result',{})
     brief=result.get('text_plan',{})
     st.markdown('### '+label('Plan your image','设计配图'))
-    st.caption(label('Choose a direction and refine it. This version prepares prompts; it does not generate or edit images.',
-                     '选择方向，再补充细节。本版会整理配图方案，不生成或修改图片。'))
+    st.caption(label('Choose a style and a mood. We will match the details for you.',
+                     '选好风格和感觉，其余细节帮你搭配。'))
     if not brief:
         st.info(label('Generate a caption first so the place and key details carry over.', '先生成文案，景点、推广重点和目标人群会自动带入。'))
         return
+    subjects=list(dict.fromkeys(h['label'] for h in brief.get('highlights',[]) if h.get('label')))
+    subjects=subjects or [brief['attraction']]
     context=brief['attraction']+'|'+str(brief.get('primary_fact_id',''))
-    suggested=brief.get('highlights',[{}])[0].get('label',brief['attraction'])
-    old_auto=st.session_state.get('image_auto_subject')
-    if st.session_state.get('image_context')!=context:
-        if st.session_state.get('form_image_subject') in (None,old_auto):
-            st.session_state['form_image_subject']=suggested
-        st.session_state['image_context']=context
-        st.session_state['image_auto_subject']=suggested
+    if st.session_state.get('simple_image_context')!=context:
+        st.session_state['form_image_subject_choice']=subjects[0]
+        st.session_state['simple_image_context']=context
+    if st.session_state.get('form_image_subject_choice') not in subjects+['custom']:
+        st.session_state['form_image_subject_choice']=subjects[0]
+    lang_index=0 if lang=='中文' else 1
     inputs, output=st.columns([1.05,1],gap='medium')
-    def choice(k,zh,en):
-        return field(st.selectbox,'image_'+k,DEFAULTS[k],label=label(en,zh),options=list(OPTIONS[k]),
-                     format_func=lambda v: OPTIONS[k][v][0 if lang=='中文' else 1])
     with inputs:
         with st.container(border=True):
             st.caption(label('From your caption','沿用文案资料')+' · '+brief['attraction'])
-            style=field(st.selectbox,'image_template','natural',label=label('Visual template','视觉模板'),options=list(VISUAL_STYLES),
-                        format_func=lambda v: VISUAL_STYLES[v]['name' if lang=='中文' else 'en'])
-            st.caption(VISUAL_STYLES[style]['purpose' if lang=='中文' else 'en_purpose'])
-            subject=field(st.text_input,'image_subject',suggested,label=label('Main subject','画面主体'),max_chars=160,
-                          help=label('One visible subject from the caption. Added details are treated as user-supplied.', '选文案里的一个可见主体；新增内容按用户提供资料处理。'))
-            choices={}
+            style=field(st.radio,'image_template','natural',label=label('What style do you like?','想要什么风格？'),options=list(VISUAL_STYLES),
+                        format_func=lambda v: STYLE_LABELS[v][lang_index],horizontal=True)
+            subject_choice=field(st.selectbox,'image_subject_choice',subjects[0],label=label('What should stand out?','主要突出什么？'),options=subjects+['custom'],
+                                 format_func=lambda v: label('Something else…','自己填写…') if v=='custom' else v)
+            subject=subject_choice
+            if subject_choice=='custom':
+                subject=field(st.text_input,'image_subject',subjects[0],label=label('Describe the subject','写下你想突出的内容'),max_chars=160)
             a,b=st.columns(2)
-            with a: choices['mode']=choice('mode','创作方式','Creation mode')
-            with b: choices['ratio']=choice('ratio','画面比例','Aspect ratio')
-            with st.expander(label('More visual details','更多画面细节')):
-                a,b=st.columns(2)
-                with a:
-                    choices['framing']=choice('framing','取景方式','Framing')
-                    choices['light']=choice('light','光线氛围','Lighting')
-                    choices['people']=choice('people','人物安排','People')
-                with b:
-                    choices['palette']=choice('palette','色彩方向','Palette')
-                    choices['title_space']=choice('title_space','标题位置','Title space')
-                    choices['treatment']=choice('treatment','风格化处理','Finish')
-                notes=field(st.text_area,'image_notes','',label=label('Extra requirements (optional)','补充画面要求（选填）'),max_chars=600,height=90)
-            with st.expander(label('Photos (optional for text concepts)','照片素材（文字概念图可不上传）'),expanded=choices['mode']=='reference' or choices['people']=='portrait'):
-                st.caption(label('Uploaded place photos also appear unchanged in the final preview. No styling is applied here.', '景区照片也会作为原图显示在整体预览中；这里不会自动风格化。'))
+            with a:
+                mood=field(st.selectbox,'image_mood','auto',label=label('What mood?','想要什么感觉？'),options=list(MOODS),format_func=lambda v:MOODS[v][lang_index])
+            with b:
+                ratio=field(st.selectbox,'image_ratio','3:4',label=label('Image shape','图片尺寸'),options=list(SIZES),format_func=lambda v:SIZES[v][lang_index])
+            with st.expander(label('Add photos or a request (optional)','添加照片或补充想法（选填）')):
+                notes=field(st.text_area,'image_notes','',label=label('Anything else?','还有什么想法？'),placeholder=label('For example: leave room above for a title','例如：上方留一点空白，方便放标题'),max_chars=600,height=80)
+                st.caption(label('Add a place photo to guide its appearance. Photos stay unchanged in this demo.', '有景区照片可以加进来，方便保留真实样貌。本版只展示原图。'))
                 photo_key=f"local_photo_{st.session_state.get('photo_epoch',0)}"
                 photo=st.file_uploader(label('Place photo / reference','景区照片／参考图'),type=['png','jpg','jpeg','webp'],key=photo_key,max_upload_size=20,on_change=clear_photo_if_removed,args=(photo_key,))
                 if photo is not None:
@@ -82,7 +88,8 @@ def render_image_workspace(field, label, lang):
                 if result.get('image') is not None:
                     st.image(result['image'],width=220,caption=label('Original upload · not generated','上传原图 · 非生成结果'))
                     st.button(label('Remove photo','移除配图'),key='remove_photo',on_click=remove_photo)
-                if choices['people']=='portrait':
+                use_portrait=field(st.checkbox,'image_use_portrait',False,label=label('Include someone from my photo','加入我提供的人物照片'))
+                if use_portrait:
                     st.caption(label('Use a portrait you may use. It is only held in this session, with no model upload.', '请使用你有权使用的人物照片，仅保留在当前会话，不发送给模型。'))
                     person=st.file_uploader(label('Portrait reference','人物参考照片'),type=['png','jpg','jpeg','webp'],max_upload_size=20,key='portrait_upload',on_change=clear_portrait)
                     if person is not None:
@@ -96,40 +103,28 @@ def render_image_workspace(field, label, lang):
                             st.error(label('Cannot read this portrait.', '无法读取人物照片。'))
                     if st.session_state.get('portrait_bytes'):
                         st.image(st.session_state['portrait_bytes'],width=150,caption=label('Portrait reference only','仅作人物参考'))
-        st.button(label('Generate image · not connected','生成图片 · 尚未连接'),key='generate_image',disabled=True,width='stretch')
+        st.button(label('Generate image · coming later','生成图片 · 暂未开放'),key='generate_image',disabled=True,width='stretch')
+    choices=simple_selections(style,mood,ratio,result.get('image') is not None,use_portrait)
     with output:
         with st.container(border=True):
-            st.markdown('#### '+label('Image brief','配图方案'))
-            st.caption(label('Prompt preview only · output quality not tested','仅提示词预览 · 生成效果未测试'))
+            st.markdown('#### '+label('Your image idea','你想要的画面'))
             ref={'sha256':st.session_state.get('photo_digest',''), 'size':list(result['image'].size),'role':'place_reference'} if result.get('image') is not None else None
             try:
                 image_plan=build_image_brief(brief,selected_caption(st.session_state),style,selections=choices,subject=subject,notes=notes,reference=ref,portrait=st.session_state.get('portrait_reference'))
                 result['visual_brief']=image_plan
                 st.write('**'+brief['attraction']+' · '+subject+'**')
-                st.write(VISUAL_STYLES[style]['name' if lang=='中文' else 'en']+' · '+choices['ratio'])
-                st.caption(label('Purpose / audience: ','推文目的／目标人群：')+brief.get('purpose','')+' · '+brief.get('audience',''))
-                with st.expander(label('View the complete prompt','查看完整提示词')):
-                    st.text(image_plan['image_prompt'])
-                st.download_button(label('Download prompt','下载提示词'),image_plan['image_prompt'],'paeleap_image_prompt.txt','text/plain',width='stretch')
-                st.download_button(label('Download image brief JSON','下载配图方案 JSON'),json.dumps(image_plan,ensure_ascii=False,indent=2),'paeleap_image_brief.json','application/json',width='stretch')
-                with st.expander(label('Compare all three templates','对比三种模板')):
-                    st.caption(label('Same place, caption and controls; only the template changes. No images are generated.', '固定同一景点、文案和选项，仅切换模板。这里没有生成图片。'))
-                    comparison=[]
-                    for sid,s in VISUAL_STYLES.items():
-                        p=build_image_brief(brief,selected_caption(st.session_state),sid,selections=choices,subject=subject,notes=notes,reference=ref,portrait=st.session_state.get('portrait_reference'))
-                        st.markdown('**'+s['name' if lang=='中文' else 'en']+'**')
-                        st.caption(s['purpose' if lang=='中文' else 'en_purpose'])
-                        comparison.append(p)
-                    st.download_button(label('Download three prompts','下载三组对比提示词'),json.dumps(comparison,ensure_ascii=False,indent=2),'paeleap_three_style_comparison.json','application/json')
+                summaries={
+                    'natural': label('A natural-looking scene, with the subject clearly visible and its surroundings kept in view.', '用自然照片的感觉呈现主体，保留景区环境与真实细节。'),
+                    'heritage': label('A poster with a paper texture and soft ink background, keeping the main subject recognizable.', '以淡水墨和纸张质感衬托景点，主体清晰可辨，上方留白放标题。'),
+                    'experience': label('A tidy collage showing the setting, a detail and another view of the subject.', '用整齐拼贴展示整体环境、主体细节和另一观察角度。'),
+                }
+                st.write(summaries[style])
+                st.caption(MOODS[mood][lang_index]+' · '+SIZES[ratio][lang_index])
+                if ref: st.caption(label('Your place photo will guide the scene.', '已带入你的景区照片，作为画面依据。'))
+                if use_portrait: st.caption(label('Your portrait is included as a reference.', '已带入人物照片作为参考。'))
+                if notes.strip(): st.write(label('Your request: ','你的想法：')+notes.strip())
+                st.caption(label('Composition, colors and styling are matched automatically. Your caption and audience carry over.', '构图、配色和质感会自动搭配，文案内容和目标人群也已带入。'))
+                st.info(label('Your choices are saved. Image generation is not connected yet; continue to Preview to review your caption and any uploaded photo.', '选择已保存。目前尚未接入图片生成，可以继续预览文案和上传的原图。'))
             except ValueError as exc:
                 result.pop('visual_brief',None)
                 st.info(str(exc))
-            with st.expander(label('Template library V1 & references','模板库 V1 与研究依据')):
-                st.caption(label('These are V1 design directions derived from the 20-post research, not three pre-established research labels.', '这三套是从20篇研究归纳的V1设计方向，不是原报告已确定的三个美学标签。'))
-                for s in VISUAL_STYLES.values():
-                    st.markdown('**'+s['name' if lang=='中文' else 'en']+'**')
-                    for r in s['references']:
-                        st.markdown(f"[{r['label']} · {r['shortTitle']}]({r['url']})")
-                st.caption(label('Mentor reference: recognizable place + paper / ink treatment + optional portrait. Titles are added later.','导师示例：可识别的景区主体＋水墨纸感＋可选人物合成；文字留待后期排版。'))
-                doc=Path(__file__).parent/'docs/template_library_v1.md'
-                if doc.exists(): st.download_button(label('Download library V1','下载模板库 V1'),doc.read_text(),'Paeleap_Template_Library_V1.md','text/markdown')

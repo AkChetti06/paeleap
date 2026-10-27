@@ -1,10 +1,9 @@
 """Read-only workspace results and editable Preview, sharing durable draft keys."""
-import json
 from html import escape
 from io import BytesIO
 import streamlit as st
 from image_brief import context_fingerprint
-from image_workspace import selected_caption
+from image_workspace import selected_caption, STYLE_LABELS
 
 
 def render_results(workspace, field, label, t, lang):
@@ -73,21 +72,6 @@ def render_results(workspace, field, label, t, lang):
             visual_brief = result.get('visual_brief')
             stale = bool(visual_brief and visual_brief['context_fingerprint'] != context_fingerprint(text_plan, selected_caption(st.session_state)))
             if visual_brief:
-                st.caption(label('Image brief (not generated): ', '配图方案（未生成）：') + visual_brief['style_name'] + ' · ' + visual_brief['selections']['ratio'])
+                st.caption(label('Image brief (not generated): ', '配图方案（未生成）：') + STYLE_LABELS[visual_brief['style_id']][0 if lang=='中文' else 1] + ' · ' + visual_brief['selections']['ratio'])
                 if stale:
                     st.warning(label('Caption changed. Return to Image to refresh the brief.', '文案已修改，请返回图片页更新配图方案。'))
-            edited = []
-            for i, source in enumerate(variants):
-                item = {**source}
-                for part in ('title', 'caption', 'hashtags'):
-                    default = ' '.join(source[part]) if part == 'hashtags' else source[part]
-                    value = st.session_state.get(f'form_draft_{i}_{part}', default)
-                    item[part] = value.split() if part == 'hashtags' else value
-                item['edited_after_generation'] = any(item[k] != source[k] for k in ('title', 'caption', 'hashtags'))
-                edited.append(item)
-            st.download_button(t['download_json'], json.dumps(dict(
-                plan=text_plan or image_plan, text_plan=text_plan, image_plan=image_plan,
-                variants=edited, source_variants=variants, selected_variant=index,
-                visual_brief=visual_brief, visual_brief_stale=stale,
-                backend=result.get('image_source', 'cloudflare') if image is not None else None, review_required=True),
-                ensure_ascii=False, indent=2), 'paeleap_post.json', 'application/json', width='stretch')
