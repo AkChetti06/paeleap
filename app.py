@@ -231,31 +231,8 @@ if workspace == 'text':
             render_results(workspace, field, label, t, lang)
 
 if workspace == 'image':
-    with st.container(border=True):
-        st.markdown('### ' + label('Choose your photo', '选择配图'))
-        field(st.selectbox, 'visual_style_choice', 'cinematic_landscape', label=t['style'],
-              options=list(STYLES), format_func=lambda value: STYLES[value]['labels'][lang])
-        st.caption(label('Image generation is not connected in this offline preview.', '当前为离线预览，图片生成暂未连接。'))
-        photo_key = f"local_photo_{st.session_state.get('photo_epoch', 0)}"
-        photo = st.file_uploader(label('Upload a photo (optional)', '上传配图（选填）'), type=['png', 'jpg', 'jpeg', 'webp'], key=photo_key, max_upload_size=20, on_change=clear_photo_if_removed, args=(photo_key,))
-        if photo is not None:
-            import hashlib
-            digest = hashlib.sha256(photo.getvalue()).hexdigest()
-            if digest != st.session_state.get('photo_digest'):
-                try:
-                    uploaded_image = decode_photo(photo.getvalue())
-                    st.session_state.setdefault('result', {})['image'] = uploaded_image.convert('RGB')
-                    st.session_state['result']['image_source'] = 'local_upload'
-                    st.session_state['result']['image_plan'] = {'attraction': st.session_state['result'].get('text_plan', {}).get('attraction', '')}
-                    st.session_state['photo_digest'] = digest
-                except ValueError:
-                    st.error(label('Unable to read this image. Please choose another file.', '无法读取这张图片，请选择其他文件。'))
-        if st.session_state.get('result', {}).get('image') is not None:
-            st.image(st.session_state['result']['image'], width=320, caption=label('Your uploaded photo', '已上传的配图'))
-            st.caption(label('Photo ready. Continue to preview.', '配图已保存，可以进入预览。'))
-            st.button(label('Remove photo', '移除配图'), key='remove_photo', on_click=remove_photo)
-
-        st.button(label('Generate Image', '生成图片'), type='primary', key='generate_image', disabled=True, width='stretch')
+    from image_workspace import render_image_workspace
+    render_image_workspace(field, label, lang)
 
 if workspace == 'preview':
     with st.container(border=False):

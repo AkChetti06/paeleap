@@ -187,3 +187,19 @@ Forms and previews use natural height rather than nested fixed-height scroll pan
 narrow screens stack the content. Next/Back buttons connect Caption, Photo and Preview.
 Local image uploads are optional, limited to 20 MB / 25 megapixels, removable, and
 labelled as uploads. Uploaded images are not AI-generated. No model API is used.
+
+## Week 3 图片模板库 V1（不接 API）
+
+图片工作区会自动沿用当前文案，提供三套研究衍生模板：自然实景感、人文故事海报、体验步骤拼贴。原研究的三类是风景区、文博、研学；本次三套美学/版式方向是产品转译，尚待导师确认。
+
+- `image_brief.py`：纯离线方案组装；主体、比例、光线、构图、色彩、人物、留白和处理方式均改变提示词。
+- `image_workspace.py`：渐进展开选项、景区/人物参考图、方案下载、三模板对比。
+- `templates/visual_library_v1.json`：模板规则、研究来源与导师示例归属。
+- `docs/template_library_v1.md`：可编辑的完整模板卡与使用说明。
+- `templates/comparison_prompts_v1.json`：乌镇/西湖各三份待生成提示词，不是生成效果。
+- `docs/week3_delivery.md`：演示及交付范围说明。
+- `assets/gallery/ATTRIBUTION.md`：随应用打包的原轮播摄影素材署名与许可。
+
+运行 `python scripts/build_visual_library_docs.py` 可从同一模板源重建文档和六份方案。执行 `python -m pytest -q` 验证离线逻辑、工作区、资料隔离和状态保留（本次63项通过）。
+
+上传原图只用于会话参考/原图预览；不会风格化，也不发送给模型。真实模型生成、质量、成本及速度均未测试。修改文案后需回图片页刷新方案；切换景点并重新生成文案会清除上一个景点的配图。

@@ -1,5 +1,8 @@
 """Presentation-only destination showcase; never invokes generation providers."""
 from hashlib import md5
+from functools import lru_cache
+from pathlib import Path
+import base64
 from html import escape
 from urllib.parse import quote
 
@@ -10,12 +13,19 @@ SLIDES = (
 )
 
 
+@lru_cache(maxsize=3)
+def bundled_photo(index):
+    """Ship the same licensed photos so blocked third-party hosts cannot blank the gallery."""
+    path = Path(__file__).parent / 'assets' / 'gallery' / f'{index}.jpg'
+    return 'data:image/jpeg;base64,' + base64.b64encode(path.read_bytes()).decode() if path.exists() else None
+
+
 def render_banner(t, lang):
     slides = []
     for index, (en, cn, filename, author, license_id) in enumerate(SLIDES):
         normalized = filename.replace(' ', '_')
         digest = md5(normalized.encode()).hexdigest()
-        image = f'https://upload.wikimedia.org/wikipedia/commons/{digest[0]}/{digest[:2]}/{quote(normalized)}'
+        image = bundled_photo(index) or f'https://upload.wikimedia.org/wikipedia/commons/{digest[0]}/{digest[:2]}/{quote(normalized)}'
         source = 'https://commons.wikimedia.org/wiki/File:' + quote(normalized)
         name = cn if lang == '中文' else en
         slides.append(
@@ -27,7 +37,7 @@ def render_banner(t, lang):
             f' · {"画面裁切" if lang == "中文" else "display cropped"}</small></figcaption></figure>'
         )
     return (f'<section class="tourism-gallery" aria-label="{"旅行灵感图库（非生成结果）" if lang == "中文" else "Travel inspiration gallery (not generated content)"}">'
-            f'<div class="gallery-fallback">{"旅行灵感 · 摄影图片暂不可用" if lang == "中文" else "Travel inspiration · Photography temporarily unavailable"}</div>'
+            f'<div class="gallery-fallback" aria-hidden="true">{"旅行灵感 · 摄影图片暂不可用" if lang == "中文" else "Travel inspiration · Photography temporarily unavailable"}</div>'
             f'{"".join(slides)}</section>')
 
 

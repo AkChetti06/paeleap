@@ -1,0 +1,166 @@
+{
+  "version": "1.0",
+  "date": "2026-10-27",
+  "status": "offline_prompt_library_not_image_generation",
+  "provenance": "基于2026-10-14最终20篇视觉分类报告归纳的新模板，不声称原研究已经确定三种美学风格。",
+  "research_categories": [
+    "风景区",
+    "文博场所",
+    "研学场所"
+  ],
+  "mentor_example": "景区主体保留可识别特征，水墨山景与纸感边框、人物前景合成、打卡标题。示例用于理解结构；不复制示例人物、奖杯、地标或文字。人物合成需用户另提供可用人物照片。",
+  "styles": [
+    {
+      "id": "natural",
+      "name": "自然实景感",
+      "en": "Natural scene",
+      "purpose": "突出景点本身与现场细节，适合风景、建筑和空间介绍。",
+      "en_purpose": "Focus on the place and its visible details.",
+      "palette": "自然低饱和，保留主体原有颜色",
+      "lighting": "柔和自然光，不改变建筑和地形",
+      "composition": "环境全景与细节有层次，单一主角，避免过度修饰",
+      "texture": "写实摄影感；这是概念画面，不冒充实拍",
+      "adaptation": "从普通现场照片、空间与讲解关系的研究归纳为生成方向；不是原报告已命名的美学类别。",
+      "references": [
+        {
+          "label": "P4",
+          "category": "风景区",
+          "title": "莫干山风景区一日游",
+          "shortTitle": "莫干山真实游记",
+          "visualJob": "朴素亲历",
+          "evidence": "p1–12：石路、建筑和树木的连续现场照片，无封面大字",
+          "lesson": "保留普通游客视角；体力和交通取舍交给文字。",
+          "url": "https://www.rednote.com/discovery/item/6ab45604000000001403015a"
+        },
+        {
+          "label": "P11",
+          "category": "文博场所",
+          "title": "在浙江博物馆之江馆听到人生最好的文物讲解",
+          "shortTitle": "浙博讲解体验",
+          "visualJob": "真人讲解",
+          "evidence": "p1–3：讲解员面对观众与展柜；p5：馆外现场",
+          "lesson": "人物和观众同框能表现讲解正在发生；正文可更短。",
+          "url": "https://www.rednote.com/discovery/item/6ac4e3b3000000001801b9c1"
+        },
+        {
+          "label": "P12",
+          "category": "文博场所",
+          "title": "杭州！！！真正的好地方都是免费的！！！（附攻略）",
+          "shortTitle": "湿地博物馆亲子",
+          "visualJob": "沉浸空间",
+          "evidence": "图集：建筑、环幕、生态装置及临展横幅",
+          "lesson": "空间尺度和互动环境有吸引力，需分清现场看点与泛赞美。",
+          "url": "https://www.rednote.com/discovery/item/68b1be5b000000001b036397"
+        }
+      ]
+    },
+    {
+      "id": "heritage",
+      "name": "人文故事海报",
+      "en": "Cultural story poster",
+      "purpose": "突出建筑、文化物件和一个主题，适合文化科普与打卡封面。",
+      "en_purpose": "Give one cultural subject a clear visual story.",
+      "palette": "米白、墨绿、赭色点缀，物件本色优先",
+      "lighting": "主体清晰，背景柔和，细节可辨认",
+      "composition": "一个主视觉，背景退后，留出标题区域；装饰不遮挡主体",
+      "texture": "纸感与轻水墨边缘；不重画真实物件上的纹饰或文字",
+      "adaptation": "文化主题与物件突出来自研究；纸感、水墨边框和人物合成来自导师2026-10-27示例，属于本次设计延伸。",
+      "references": [
+        {
+          "label": "P7",
+          "category": "风景区",
+          "title": "走进语文课本里的绍兴｜一日游·攻略&路线",
+          "shortTitle": "课本里的绍兴",
+          "visualJob": "文化主题串点",
+          "evidence": "p1–18：课文相关地点、街景、角色与食物交替出现",
+          "lesson": "以文学主题组织地点，区别于单纯摄影打卡。",
+          "url": "https://www.rednote.com/discovery/item/6ab9196b000000001c00cd7e"
+        },
+        {
+          "label": "P8",
+          "category": "文博场所",
+          "title": "第一次去国博丨必看的19件文物珍品！",
+          "shortTitle": "国博必看清单",
+          "visualJob": "展品精选",
+          "evidence": "p1：展品实景上叠大字；p3–14：一张图突出一件或一组文物",
+          "lesson": "把选择负担变成可扫读清单，标注保持简短。",
+          "url": "https://www.rednote.com/discovery/item/6962941f000000002202048e"
+        },
+        {
+          "label": "P10",
+          "category": "文博场所",
+          "title": "杭州浙博｜圆明园四兽首打卡攻略✨",
+          "shortTitle": "浙博四兽首临展",
+          "visualJob": "临展海报",
+          "evidence": "p1：兽首拼贴、展名和日期；p2：四件展品；p9：平面图",
+          "lesson": "先说明这是哪场展，再从展品与空间补足预期。",
+          "url": "https://www.rednote.com/discovery/item/6a72e7e100000000280070ae"
+        }
+      ]
+    },
+    {
+      "id": "experience",
+      "name": "体验步骤拼贴",
+      "en": "Experience storyboard",
+      "purpose": "表现先看什么、再观察什么，适合体验、任务和研学内容。",
+      "en_purpose": "Show a clear sequence of details or activities.",
+      "palette": "统一暖白底，少量明亮色块，避免每格不同滤镜",
+      "lighting": "各格光线与色温一致，动作与材料清楚",
+      "composition": "三格：整体场景、重点细节、观察或参与动作；没有活动依据时只展示观察角度",
+      "texture": "干净照片拼贴与短标注留白，统一边距，不自动生成地图",
+      "adaptation": "按楼层、任务、工序和表达成果组织画面，转成可复用三格结构；不能把建议动作当成真实活动证明。",
+      "references": [
+        {
+          "label": "P13",
+          "category": "文博场所",
+          "title": "一秒梦回童年‼️中国动漫博物馆保姆级攻略",
+          "shortTitle": "中国动漫博物馆",
+          "visualJob": "楼层分镜",
+          "evidence": "p1：童年IP拼图；p2–9：按楼层组织实景；p16：服务导览",
+          "lesson": "把多楼层内容拆成可浏览章节，而非堆成一张长攻略。",
+          "url": "https://www.rednote.com/discovery/item/69e18e98000000002200ec8d"
+        },
+        {
+          "label": "P16",
+          "category": "研学场所",
+          "title": "自制博物馆研学带娃暴走三小时，不喊累",
+          "shortTitle": "湖北省博物馆手册",
+          "visualJob": "任务手册",
+          "evidence": "p1：手册在馆外实拍；p2：勾选地图；p3–4：文物标注卡",
+          "lesson": "把‘看什么’转成寻找、辨认、记录的具体动作。",
+          "url": "https://www.rednote.com/discovery/item/689ef240000000001b036ee4"
+        },
+        {
+          "label": "P17",
+          "category": "研学场所",
+          "title": "杭州雨天遛娃天花板✨厂房里的非遗手作天堂",
+          "shortTitle": "杭州非遗手作",
+          "visualJob": "工序与成品",
+          "evidence": "p1：项目拼图；p4、p7：孩子亲手制作",
+          "lesson": "展示手、材料和半成品，比只拍空工位更能说明参与。",
+          "url": "https://www.rednote.com/discovery/item/6a2d4e590000000022014196"
+        },
+        {
+          "label": "P19",
+          "category": "研学场所",
+          "title": "一定会去二刷的研学式农场｜好玩又好学",
+          "shortTitle": "阿嘟农场体验",
+          "visualJob": "农事过程",
+          "evidence": "p1–11：洗菜、拔萝卜、喂养、做饭等；p18：活动板",
+          "lesson": "按孩子实际动作排序；兑换奖励不能替代学习证据。",
+          "url": "https://www.rednote.com/discovery/item/69bfb5a80000000023015173"
+        },
+        {
+          "label": "P20",
+          "category": "研学场所",
+          "title": "那个在科技馆讲解的女孩，眼里藏不住光了❤",
+          "shortTitle": "科技馆小讲解员",
+          "visualJob": "表达成果",
+          "evidence": "p1：孩子讲解；p2：考核；p3–4：与观众交流；p5：准备",
+          "lesson": "以可观察的讲解行为收尾，不把个人成长写成普遍结果。",
+          "url": "https://www.rednote.com/discovery/item/6a92e8e200000000290353af"
+        }
+      ]
+    }
+  ]
+}

@@ -3,6 +3,8 @@ import json
 from html import escape
 from io import BytesIO
 import streamlit as st
+from image_brief import context_fingerprint
+from image_workspace import selected_caption
 
 
 def render_results(workspace, field, label, t, lang):
@@ -68,6 +70,12 @@ def render_results(workspace, field, label, t, lang):
             with st.expander(t['prompt']):
                 st.code(image_plan.get('image_prompt', ''), language='text')
         if workspace == 'preview' and (variants or image is not None):
+            visual_brief = result.get('visual_brief')
+            stale = bool(visual_brief and visual_brief['context_fingerprint'] != context_fingerprint(text_plan, selected_caption(st.session_state)))
+            if visual_brief:
+                st.caption(label('Image brief (not generated): ', '配图方案（未生成）：') + visual_brief['style_name'] + ' · ' + visual_brief['selections']['ratio'])
+                if stale:
+                    st.warning(label('Caption changed. Return to Image to refresh the brief.', '文案已修改，请返回图片页更新配图方案。'))
             edited = []
             for i, source in enumerate(variants):
                 item = {**source}
@@ -80,5 +88,6 @@ def render_results(workspace, field, label, t, lang):
             st.download_button(t['download_json'], json.dumps(dict(
                 plan=text_plan or image_plan, text_plan=text_plan, image_plan=image_plan,
                 variants=edited, source_variants=variants, selected_variant=index,
+                visual_brief=visual_brief, visual_brief_stale=stale,
                 backend=result.get('image_source', 'cloudflare') if image is not None else None, review_required=True),
                 ensure_ascii=False, indent=2), 'paeleap_post.json', 'application/json', width='stretch')
