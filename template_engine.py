@@ -141,7 +141,8 @@ def generate_drafts(brief, mode='offline', config=None):
         if mode != 'offline':
             raise ValueError('详细输入原型仅支持离线预览。')
         from promotional_brief import detailed_drafts
-        return detailed_drafts(brief)
+        from xiaohongshu_templates import template_drafts
+        return template_drafts(brief, detailed_drafts(brief))
     if mode == 'offline':
         return offline_drafts(brief)
     if mode != 'llm':

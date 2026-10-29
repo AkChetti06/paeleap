@@ -30,14 +30,22 @@ def create_offline_preview(brief):
     previous = st.session_state.get('result', {})
     if previous.get('text_plan') and previous['text_plan'].get('attraction') != brief['attraction']:
         # Avoid carrying a different place's photo or custom subject into the next draft.
-        for key in ('image', 'image_source', 'image_plan', 'visual_brief'):
+        for key in ('image', 'image_source', 'image_plan', 'visual_brief', 'photos'):
             previous.pop(key, None)
         for key in ('photo_digest', 'form_image_subject', 'portrait_reference', 'portrait_bytes'):
             st.session_state.pop(key, None)
         st.session_state['photo_epoch'] = st.session_state.get('photo_epoch', 0) + 1
+    if 'photos' in previous:
+        from xiaohongshu_templates import ordered_photos
+        arranged=ordered_photos(brief,previous['photos'])
+        if arranged:
+            previous.update(image=arranged[0]['image'],image_source='local_upload',image_plan={'attraction':brief['attraction']})
+        else:
+            for key in ('image','image_source','image_plan'): previous.pop(key,None)
     st.session_state['result'] = {**previous,
         'text_plan': {**brief, 'language': '中文'}, 'variants': variants,
-        'copy_source': copy['copy_source']}
+        'copy_source': copy['copy_source'], 'template_id': copy.get('template_id'),
+        'template_name': copy.get('template_name'), 'content_outline': copy.get('content_outline', [])}
     st.session_state['form_caption_variant'] = 0
     for i, variant in enumerate(variants):
         for part in ('title', 'caption', 'hashtags'):

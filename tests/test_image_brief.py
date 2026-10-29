@@ -27,7 +27,7 @@ def test_style_changes_structure_not_facts(brief):
     assert len({p['image_prompt'] for p in plans})==3
     assert all(p['content']==plans[0]['content'] for p in plans)
     assert all(p['references'] and p['status']=='prompt_only_not_generated' for p in plans)
-    assert '三格内容顺序' in plans[2]['image_prompt']
+    assert '只有一张素材时不拼贴、不重复凑图' in plans[2]['image_prompt']
 
 def test_missing_assets_do_not_pretend_to_style(brief):
     with pytest.raises(ValueError,match='景区参考'):build_image_brief(brief,'',subject='水乡',selections={'mode':'reference'})
@@ -83,7 +83,7 @@ def test_simple_choices_map_to_instructions_and_photos(brief):
     for mood in MOODS:
         selections=simple_selections('heritage',mood,'3:4')
         plan=build_image_brief(brief,'同一文案','heritage',subject='水乡风景',selections=selections)
-        assert plan['selections']['treatment']=='ink'
+        assert plan['selections']['treatment']=='subtle'
         prompts.append(plan['image_prompt'])
     assert len(set(prompts))==len(MOODS)
     assert simple_selections('natural','auto','1:1',True)['mode']=='reference'
@@ -101,7 +101,7 @@ def test_simple_ui_hides_technical_tools_and_ignores_legacy_options():
     a.radio(key='image_template').set_value('heritage').run()
     p=a.session_state['result']['visual_brief']
     assert p['selections']['mode']=='reference'
-    assert p['selections']['light']=='auto' and p['selections']['treatment']=='ink'
+    assert p['selections']['light']=='auto' and p['selections']['treatment']=='subtle'
     assert not a.get('download_button')
     assert len(a.selectbox)==3  # subject, mood, shape; no expert settings
     a.selectbox(key='image_subject_choice').select('蓝印花布').run()

@@ -2,11 +2,12 @@
 import hashlib
 import streamlit as st
 from image_brief import VISUAL_STYLES, DEFAULTS, build_image_brief
+from xiaohongshu_templates import template_for, STYLE_IDS, ordered_photos, photo_plan
 from local_photo import decode_photo, clear_photo_if_removed, remove_photo
 
 
 # Friendly choices map to complete visual instructions; hidden legacy controls are ignored.
-STYLE_LABELS = {'natural': ('自然照片', 'Natural photo'), 'heritage': ('水墨海报', 'Ink poster'), 'experience': ('旅行拼贴', 'Travel collage')}
+STYLE_LABELS = {'natural': ('自然清新', 'Fresh scenery'), 'heritage': ('人文纪实', 'Cultural detail'), 'experience': ('活力体验', 'Lively experience')}
 MOODS = {
     'auto': ('帮我搭配', 'Match for me', {'light': 'auto', 'palette': 'auto'}),
     'fresh': ('清新明亮', 'Fresh & bright', {'light': 'soft', 'palette': 'cool'}),
@@ -19,7 +20,7 @@ def simple_selections(style, mood, ratio, has_photo=False, use_portrait=False):
     return {**DEFAULTS, **MOODS[mood][2], 'ratio': ratio,
             'mode': 'reference' if has_photo else 'concept',
             'people': 'portrait' if use_portrait else 'none',
-            'treatment': {'natural': 'subtle', 'heritage': 'ink', 'experience': 'cutout'}[style]}
+            'treatment': 'subtle'}
 
 
 def selected_caption(state):
@@ -42,16 +43,18 @@ def render_image_workspace(field, label, lang):
     brief=result.get('text_plan',{})
     st.markdown('### '+label('Plan your image','设计配图'))
     st.caption(label('Choose a style and a mood. We will match the details for you.',
-                     '选好风格和感觉，其余细节帮你搭配。'))
+                     '沿用小红书模板，选择照片对应的看点，自动安排图片顺序。'))
     if not brief:
         st.info(label('Generate a caption first so the place and key details carry over.', '先生成文案，景点、推广重点和目标人群会自动带入。'))
         return
     subjects=list(dict.fromkeys(h['label'] for h in brief.get('highlights',[]) if h.get('label')))
     subjects=subjects or [brief['attraction']]
-    context=brief['attraction']+'|'+str(brief.get('primary_fact_id',''))
+    context=brief['attraction']+'|'+str(brief.get('selected_fact_ids',[]))
     if st.session_state.get('simple_image_context')!=context:
         st.session_state['form_image_subject_choice']=subjects[0]
         st.session_state['simple_image_context']=context
+        matched=template_for(brief)
+        st.session_state['form_image_template']=STYLE_IDS[matched['id']] if matched else 'natural'
     if st.session_state.get('form_image_subject_choice') not in subjects+['custom']:
         st.session_state['form_image_subject_choice']=subjects[0]
     lang_index=0 if lang=='中文' else 1
@@ -75,19 +78,39 @@ def render_image_workspace(field, label, lang):
                 notes=field(st.text_area,'image_notes','',label=label('Anything else?','还有什么想法？'),placeholder=label('For example: leave room above for a title','例如：上方留一点空白，方便放标题'),max_chars=600,height=80)
                 st.caption(label('Add a place photo to guide its appearance. Photos stay unchanged in this demo.', '有景区照片可以加进来，方便保留真实样貌。本版只展示原图。'))
                 photo_key=f"local_photo_{st.session_state.get('photo_epoch',0)}"
-                photo=st.file_uploader(label('Place photo / reference','景区照片／参考图'),type=['png','jpg','jpeg','webp'],key=photo_key,max_upload_size=20,on_change=clear_photo_if_removed,args=(photo_key,))
-                if photo is not None:
+                photos=st.file_uploader(label('Place photo / reference','景区照片／参考图'),type=['png','jpg','jpeg','webp'],key=photo_key,max_upload_size=20,accept_multiple_files=True,on_change=clear_photo_if_removed,args=(photo_key,))
+                records=[]
+                for photo in (photos or []):
                     digest=hashlib.sha256(photo.getvalue()).hexdigest()
-                    if digest!=st.session_state.get('photo_digest'):
-                        try:
-                            image=decode_photo(photo.getvalue())
-                            result.update(image=image,image_source='local_upload',image_plan={'attraction':brief['attraction']})
-                            st.session_state['photo_digest']=digest
-                        except ValueError:
-                            st.error(label('Cannot read this photo. Choose a valid image under 20 MB and 25 MP.', '无法读取照片，请使用20MB、2500万像素以内的有效图片。'))
-                if result.get('image') is not None:
-                    st.image(result['image'],width=220,caption=label('Original upload · not generated','上传原图 · 非生成结果'))
+                    try:
+                        image=decode_photo(photo.getvalue())
+                    except ValueError:
+                        st.error(label('Cannot read photo: ','无法读取照片：')+photo.name)
+                        continue
+                    options=['']+[h['id'] for h in brief['highlights']]
+                    names={h['id']:h['label'] for h in brief['highlights']}
+                    map_key='photo_match_'+digest
+                    if map_key not in st.session_state:
+                        st.session_state[map_key]=next((p['fact_id'] for p in result.get('photos',[]) if p['digest']==digest and p['fact_id'] in options),'')
+                    elif st.session_state[map_key] not in options: st.session_state[map_key]=''
+                    fact_id=st.radio(label('Photo subject: ','照片对应看点：')+photo.name,options,
+                        format_func=lambda v:names.get(v,label('Not selected','未选择')),key=map_key,horizontal=True)
+                    records.append(dict(digest=digest,fact_id=fact_id,name=photo.name,image=image))
+                if photos: result['photos']=records
+                arranged=ordered_photos(brief,result.get('photos',[]))
+                if arranged:
+                    result.update(image=arranged[0]['image'],image_source='local_upload',image_plan={'attraction':brief['attraction']})
+                    st.session_state['photo_digest']=arranged[0]['digest']
+                    st.image(arranged[0]['image'],width=220,caption=label('First photo · unchanged','首图 · 原图展示'))
+                    st.button(label('Remove photos','移除全部配图'),key='remove_photo',on_click=remove_photo)
+                elif 'photos' in result:
+                    for key in ('image','image_source','image_plan'):result.pop(key,None)
+                    st.session_state.pop('photo_digest',None)
+                if not arranged and result.get('image') is not None:
+                    st.image(result['image'],width=220,caption=label('Original upload','上传原图'))
                     st.button(label('Remove photo','移除配图'),key='remove_photo',on_click=remove_photo)
+                if records and len(arranged)<len(records):
+                    st.caption(label('Unmatched photos stay out of the post.', '未匹配看点的照片不会加入笔记。'))
                 use_portrait=field(st.checkbox,'image_use_portrait',False,label=label('Include someone from my photo','加入我提供的人物照片'))
                 if use_portrait:
                     st.caption(label('Use a portrait you may use. It is only held in this session, with no model upload.', '请使用你有权使用的人物照片，仅保留在当前会话，不发送给模型。'))
@@ -113,12 +136,15 @@ def render_image_workspace(field, label, lang):
                 image_plan=build_image_brief(brief,selected_caption(st.session_state),style,selections=choices,subject=subject,notes=notes,reference=ref,portrait=st.session_state.get('portrait_reference'))
                 result['visual_brief']=image_plan
                 st.write('**'+brief['attraction']+' · '+subject+'**')
-                summaries={
-                    'natural': label('A natural-looking scene, with the subject clearly visible and its surroundings kept in view.', '用自然照片的感觉呈现主体，保留景区环境与真实细节。'),
-                    'heritage': label('A poster with a paper texture and soft ink background, keeping the main subject recognizable.', '以淡水墨和纸张质感衬托景点，主体清晰可辨，上方留白放标题。'),
-                    'experience': label('A tidy collage showing the setting, a detail and another view of the subject.', '用整齐拼贴展示整体环境、主体细节和另一观察角度。'),
-                }
-                st.write(summaries[style])
+                from xiaohongshu_templates import TEMPLATES
+                chosen=TEMPLATES[{'natural':'nature','heritage':'ancient_town','experience':'theme_park'}[style]]
+                st.write(chosen['visual'])
+                st.caption(label('Photo order follows caption highlights.', '配图按正文看点排序；只有一张照片就做单图笔记。'))
+                order=photo_plan(brief,result.get('photos',[]))
+                for item in order:
+                    st.write(str(item['position'])+'. '+item['subject']+' · '+item['name'])
+                if not order:
+                    st.caption(label('Add photos to preview actual images.', '添加照片后可预览实际配图；没有照片时只保留文案。'))
                 st.caption(MOODS[mood][lang_index]+' · '+SIZES[ratio][lang_index])
                 if ref: st.caption(label('Your place photo will guide the scene.', '已带入你的景区照片，作为画面依据。'))
                 if use_portrait: st.caption(label('Your portrait is included as a reference.', '已带入人物照片作为参考。'))

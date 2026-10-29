@@ -3,8 +3,12 @@ import hashlib
 import json
 from pathlib import Path
 
-LIBRARY = json.loads((Path(__file__).parent / 'templates/visual_library_v1.json').read_text())
-VISUAL_STYLES = {s['id']: s for s in LIBRARY['styles']}
+from xiaohongshu_templates import LIBRARY, TEMPLATES
+VISUAL_STYLES = {}
+for key, tid in [('natural','nature'),('heritage','ancient_town'),('experience','theme_park')]:
+    t=TEMPLATES[tid]
+    VISUAL_STYLES[key]=dict(name=t['style'],composition=t['visual'],texture='保留原图细节，不强制滤镜或拼贴',
+        palette=t['color'],lighting='保留素材自然光线',references=t['refs'],template_id=tid)
 # Each user choice has one explicit visual instruction, not just an appended label.
 OPTIONS = {
  'mode': {'concept': ('文字概念图','Text concept','根据文字设计概念画面；没有参考图时，不声称还原真实地标细节。'), 'reference': ('参考照片风格化','Style a reference photo','以提供的景区参考照片为结构依据，保留地标轮廓、建筑比例、纹饰和主体空间关系；只调整表现方式。')},
@@ -48,9 +52,7 @@ def build_image_brief(brief, caption, style_id='natural', *, selections=None, su
            f'色彩：{style["palette"] if choices["palette"]=="auto" else OPTIONS["palette"][choices["palette"]][2]}',
            f'光线：{style["lighting"] if choices["light"]=="auto" and choices["mode"]=="concept" else OPTIONS["light"][choices["light"]][2]}']
     lines += [OPTIONS[k][choices[k]][2] for k in ('mode','ratio','framing','people','title_space','treatment')]
-    if style_id=='experience':
-        lines.append('取景方式与标题留白应用于主格；三格顺序优先。')
-        lines.append('三格内容顺序：整体场景 → 所选主体的细节 → 同一主体的另一观察角度。只有输入了实际活动材料和动作依据时，才替换为参与过程；不是游览路线图。')
+    lines.append('配图顺序：按所选看点逐张展开；主重点优先。只有一张素材时不拼贴、不重复凑图。')
     if choices['mode']=='reference': lines.append('景区参考图：'+json.dumps(reference,ensure_ascii=False))
     if choices['people']=='portrait': lines.append('人物参考图：'+json.dumps(portrait,ensure_ascii=False))
     boundaries=['不虚构或改造地标、文物纹饰、活动项目、路线、票价、时间、奖项或游客经历。','画面不生成文字、乱码、水印、标识或活动日期；标题及打卡贴纸由后期排版添加。','不复制研究笔记的图片、人物或构图细节；借鉴视觉任务与组织方式。','生成结果仅为概念图；照片风格化与人物合成也不能作为真实到访证明。']+brief.get('boundaries',[])

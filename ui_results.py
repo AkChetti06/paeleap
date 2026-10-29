@@ -1,6 +1,8 @@
 """Read-only workspace results and editable Preview, sharing durable draft keys."""
 from html import escape
 from io import BytesIO
+from zipfile import ZipFile
+from xiaohongshu_templates import ordered_photos
 import streamlit as st
 from image_brief import context_fingerprint
 from image_workspace import selected_caption, STYLE_LABELS
@@ -10,6 +12,7 @@ def render_results(workspace, field, label, t, lang):
     result = st.session_state.get('result', {})
     variants = result.get('variants', [])
     image = result.get('image')
+    photos = ordered_photos(result.get('text_plan',{}),result.get('photos',[]))
     text_plan = result.get('text_plan', result.get('plan', {}))
     image_plan = result.get('image_plan', result.get('plan', {}))
     if workspace == 'text':
@@ -33,6 +36,12 @@ def render_results(workspace, field, label, t, lang):
                         label('PAELEAP Travel Notes', 'PAELEAP 旅行手记') + '<small>' +
                         escape(attraction) + '</small></div></div>', unsafe_allow_html=True)
         if workspace in ('image', 'preview'):
+            if photos:
+                options=list(range(len(photos)))
+                if st.session_state.get('preview_photo',0) not in options: st.session_state['preview_photo']=0
+                photo_index=st.selectbox(label('Photo order','配图顺序'),options,
+                    format_func=lambda i: str(i+1)+' / '+str(len(photos))+' · '+photos[i]['name'],key='preview_photo')
+                image=photos[photo_index]['image']
             if image is not None:
                 st.image(image, caption=label('Uploaded photo', '本地上传配图') if result.get('image_source') == 'local_upload' else t['image'], width='stretch')
             else:
@@ -40,6 +49,7 @@ def render_results(workspace, field, label, t, lang):
         if workspace in ('text', 'preview'):
             if variants:
                 source = variants[index]
+                if result.get('template_name'): st.caption(label('Template: ','模板：')+result['template_name'])
                 if result.get('copy_source') == 'local_template_not_llm' and lang != '中文':
                     st.caption('Offline drafts currently remain in Chinese; switching interface language does not translate them.')
                 elif text_plan.get('language') != lang:
@@ -65,6 +75,14 @@ def render_results(workspace, field, label, t, lang):
             bio = BytesIO()
             image.save(bio, format='PNG')
             st.download_button(t['download_image'], bio.getvalue(), 'paeleap_visual.png', 'image/png', width='stretch')
+            if len(photos)>1:
+                bundle=BytesIO()
+                with ZipFile(bundle,'w') as archive:
+                    for number,p in enumerate(photos,1):
+                        data=BytesIO();p['image'].save(data,format='PNG')
+                        archive.writestr(f'{number:02d}.png',data.getvalue())
+                st.download_button(label('Download ordered photos','按顺序下载全部配图'),bundle.getvalue(),'paeleap_photos.zip','application/zip',width='stretch')
+
         if workspace == 'image' and image is not None:
             with st.expander(t['prompt']):
                 st.code(image_plan.get('image_prompt', ''), language='text')

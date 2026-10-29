@@ -18,14 +18,14 @@ def decode_photo(data):
 
 
 def clear_photo_if_removed(widget_key):
-    if st.session_state.get(widget_key) is None:
-        for key in ('image', 'image_source', 'image_plan'):
+    if not st.session_state.get(widget_key):
+        for key in ('image', 'image_source', 'image_plan', 'photos'):
             st.session_state.get('result', {}).pop(key, None)
         st.session_state.pop('photo_digest', None)
 
 
 def remove_photo():
-    for key in ('image', 'image_source', 'image_plan'):
+    for key in ('image', 'image_source', 'image_plan', 'photos'):
         st.session_state.get('result', {}).pop(key, None)
     st.session_state.pop('photo_digest', None)
     st.session_state['photo_epoch'] = st.session_state.get('photo_epoch', 0) + 1
