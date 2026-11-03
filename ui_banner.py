@@ -20,13 +20,13 @@ def render_banner(t, lang):
         name = cn if lang == '中文' else en
         slides.append(
             f'<figure class="gallery-slide gallery-slide-{index}">'
-            f'<img src="{image}" alt="{escape(name)}" referrerpolicy="no-referrer">'
+            f'<img src="{image}" alt="{escape(name)}" referrerpolicy="no-referrer" loading="eager" decoding="async">'
             f'<figcaption><b>{escape(name)}</b><span>{"杭州" if lang == "中文" else "HANGZHOU"} · {index+1:02d} / 03</span>'
             f'<small><a href="{source}" target="_blank" rel="noopener noreferrer">{escape(author)} · {"维基共享资源" if lang == "中文" else "Wikimedia Commons"}</a> · '
             f'<a href="https://creativecommons.org/licenses/{license_id}/" target="_blank" rel="noopener noreferrer">CC {license_id.upper()}</a>'
             f' · {"画面裁切" if lang == "中文" else "display cropped"}</small></figcaption></figure>'
         )
-    return (f'<section class="tourism-gallery" aria-label="{"旅行灵感图库（非生成结果）" if lang == "中文" else "Travel inspiration gallery (not generated content)"}">'
+    return (f'<section class="tourism-gallery" tabindex="0" aria-label="{"旅行灵感图库（非生成结果）" if lang == "中文" else "Travel inspiration gallery (not generated content)"}">'
             f'<div class="gallery-fallback">{"旅行灵感 · 摄影图片暂不可用" if lang == "中文" else "Travel inspiration · Photography temporarily unavailable"}</div>'
             f'{"".join(slides)}</section>')
 
@@ -36,4 +36,4 @@ def render_gallery(t, lang):
     import streamlit as st
     with st.container(key='gallery'):
         st.markdown(render_banner(t, lang), unsafe_allow_html=True)
-        st.caption('旅行灵感 · 摄影参考，非生成结果' if lang == '中文' else 'TRAVEL INSPIRATION · Photography references, not generated results')
+        st.caption('旅行灵感 · 摄影参考，非生成结果' if lang == '中文' else 'Travel inspiration · Photography references, not generated results')

@@ -19,7 +19,7 @@ def studio(monkeypatch, tmp_path):
     def image(*args):
         calls.append('image')
         return Image.new('RGB', (16, 20), color=(len(calls), 0, 0))
-    def video(*args):
+    def video(*args, **kwargs):
         calls.append('video')
         return b'video'
     monkeypatch.setattr(engine, 'generate_caption_variants', captions)
@@ -28,6 +28,7 @@ def studio(monkeypatch, tmp_path):
     monkeypatch.setattr(engine, 'save_output', lambda *args: tmp_path)
     monkeypatch.setattr(studio_state, 'save_caption_output', lambda *args: tmp_path)
     app = AppTest.from_file(str(Path(__file__).resolve().parents[1] / 'app.py')).run()
+    app.text_input(key='highlights').set_value('Lake scenery').run()
     return app, calls
 
 
@@ -38,7 +39,7 @@ def navigate(app, workspace):
 
 def test_independent_generations_and_preview_edits(studio):
     app, calls = studio
-    assert app.radio(key='workspace').options == ['Caption', 'Image', 'Preview']
+    assert app.radio(key='workspace').options == ['Caption', 'Image', 'Video']
     assert not app.sidebar.radio
     assert not any(button.key in ('gallery_next', 'gallery_previous') for button in app.button)
     gallery = next(block.value for block in app.markdown if '<section class="tourism-gallery"' in block.value)
@@ -47,28 +48,28 @@ def test_independent_generations_and_preview_edits(studio):
     app.text_input(key='audience').set_value('Families').run()
     app.button(key='generate_caption').click().run()
     assert not app.exception and calls == ['text']
-    assert not app.text_area
+    assert app.text_area
     assert not app.session_state['result'].get('image')
     original = app.session_state['result']['variants'][0].copy()
     app.selectbox(key='caption_variant').select(1).run()
-    navigate(app, 'preview')
+    navigate(app, 'text')
     assert app.text_input(key='draft_1_title').value == 'English 1'
     assert any('preview-missing-image' in block.value and 'No image yet' in block.value for block in app.markdown)
     app.text_input(key='draft_1_title').set_value('My title').run()
     app.text_area(key='draft_1_caption').set_value('My caption').run()
     app.text_area(key='draft_1_hashtags').set_value('#mine').run()
     navigate(app, 'text')
-    assert not app.text_area
+    assert app.text_area
     assert app.session_state['result']['variants'][0] == original
     assert app.session_state['result']['variants'][1]['title'] == 'English 1'
     assert app.text_input(key='keywords').value == 'Quiet afternoon'
     navigate(app, 'image')
-    assert not app.text_area
+    assert app.text_area
     app.selectbox(key='visual_style_choice').select('cyberpunk_neon').run()
     app.button(key='generate_image').click().run()
     assert not app.exception and calls == ['text', 'image']
     first_image = app.session_state['result']['image']
-    navigate(app, 'preview')
+    navigate(app, 'text')
     assert app.text_input(key='draft_1_title').value == 'My title'
     assert app.text_area(key='draft_1_caption').value == 'My caption'
     assert app.text_area(key='draft_1_hashtags').value == '#mine'
@@ -78,17 +79,17 @@ def test_independent_generations_and_preview_edits(studio):
     assert calls == ['text', 'image', 'image']
     assert app.session_state['result']['image'] is not first_image
     latest_image = app.session_state['result']['image']
-    navigate(app, 'preview')
+    navigate(app, 'text')
     assert app.text_input(key='draft_1_title').value == 'My title'
     navigate(app, 'text')
     app.radio(key='language').set_value('中文').run()
-    assert app.radio(key='workspace').options == ['文案', '图片', '预览']
+    assert app.radio(key='workspace').options == ['文案', '图片', '视频']
     app.button(key='generate_caption').click().run()
     assert calls == ['text', 'image', 'image', 'text']
-    navigate(app, 'preview')
+    navigate(app, 'text')
     assert app.text_input(key='draft_0_title').value == '中文 0'
     assert app.session_state['result']['image'] is latest_image
-    for workspace in ('image', 'text', 'preview'):
+    for workspace in ('image', 'text'):
         navigate(app, workspace)
     assert calls == ['text', 'image', 'image', 'text']
     assert app.session_state['form_visual_style_choice'] == 'cyberpunk_neon'
@@ -97,18 +98,18 @@ def test_independent_generations_and_preview_edits(studio):
 def test_image_first_and_failed_regeneration(studio, monkeypatch):
     import engine
     app, calls = studio
-    navigate(app, 'preview')
+    navigate(app, 'text')
     assert not app.text_area
     navigate(app, 'image')
     app.button(key='generate_image').click().run()
     assert not app.exception and calls == ['image']
     image = app.session_state['result']['image']
-    navigate(app, 'preview')
-    assert not app.text_input
+    navigate(app, 'text')
+    assert not any(x.key.startswith('draft_') for x in app.text_input)
     assert any('preview-missing-caption' in block.value and 'No caption yet' in block.value for block in app.markdown)
     navigate(app, 'text')
     app.button(key='generate_caption').click().run()
-    navigate(app, 'preview')
+    navigate(app, 'text')
     app.text_input(key='draft_0_title').set_value('Retained edit').run()
     def fail(*args):
         raise engine.CaptionError('Text service unavailable')
@@ -116,7 +117,7 @@ def test_image_first_and_failed_regeneration(studio, monkeypatch):
     navigate(app, 'text')
     app.button(key='generate_caption').click().run()
     assert len(app.error) == 1
-    navigate(app, 'preview')
+    navigate(app, 'text')
     assert app.text_input(key='draft_0_title').value == 'Retained edit'
     assert app.session_state['result']['image'] is image
     def image_fail(*args):
@@ -137,13 +138,13 @@ def test_open_legacy_result_keeps_edits_and_provenance(studio):
         variants=[dict(title='Original', caption='Generated', hashtags=['#original'])],
         image=Image.new('RGB', (16, 20)), video=None)
     app.session_state['form_draft_0_title'] = 'Existing edit'
-    navigate(app, 'preview')
+    navigate(app, 'text')
     assert app.text_input(key='draft_0_title').value == 'Existing edit'
     assert app.session_state['result']['text_plan'] == legacy_plan
     assert app.session_state['result']['image_plan'] == legacy_plan
     navigate(app, 'image')
     app.button(key='generate_image').click().run()
-    navigate(app, 'preview')
+    navigate(app, 'text')
     assert app.text_input(key='draft_0_title').value == 'Existing edit'
     assert app.session_state['result']['text_plan'] == legacy_plan
     assert calls == ['image']
@@ -151,13 +152,13 @@ def test_open_legacy_result_keeps_edits_and_provenance(studio):
 
 def test_preview_unified_empty_state(studio):
     app, calls = studio
-    navigate(app, 'preview')
+    navigate(app, 'text')
     empty = [block.value for block in app.markdown if '<div class="preview-empty"' in block.value]
     assert len(empty) == 1
     assert 'Nothing to preview yet' in empty[0]
     assert 'Generate a caption and image to see your post here.' in empty[0]
     assert not any('No image yet' in block.value or 'No caption yet' in block.value for block in app.caption)
-    assert not app.text_input and not app.text_area
+    assert not any(x.key.startswith('draft_') for x in app.text_input) and not app.text_area
     app.radio(key='language').set_value('中文').run()
     assert any('暂无可预览内容' in block.value for block in app.markdown)
     assert calls == []

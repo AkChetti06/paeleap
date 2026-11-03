@@ -4,23 +4,27 @@ import os
 import time
 from html import escape
 from pathlib import Path
+from io import BytesIO
+from PIL import Image, ImageOps
 
 import streamlit as st
 from dotenv import load_dotenv
 from ui_banner import render_gallery
 from ui_workspaces import render_navigation
-from ui_results import render_results
+from ui_results import render_results, render_preview_header
+from ui_video import render_video_controls
+from platform_config import PLATFORM_CONFIG, FORMATS, TEMPLATE_LIBRARY
 from studio_state import save_caption_output, retain_legacy_plans
 from engine import (CATEGORY_CONFIG, DESTINATIONS, STYLES, plan, recommend_style,
-                    generate_caption_variants, generate_cloudflare_image, video_plans,
-                    render_slideshow, save_output, safe_error)
+                    generate_caption_variants, generate_cloudflare_image,
+                    save_output, safe_error)
 
 load_dotenv(dotenv_path=Path(__file__).resolve().parent / '.env', override=False)
 st.set_page_config(page_title='PAELEAP | Creator Studio', page_icon='✦', layout='wide', initial_sidebar_state='collapsed')
 
 COPY = {'English': {'eyebrow': 'A LITTLE WANDER. A GREAT STORY.',
              'headline': 'Turn places into stories.',
-             'subhead': 'Your next RedNote travel post, thoughtfully written and beautifully imagined.',
+             'subhead': 'Your next travel post, thoughtfully written and beautifully imagined.',
              'workspace': 'Start with a place',
              'workspace_sub': 'Set the scene. We’ll help you find the story.',
              'preview': 'Your story, taking shape',
@@ -63,7 +67,7 @@ COPY = {'English': {'eyebrow': 'A LITTLE WANDER. A GREAT STORY.',
              'eval_download': '↓  Export review'},
  '中文': {'eyebrow': '灵感始于远方，故事由你书写',
         'headline': '让每个目的地，都有好故事。',
-        'subhead': '从一个地名开始，用 AI 创作有温度的小红书旅行图文。',
+        'subhead': '从一个地名开始，用 AI 创作有温度的旅行内容。',
         'workspace': '从一个目的地开始',
         'workspace_sub': '告诉我们你的灵感，其余交给创作。',
         'preview': '故事，正在发生',
@@ -137,6 +141,13 @@ def use_preset():
         st.session_state['form_category'] = item['category']
 
 
+def change_platform():
+    # A platform change always starts from that platform's recommended format.
+    default = PLATFORM_CONFIG[st.session_state['form_platform']]['ratio']
+    st.session_state['form_preview_ratio'] = default
+    st.session_state['active_ratio'] = default
+
+
 def edited_name():
     st.session_state['name_is_preset'] = False
 
@@ -158,11 +169,12 @@ theme_type = getattr(getattr(st.context, 'theme', None), 'type', None) or st.get
 if theme_type == 'dark':
     st.markdown('<span class="studio-theme-dark" aria-hidden="true" style="display:none"></span>', unsafe_allow_html=True)
 st.markdown('<style>' + (Path(__file__).parent / 'studio.css').read_text() + '</style>', unsafe_allow_html=True)
-bar_left, bar_right = st.columns([5, 1.3], vertical_alignment='center')
+header = st.container(key='studio_header')
+bar_left, bar_right = header.columns([5, 1.3], vertical_alignment='center')
 with bar_left:
     header_cn = st.session_state.get('language', 'English') == '中文'
     subtitle = '创作值得分享的视觉故事。' if header_cn else 'Create visual stories worth sharing.'
-    st.markdown('<div class="studio-header"><div class="brand"><span>＊</span> PAELEAP STUDIO</div>'
+    st.markdown('<div class="studio-header"><div class="brand"><span class="brand-mark">p.</span> PAELEAP <em>STUDIO</em></div>'
                 f'<div class="brand-subtitle">{subtitle}</div></div>', unsafe_allow_html=True)
 with bar_right:
     # A native single-choice radio styled as segments cannot be toggled into an empty state.
@@ -180,130 +192,163 @@ def label(en, zh):
 
 
 render_gallery(t, lang)
-workspace = render_navigation(cn)
-if 'result' in st.session_state:
-    retain_legacy_plans(st.session_state['result'])
-clicked = False
-if workspace == 'text':
-    st.markdown(f'<div class="heading-box"><div class="panel-title"><span>01</span>{escape(t["workspace"])}</div><div class="panel-sub">{escape(t["workspace_sub"])}</div></div>', unsafe_allow_html=True)
-    with st.container(border=True, key='brief_card'):
-        place, name = st.columns(2)
-        with place:
+st.markdown('<div class="page-intro" lang="' + ('zh-CN' if cn else 'en') + '"><div class="eyebrow">' + label('YOUR CREATIVE WORKSPACE', '旅行内容创作空间') + '</div><h1>' +
+    label('A place. A perspective. Your story.', '从目的地出发，写下你的视角。') + '</h1><p>' +
+    label('Shape thoughtful travel content, from the first idea to the final frame.', '从第一份灵感到最后一帧，让旅行内容有自己的表达。') + '</p></div>', unsafe_allow_html=True)
+with st.container(key='platform_toolbar'):
+    platform = field(st.radio, 'platform', 'xiaohongshu', callback=change_platform,
+        label=label('Create for', '创作平台'), options=list(PLATFORM_CONFIG),
+        format_func=lambda key: PLATFORM_CONFIG[key]['labels'][lang], horizontal=True)
+with st.container(key='creator_grid'):
+    controls, preview = st.columns([0.42, 0.58], gap='large')
+# Render the preview selector first so this run's generation and video use its value.
+results_panel = preview.container(key='results_panel')
+with results_panel:
+    ratio = render_preview_header(field, label, lang)
+with controls:
+    st.markdown('<div class="panel-heading"><h2>' + label('Content brief', '创作简报') + '</h2><span>' +
+        label('01 / CREATE', '01 / 创作') + '</span></div>', unsafe_allow_html=True)
+    workspace = render_navigation(cn)
+    if 'result' in st.session_state:
+        retain_legacy_plans(st.session_state['result'])
+    clicked = False
+    if workspace == 'text':
+        with st.container(key='brief_card'):
+            st.markdown('<div class="brief-section">' + label('Destination', '目的地') + '</div>', unsafe_allow_html=True)
+            # Preserve names edited in older sessions when migrating to one selector.
+            if not st.session_state.get('name_is_preset', True) and st.session_state.get('form_destination', 'west_lake') in DESTINATIONS:
+                st.session_state['form_destination'] = 'custom'
             destination = field(st.selectbox, 'destination', 'west_lake', callback=use_preset,
-                label=t['destination'], options=[*DESTINATIONS, 'custom'],
+                label=t['destination'], label_visibility='collapsed', options=[*DESTINATIONS, 'custom'],
                 format_func=lambda value: DESTINATIONS[value]['labels'][lang] if value in DESTINATIONS else t['custom'],
                 help=t['destination_help'])
-        with name:
-            attraction = field(st.text_input, 'attraction', DESTINATIONS['west_lake']['labels'][lang],
-                callback=edited_name, label=t['name'], placeholder=label('e.g. West Lake, Hangzhou', '例如：杭州西湖'), max_chars=100)
-        category = field(st.radio, 'category', 'natural_scenery', label=t['scene'],
-            options=list(CATEGORY_CONFIG), format_func=lambda value: CATEGORY_CONFIG[value]['labels'][lang], horizontal=True)
-        angle_value = st.session_state.get('form_creative_angle', '')
-        recommendation = recommend_style(attraction, category, angle_value)
-        # Only meaningful brief changes update the suggestion. Translation is not a brief change.
-        name_context = destination if st.session_state.get('name_is_preset', True) else attraction
-        context = (name_context, category, angle_value)
-        if st.session_state.get('style_context') != context:
-            st.session_state['form_visual_style_choice'] = recommendation
-            st.session_state['style_context'] = context
-        st.caption(f'✦ {t["recommend"]}: **{STYLES[recommendation]["labels"][lang]}** · {t["style_custom"]}')
-        style = field(st.selectbox, 'visual_style_choice', recommendation, label=t['style'],
-            options=list(STYLES), format_func=lambda value: STYLES[value]['labels'][lang])
-        audience_column, angle_column = st.columns(2)
-        with audience_column:
-            audience = field(st.text_input, 'audience', t['audience_default'], callback=edited_audience,
-                label=t['audience'], max_chars=100)
-        with angle_column:
-            angle = field(st.text_input, 'creative_angle', '', label=t['angle'],
-                placeholder=t['angle_placeholder'], max_chars=180)
-        keywords = field(st.text_input, 'keywords', '', label=label('Keywords (optional)', '关键词（可选）'),
-            placeholder=label('e.g. waterside, quiet textures', '例如：水岸、宁静质感'), max_chars=180)
-        st.markdown('<div style="height:2px"></div>', unsafe_allow_html=True)
-        st.divider()
-        st.markdown('### ' + label('Generate Caption', '生成文案'))
-        clicked = st.button(t['generate'], key='generate_caption', type='primary', use_container_width=True, disabled=not attraction.strip())
-
-if workspace == 'image':
-    # A style chosen before opening the text brief is a deliberate user choice.
-    st.session_state.setdefault('style_context', (
-        st.session_state.get('form_destination', 'west_lake') if st.session_state.get('name_is_preset', True)
-        else st.session_state.get('form_attraction', ''),
-        st.session_state.get('form_category', 'natural_scenery'),
-        st.session_state.get('form_creative_angle', '')))
-    with st.container(border=True):
-        st.markdown('### ' + label('Generate Image', '生成图片'))
-        style = field(st.selectbox, 'visual_style_choice', recommend_style(
-            st.session_state.get('form_attraction', DESTINATIONS['west_lake']['labels'][lang]),
-            st.session_state.get('form_category', 'natural_scenery'),
-            st.session_state.get('form_creative_angle', '')), label=t['style'],
-            options=list(STYLES), format_func=lambda value: STYLES[value]['labels'][lang])
-        clicked = st.button(label('Generate Image', '生成图片'), type='primary', key='generate_image',
-                            use_container_width=True,
-                            disabled=not st.session_state.get('form_attraction', DESTINATIONS['west_lake']['labels'][lang]).strip())
-    attraction = st.session_state.get('form_attraction', DESTINATIONS['west_lake']['labels'][lang])
-    category = st.session_state.get('form_category', 'natural_scenery')
-    keywords = st.session_state.get('form_keywords', '')
-    audience = st.session_state.get('form_audience', t['audience_default'])
-    angle = st.session_state.get('form_creative_angle', '')
-
-if clicked:
-    try:
-        p = plan(attraction, category, keywords, lang, style=style, audience=audience, visit_reason=angle)
-        with st.spinner(label('Generating caption…', '正在生成文案…') if workspace == 'text' else label('Generating image…', '正在生成图片…')):
-            start = time.monotonic()
-            previous = st.session_state.get('result', {})
-            if workspace == 'text':
-                variants = generate_caption_variants(p, setting('TEXT_API_KEY'), setting('TEXT_BASE_URL'),
-                                                     setting('TEXT_MODEL', 'qwen-plus'), lang)
-                elapsed = time.monotonic() - start
-                folder = save_caption_output('outputs', p, variants, elapsed)
-                st.session_state['result'] = {**previous, 'text_plan': p,
-                    'variants': variants, 'text_elapsed': elapsed, 'text_folder': str(folder)}
-                st.session_state['form_caption_variant'] = 0
-                for index, item in enumerate(variants):
-                    for part in ('title', 'caption', 'hashtags'):
-                        value = ' '.join(item[part]) if part == 'hashtags' else item[part]
-                        st.session_state[f'form_draft_{index}_{part}'] = value
+            if destination == 'custom':
+                attraction = field(st.text_input, 'attraction', '', callback=edited_name,
+                    label=t['name'], placeholder=label('Enter an attraction name', '请输入景点名称'), max_chars=100)
             else:
-                image = generate_cloudflare_image(p, setting('CLOUDFLARE_ACCOUNT_ID'), setting('CLOUDFLARE_API_TOKEN'))
-                elapsed = time.monotonic() - start
-                folder = save_output('outputs', p, previous.get('variants', []), image, elapsed)
-                st.session_state['result'] = {**previous, 'image_plan': p, 'image': image,
-                    'image_elapsed': elapsed, 'folder': str(folder), 'video': None}
-    except Exception as exc:
-        st.error(safe_error(exc, lang))
-        if 'result' in st.session_state:
-            st.warning(label('The previous successful draft is retained.', '已保留上次成功生成的草稿。'))
+                attraction = DESTINATIONS[destination]['labels'][lang]
+                st.session_state['form_attraction'] = attraction
+            category = field(st.radio, 'category', 'natural_scenery', label=t['scene'],
+                options=list(CATEGORY_CONFIG), format_func=lambda value: CATEGORY_CONFIG[value]['labels'][lang], horizontal=True)
+            angle_value = st.session_state.get('form_creative_angle', '')
+            recommendation = recommend_style(attraction, category, angle_value)
+            # Only meaningful brief changes update the suggestion. Translation is not a brief change.
+            name_context = destination if st.session_state.get('name_is_preset', True) else attraction
+            context = (name_context, category, angle_value)
+            if st.session_state.get('style_context') != context:
+                st.session_state['form_visual_style_choice'] = recommendation
+                st.session_state['style_context'] = context
+            st.markdown('<div class="brief-section">' + label('Creative direction', '创作方向') + '</div>', unsafe_allow_html=True)
+            style = st.session_state.get('form_visual_style_choice', recommendation)
+            audience_column, angle_column = st.columns(2)
+            with audience_column:
+                audience = field(st.text_input, 'audience', t['audience_default'], callback=edited_audience,
+                    label=t['audience'], max_chars=100)
+            with angle_column:
+                angle = field(st.text_input, 'creative_angle', '', label=t['angle'],
+                    placeholder=t['angle_placeholder'], max_chars=180)
+            st.markdown('<div class="brief-section">' + label('Content details', '内容重点') + '</div>', unsafe_allow_html=True)
+            highlights_text = field(st.text_input, 'highlights', '', label=label('Key highlights (1–3, separated by ;)', '核心看点（1–3个，用；分隔）'), max_chars=302)
+            st.caption(TEMPLATE_LIBRARY[category]['name'])
+            keywords = field(st.text_input, 'keywords', '', label=label('Keywords (optional)', '关键词（可选）'),
+                placeholder=label('e.g. waterside, quiet textures', '例如：水岸、宁静质感'), max_chars=180)
+            st.divider()
+            clicked = st.button(t['generate'], key='generate_caption', type='primary', use_container_width=False, disabled=not attraction.strip())
 
-render_results(workspace, field, label, t, lang)
-if workspace == 'preview' and st.session_state.get('result', {}).get('image') is not None:
-    result = st.session_state['result']
-    p = result.get('image_plan', result.get('plan'))
-    with st.expander(label('Short video', '短视频')):
-        st.caption(label('Video reuses the cover and generates two more Cloudflare images, using additional quota.',
-                         '视频复用封面，另生成两张 Cloudflare 图片，会使用额外额度。'))
-        if st.button(label('Create short video', '生成短视频'), key='generate_video'):
-            try:
-                with st.spinner(label('Creating two images and rendering video…', '正在生成两张图片并渲染视频…')):
-                    frames = [result['image']]
-                    for frame_plan in video_plans(p)[1:]:
-                        frames.append(generate_cloudflare_image(frame_plan, setting('CLOUDFLARE_ACCOUNT_ID'), setting('CLOUDFLARE_API_TOKEN')))
-                    video = render_slideshow(frames)
-                    (Path(result['folder']) / 'slideshow.mp4').write_bytes(video)
-                    result['video'] = video
-            except Exception as exc:
-                st.error(safe_error(exc, lang))
-        if result.get('video'):
-            st.video(result['video'])
-            st.download_button(label('Download video', '下载视频'), result['video'], 'paeleap_slideshow.mp4', 'video/mp4')
+    if workspace == 'image':
+        # A style chosen before opening the text brief is a deliberate user choice.
+        st.session_state.setdefault('style_context', (
+            st.session_state.get('form_destination', 'west_lake') if st.session_state.get('name_is_preset', True)
+            else st.session_state.get('form_attraction', ''),
+            st.session_state.get('form_category', 'natural_scenery'),
+            st.session_state.get('form_creative_angle', '')))
+        with st.container(key='image_controls'):
+            st.markdown('<div class="brief-section">' + label('Visual direction', '视觉方向') + '</div>', unsafe_allow_html=True)
+            st.caption(label('Use the destination and highlights from your caption brief.', '沿用文案简报中的目的地和核心看点。'))
+            style = field(st.selectbox, 'visual_style_choice', recommend_style(
+                st.session_state.get('form_attraction', DESTINATIONS['west_lake']['labels'][lang]),
+                st.session_state.get('form_category', 'natural_scenery'),
+                st.session_state.get('form_creative_angle', '')), label=t['style'],
+                options=list(STYLES), format_func=lambda value: STYLES[value]['labels'][lang])
+            with st.expander(label('Use your own photo', '使用自己的照片')):
+                upload = st.file_uploader(label('Photo (PNG, JPEG, WebP)', '照片（PNG、JPEG、WebP）'), type=['png', 'jpg', 'jpeg', 'webp'])
+                supplied = [h.strip() for h in st.session_state.get('form_highlights', '').replace('；', ';').split(';') if h.strip()]
+                if st.session_state.get('form_photo_highlight') not in (supplied or ['']):
+                    st.session_state['form_photo_highlight'] = supplied[0] if supplied else ''
+                match = field(st.selectbox, 'photo_highlight', supplied[0] if supplied else '',
+                    label=label('Corresponding highlight', '对应看点'), options=supplied or [''])
+                if st.button(label('Use photo', '使用照片'), disabled=upload is None, key='use_photo'):
+                    try:
+                        if upload.size > 20_000_000:
+                            raise ValueError('Photo must be under 20 MB')
+                        photo = ImageOps.exif_transpose(Image.open(BytesIO(upload.getvalue())))
+                        photo.load()
+                        previous = st.session_state.get('result', {})
+                        photo_plan = dict(attraction=st.session_state.get('form_attraction', ''),
+                            image_highlight=match, platform=platform, aspect_ratio=ratio, source='uploaded_photo')
+                        st.session_state['result'] = {**previous, 'image': photo.copy(), 'image_plan': photo_plan,
+                            'image_backend': 'uploaded_photo', 'video': None}
+                    except Exception as exc:
+                        st.error(safe_error(exc, lang))
+            clicked = st.button(label('Generate Image', '生成图片'), type='primary', key='generate_image',
+                                use_container_width=False,
+                                disabled=not st.session_state.get('form_attraction', DESTINATIONS['west_lake']['labels'][lang]).strip())
+        attraction = st.session_state.get('form_attraction', DESTINATIONS['west_lake']['labels'][lang])
+        category = st.session_state.get('form_category', 'natural_scenery')
+        keywords = st.session_state.get('form_keywords', '')
+        audience = st.session_state.get('form_audience', t['audience_default'])
+        angle = st.session_state.get('form_creative_angle', '')
+
+    if clicked:
+        try:
+            highlights = [h.strip() for h in st.session_state.get('form_highlights', '').replace('；', ';').split(';') if h.strip()]
+            if workspace == 'text' and not 1 <= len(highlights) <= 3:
+                raise ValueError(label('Enter one to three key highlights.', '请输入1–3个核心看点。'))
+            p = plan(attraction, category, keywords, lang, style=style, audience=audience, visit_reason=angle, platform=platform, aspect_ratio=ratio, highlights=highlights)
+            with st.spinner(label('Generating caption…', '正在生成文案…') if workspace == 'text' else label('Generating image…', '正在生成图片…')):
+                start = time.monotonic()
+                previous = st.session_state.get('result', {})
+                if workspace == 'text':
+                    variants = generate_caption_variants(p, setting('TEXT_API_KEY'), setting('TEXT_BASE_URL'),
+                                                         setting('TEXT_MODEL', 'qwen-plus'), lang)
+                    elapsed = time.monotonic() - start
+                    folder = save_caption_output('outputs', p, variants, elapsed)
+                    st.session_state['result'] = {**previous, 'text_plan': p,
+                        'variants': variants, 'text_elapsed': elapsed, 'text_folder': str(folder)}
+                    st.session_state['form_caption_variant'] = 0
+                    for index, item in enumerate(variants):
+                        alternatives = item.get('alternative_titles', [v['title'] for j, v in enumerate(variants) if j != index][:2])
+                        for n, suggestion in enumerate(alternatives):
+                            st.session_state[f'form_draft_{index}_alternative_{n}'] = suggestion
+                        for part in ('title', 'caption', 'hashtags'):
+                            value = ' '.join(item[part]) if part == 'hashtags' else item[part]
+                            st.session_state[f'form_draft_{index}_{part}'] = value
+                else:
+                    image = generate_cloudflare_image(p, setting('CLOUDFLARE_ACCOUNT_ID'), setting('CLOUDFLARE_API_TOKEN'))
+                    elapsed = time.monotonic() - start
+                    folder = save_output('outputs', p, previous.get('variants', []), image, elapsed)
+                    st.session_state['result'] = {**previous, 'image_plan': p, 'image': image,
+                        'image_backend': 'cloudflare', 'image_elapsed': elapsed, 'folder': str(folder), 'video': None}
+        except Exception as exc:
+            st.error(safe_error(exc, lang))
+            if 'result' in st.session_state:
+                st.warning(label('The previous successful draft is retained.', '已保留上次成功生成的草稿。'))
+
+    if workspace == 'video':
+        render_video_controls(label, lang, platform, ratio, setting)
+
+with preview:
+    with results_panel:
+        render_results(workspace, field, label, t, lang)
+        if 'result' in st.session_state:
+            with st.expander(t['review']):
+                st.caption(t['review_note'])
+                fields = ['metric1', 'metric2', 'metric3', 'metric4', 'metric5']
+                values = [field(st.slider, f'score_{i}', 3, label=t[key], min_value=1, max_value=5) for i, key in enumerate(fields)]
+                score = sum(value * weight for value, weight in zip(values, [.25, .25, .2, .15, .15])) * 20
+                st.metric(t['score'], f'{score:.0f}/100')
+                st.download_button(t['eval_download'], json.dumps(dict(weighted_score=score,
+                    ratings=dict(zip(fields, values)), backend='cloudflare', image_test_valid=st.session_state['result'].get('image') is not None), ensure_ascii=False, indent=2), 'review.json')
+
 
 st.markdown('<div class="footer"><span>PAELEAP STUDIO / ' + label('MADE FOR EXPLORING', '为探索而生') + '</span><span>' + escape(t['notice']) + '</span></div>', unsafe_allow_html=True)
-if workspace == 'preview' and 'result' in st.session_state:
-    with st.expander(t['review']):
-        st.caption(t['review_note'])
-        fields = ['metric1', 'metric2', 'metric3', 'metric4', 'metric5']
-        values = [field(st.slider, f'score_{i}', 3, label=t[key], min_value=1, max_value=5) for i, key in enumerate(fields)]
-        score = sum(value * weight for value, weight in zip(values, [.25, .25, .2, .15, .15])) * 20
-        st.metric(t['score'], f'{score:.0f}/100')
-        st.download_button(t['eval_download'], json.dumps(dict(weighted_score=score,
-            ratings=dict(zip(fields, values)), backend='cloudflare', image_test_valid=st.session_state['result'].get('image') is not None), ensure_ascii=False, indent=2), 'review.json')
