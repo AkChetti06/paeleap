@@ -1,0 +1,41 @@
+/* Focused local UI: preserve the ivory / sand / clay palette from studio.css. */
+.simple-brand{display:flex;align-items:center;justify-content:space-between;gap:12px;color:var(--clay);font-weight:600;font-size:13px;margin:8px 0 20px}
+.simple-brand span{background:var(--sand);border-radius:20px;padding:6px 12px;color:var(--charcoal);font-size:11px;font-weight:400}
+h1{text-wrap:balance;font-size:clamp(28px,4vw,46px)!important;letter-spacing:-.03em!important}
+.st-key-simple_brief{border-radius:16px;padding:22px!important;background:#fffdf9;box-shadow:0 3px 12px #33332f05;border-color:var(--line)!important}
+.st-key-simple_post{border-radius:16px;padding:20px!important;background:#fffdf9;border-color:var(--line)!important}
+.st-key-simple_post textarea{line-height:1.9!important;font-size:14px!important}
+.st-key-focus_choices button{min-height:40px;border-radius:22px!important;transition:background-color 150ms ease,border-color 150ms ease}
+.st-key-focus_choices button[aria-pressed="true"]{background:var(--clay)!important;color:#fff!important;border-color:var(--clay)!important}
+.st-key-active_version [role="radiogroup"]{gap:10px;flex-wrap:wrap}
+.st-key-active_version [role="radiogroup"] label{min-height:44px;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:var(--ivory);margin:0}
+.st-key-active_version [role="radiogroup"] label:has(input:checked){border-color:var(--clay);background:#f5e7dd}
+.stDownloadButton>button[kind="primary"]{background:var(--clay)!important;color:#fff!important;border-color:var(--clay)!important}
+.stDownloadButton>button[kind="primary"] [data-testid="stMarkdownContainer"]{color:#fff!important}
+.simple-empty{display:flex;flex-direction:column;gap:18px;align-items:center;justify-content:center;text-align:center;min-height:440px;background:var(--sand);border-radius:16px;padding:28px;color:var(--charcoal)}
+.simple-empty>span{font-size:54px;color:var(--sage)}
+.simple-empty strong{font-size:20px;font-weight:500;text-wrap:balance}
+.simple-empty p,.simple-empty small{line-height:1.9;margin:0;color:#66645c}
+@media(max-width:760px){.block-container{padding:18px!important}.simple-brand{align-items:flex-start;flex-wrap:wrap}.st-key-simple_brief,.st-key-simple_post{padding:16px!important}.simple-empty{min-height:260px;padding:22px}}
+@media(prefers-reduced-motion:reduce){.st-key-focus_choices button{transition:none}}
+.st-key-focus_choices button[aria-pressed="true"] [data-testid="stMarkdownContainer"],
+.st-key-focus_choices button[aria-pressed="true"] [data-testid="stMarkdownContainer"] p{color:#fff!important}
+
+/* Restore the original studio's visual shell, keeping the simplified workflow. */
+.block-container{max-width:1320px;padding:28px 48px 32px}
+.destination-hero .hero-copy{width:58%;padding:48px 44px}
+h1.hero-title{font-family:'Cormorant Garamond','Noto Sans SC',Georgia,serif!important;font-size:clamp(36px,4.6vw,64px)!important;font-weight:400!important;line-height:1.15!important;letter-spacing:-1px!important;margin:0;padding:0;text-wrap:balance}
+.heading-box{min-height:88px;display:flex;align-items:center;margin-top:12px}
+h2.panel-title{font-family:'Cormorant Garamond','Noto Sans SC',Georgia,serif;font-size:27px!important;font-weight:400;line-height:1.35;margin:0;padding:0}
+.st-key-simple_brief{background:#fff;border-radius:12px;padding:24px!important;box-shadow:none;border:1px solid var(--line)!important}
+.st-key-simple_post{background:#fff;border-radius:12px;padding:24px!important;box-shadow:none;border:1px solid var(--line)!important}
+.simple-empty{background:#eeeae2;border-radius:12px;min-height:460px}
+.simple-empty strong{font-family:'Cormorant Garamond','Noto Sans SC',Georgia,serif;font-size:28px;font-weight:400}
+@media(max-width:760px){.block-container{padding:20px!important}.destination-hero .hero-copy{width:100%;padding:28px 24px}.destination-hero{min-height:470px}h1.hero-title{font-size:40px!important;max-width:90%}.heading-box{min-height:84px;padding:18px}h2.panel-title{font-size:25px!important}.st-key-simple_brief,.st-key-simple_post{padding:18px!important}.simple-empty{min-height:320px}}
+/* Streamlit wraps HTML headings in spans; don't style the whole heading as a number. */
+h2.panel-title>span[data-heading-text]{font:inherit!important;color:inherit!important;margin:0!important;vertical-align:baseline!important}
+
+.heading-box{min-height:120px}
+h1.hero-title>span{display:block}
+@media(min-width:761px) and (max-width:1100px){h1.hero-title{font-size:34px!important}}
+@media(max-width:760px){.heading-box{min-height:112px}}

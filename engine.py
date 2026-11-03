@@ -216,6 +216,86 @@ def generate_copy(p, api_key='', base_url='', model='qwen-plus', lang='中文'):
     return parse_caption(raw)
 
 
+def placeholder(p):
+    img=Image.new('RGB',(900,1200),'#efece5');draw=ImageDraw.Draw(img)
+    draw.rounded_rectangle((60,65,840,1135),radius=24,outline='#b4a999',width=4)
+    fontpath='/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'
+    font=ImageFont.truetype(fontpath,43) if os.path.exists(fontpath) else ImageFont.load_default()
+    small=ImageFont.truetype(fontpath,24) if os.path.exists(fontpath) else ImageFont.load_default()
+    draw.text((100,170),'DEMO / NO AI IMAGE',font=font,fill='#594b40')
+    draw.text((100,270),'Illustrative placeholder only',font=small,fill='#594b40')
+    draw.text((100,315),'Not a photograph of the location',font=small,fill='#594b40')
+    draw.text((100,955),p['style'],font=small,fill='#594b40')
+    draw.text((100,1010),'Connect an image provider to generate',font=small,fill='#594b40')
+    return img
+
+def generate_wan_image(p, key, base_url, model='wan2.6-t2i'):
+    if not key or not base_url: raise ValueError('请设置DASHSCOPE_API_KEY及DASHSCOPE_BASE_URL。')
+    import dashscope
+    from dashscope.aigc.image_generation import ImageGeneration
+    from dashscope.api_entities.dashscope_response import Message
+    dashscope.base_http_api_url=base_url.rstrip('/')
+    rsp=ImageGeneration.call(model=model, api_key=key, messages=[Message(role='user',content=[{'text':p['image_prompt']}])], n=1,size='1152*1536',prompt_extend=True,watermark=False)
+    if rsp.status_code != 200:
+        raise RuntimeError(f'Wan API调用失败 (HTTP {rsp.status_code})，请检查权限、额度和模型。')
+    try:
+        url=rsp.output.choices[0].message.content[0]['image']
+    except Exception as exc:raise RuntimeError('Wan返回格式与预期不同，请检查模型和SDK版本') from exc
+    if urlparse(url).scheme!='https':raise RuntimeError('Unexpected non-HTTPS image URL')
+    result=requests.get(url,timeout=60);result.raise_for_status()
+    if len(result.content)>20_000_000:raise RuntimeError('Image too large')
+    image=Image.open(BytesIO(result.content));image.load()
+    return image.convert('RGB')
+
+def save_output(root,p,copy,image,backend,elapsed):
+    root=Path(root);root.mkdir(parents=True,exist_ok=True)
+    serial=datetime.now().strftime('%Y%m%d_%H%M%S_%f')
+    folder=root/serial;folder.mkdir()
+    image.save(folder/'visual.png')
+    manifest=dict(plan=p,post=copy,backend=backend,elapsed_seconds=round(elapsed,2),image_is_illustrative=(backend!='placeholder'),
+                  review_required=True,generated_at=serial)
+    (folder/'post.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2),encoding='utf8')
+    (folder/'post.txt').write_text(copy['title']+'\n\n'+copy['caption']+'\n\n'+' '.join(copy['hashtags'])+'\n',encoding='utf8')
+    return folder
+
+def generate_hf_image(p, token, model='black-forest-labs/FLUX.1-schnell'):
+    """Generate through Hugging Face Inference Providers (limited monthly free credits)."""
+    if not token:
+        raise ValueError('Hugging Face token missing / 缺少 Hugging Face Token (HF_TOKEN).')
+    from huggingface_hub import InferenceClient
+    client = InferenceClient(api_key=token, timeout=110)
+    try:
+        image = client.text_to_image(prompt=p['image_prompt'], model=model)
+        return image.convert('RGB')
+    except Exception as exc:
+        raise RuntimeError('Hugging Face image request failed. Check model availability, token permissions and credits. / 请检查模型、权限及额度。') from exc
+
+
+def english_copy(p):
+    name=ATTRACTIONS.get(p['attraction'],{}).get('name_en',p['attraction'])
+    messages={
+        '自然风光':(f'{name} | A simple first-visit idea 🌿',f'Planning a visit to {name}? Here is a starting point for your day.\n\n① Decide what scenery or experience interests you most.\n② Plan a sensible walking order using the official visitor map.\n③ Check current access details, weather and transport before leaving.\n\nThis is travel inspiration, not a verified first-hand guide.'),
+        '人文历史':(f'{name} | Explore the highlights 🏛️',f'Curious about {name}? Build your visit around a theme you want to understand.\n\n① Check the museum’s current exhibitions and featured objects.\n② Pause at a few highlights and read their interpretation.\n③ Use on-site directions to plan your route.\n\nConfirm exhibition details and opening arrangements with the venue.'),
+        '娱乐体验':(f'{name} | Turn a visit into discovery 📒',f'Bring a simple learning goal to {name}.\n\n① Choose one thing to observe before arriving.\n② Record interesting details and steps during your visit.\n③ Make a small observation card afterwards.\n\nThese are suggested self-guided tasks, not claims about actual scheduled activities.'),
+    }
+    messages['娱乐体验']=(f'{name} | Try a new experience ✨',f'Explore {name} through an experience that interests you. Check the official programme and booking requirements, choose activities at your own pace, and leave time to rest. Confirm actual availability, schedules and fees with the venue.')
+    messages['城市探索']=(f'{name} | A fresh view of the city 🌆',f'Use {name} as a starting point for noticing architecture, public spaces and everyday details. Plan a manageable walk with an official map. Check transport, access and safety before an evening visit. This is exploration inspiration, not a verified route; visuals are illustrative.')
+    title,caption=messages[p['category']]
+    if p.get('reason') and p['reason'] != ATTRACTIONS.get(p['attraction'],{}).get('concept','值得了解的参观体验'):
+        caption = f"Creative angle: {p['reason']}.\n\n" + caption
+    if p.get('audience') and p['audience'] not in ('首次到访游客','First-time visitors'):
+        caption = f"For: {p['audience']}.\n\n" + caption
+    return {'title':title,'caption':caption,'hashtags':['#ChinaTravel','#TravelInspiration','#ExploreChina','#WeekendIdeas'],'copy_source':'local_template_not_llm'}
+
+
+def localized_copy(p, lang='中文', api_key='', base_url='', model='qwen-plus', use_llm=False):
+    if use_llm and (not api_key or not base_url):
+        raise ValueError('LLM caption mode needs TEXT_API_KEY and TEXT_BASE_URL in .env / 请配置文字模型 API 参数。')
+    if not use_llm:
+        return fallback_copy(p) if lang=='中文' else english_copy(p)
+    return generate_copy(p, api_key, base_url, model, lang=lang)
+
+
 class ImageProviderError(RuntimeError):
     """Image API error with a category for safe, actionable UI messages."""
     def __init__(self, provider, category, detail):
