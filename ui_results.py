@@ -25,6 +25,12 @@ def render_results(workspace, field, label, t, lang):
     else:
         index = st.session_state.get('form_caption_variant', 0)
     with st.container(key='preview_stage' if workspace == 'preview' else 'workspace_results'):
+        if workspace == 'preview' and not variants and image is None:
+            st.markdown('<div class="preview-empty" role="status"><h4>' +
+                        label('Nothing to preview yet', '暂无可预览内容') + '</h4><p>' +
+                        label('Generate a caption and image to see your post here.',
+                              '生成文案和图片，即可在此预览你的图文。') + '</p></div>', unsafe_allow_html=True)
+            return
         if workspace == 'preview' and (variants or image is not None):
             st.markdown('<div class="preview-label">' + label('REDNOTE · POST PREVIEW', '小红书 · 图文预览') + '</div>', unsafe_allow_html=True)
             attraction = text_plan.get('attraction') or image_plan.get('attraction', '')
@@ -34,6 +40,10 @@ def render_results(workspace, field, label, t, lang):
         if workspace in ('image', 'preview'):
             if image is not None:
                 st.image(image, caption=t['image'], use_container_width=True)
+            elif workspace == 'preview':
+                st.markdown('<div class="preview-missing preview-missing-image">' +
+                            label('No image yet. Generate one in Image.', '暂无图片，请前往图片工作区生成。') +
+                            '</div>', unsafe_allow_html=True)
             else:
                 st.caption(label('No image yet. Generate one in Image.', '暂无图片，请前往图片工作区生成。'))
         if workspace in ('text', 'preview'):
@@ -56,6 +66,10 @@ def render_results(workspace, field, label, t, lang):
                     st.text(hashtags)
                 st.download_button(t['download_copy'], title + '\n\n' + caption + '\n\n' + hashtags,
                                    f'caption_{index + 1}.txt', key=f'download_{index}', use_container_width=True)
+            elif workspace == 'preview':
+                st.markdown('<div class="preview-missing preview-missing-caption">' +
+                            label('No caption yet. Generate one in Caption.', '暂无文案，请前往文案工作区生成。') +
+                            '</div>', unsafe_allow_html=True)
             else:
                 st.caption(label('No caption yet. Generate one in Caption.', '暂无文案，请前往文案工作区生成。'))
         if workspace in ('image', 'preview') and image is not None:

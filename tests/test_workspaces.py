@@ -53,7 +53,7 @@ def test_independent_generations_and_preview_edits(studio):
     app.selectbox(key='caption_variant').select(1).run()
     navigate(app, 'preview')
     assert app.text_input(key='draft_1_title').value == 'English 1'
-    assert any('No image yet' in block.value for block in app.caption)
+    assert any('preview-missing-image' in block.value and 'No image yet' in block.value for block in app.markdown)
     app.text_input(key='draft_1_title').set_value('My title').run()
     app.text_area(key='draft_1_caption').set_value('My caption').run()
     app.text_area(key='draft_1_hashtags').set_value('#mine').run()
@@ -105,7 +105,7 @@ def test_image_first_and_failed_regeneration(studio, monkeypatch):
     image = app.session_state['result']['image']
     navigate(app, 'preview')
     assert not app.text_input
-    assert any('No caption yet' in block.value for block in app.caption)
+    assert any('preview-missing-caption' in block.value and 'No caption yet' in block.value for block in app.markdown)
     navigate(app, 'text')
     app.button(key='generate_caption').click().run()
     navigate(app, 'preview')
@@ -147,3 +147,17 @@ def test_open_legacy_result_keeps_edits_and_provenance(studio):
     assert app.text_input(key='draft_0_title').value == 'Existing edit'
     assert app.session_state['result']['text_plan'] == legacy_plan
     assert calls == ['image']
+
+
+def test_preview_unified_empty_state(studio):
+    app, calls = studio
+    navigate(app, 'preview')
+    empty = [block.value for block in app.markdown if '<div class="preview-empty"' in block.value]
+    assert len(empty) == 1
+    assert 'Nothing to preview yet' in empty[0]
+    assert 'Generate a caption and image to see your post here.' in empty[0]
+    assert not any('No image yet' in block.value or 'No caption yet' in block.value for block in app.caption)
+    assert not app.text_input and not app.text_area
+    app.radio(key='language').set_value('中文').run()
+    assert any('暂无可预览内容' in block.value for block in app.markdown)
+    assert calls == []

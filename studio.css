@@ -228,3 +228,25 @@ input::placeholder,textarea::placeholder{color:var(--muted,#77756d)!important;op
 @media(prefers-reduced-motion:reduce){
   .st-key-workspace [role="radiogroup"] label{transition:none}
 }
+
+/* Final Preview empty and partial states; other workspaces are unchanged. */
+.st-key-preview_stage:has(.preview-empty){padding:0!important}
+.st-key-preview_stage .preview-empty{
+  min-height:200px;box-sizing:border-box;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;gap:10px;
+  padding:28px 24px;border-radius:12px;
+}
+.st-key-preview_stage .preview-empty h4{
+  margin:0;font-family:'Cormorant Garamond','Noto Sans SC',Georgia,serif;
+  font-size:25px;font-weight:500;line-height:1.3;color:var(--charcoal);
+}
+.st-key-preview_stage .preview-empty p{
+  margin:0;max-width:360px;font-size:13px;line-height:1.7;color:var(--muted);
+}
+.st-key-preview_stage .preview-missing{
+  display:flex;align-items:center;justify-content:center;box-sizing:border-box;
+  padding:20px;text-align:center;background:var(--ivory);color:var(--muted);
+  border:1px dashed var(--line);border-radius:8px;font-size:12px;line-height:1.6;
+}
+.st-key-preview_stage .preview-missing-image{min-height:140px;margin-top:16px}
+.st-key-preview_stage .preview-missing-caption{min-height:76px;margin:12px 0}
