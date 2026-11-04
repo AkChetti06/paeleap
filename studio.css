@@ -227,6 +227,46 @@ h1{font-size:28px!important}h2{font-size:22px!important}h3{font-size:18px!import
   min-height:42px!important;
   padding:0 8px!important;
 }
+
+/* Suppress Streamlit/BaseWeb's second (inner) focus rectangle.
+   Outer .st-key-control_* borders and their focus colours are unchanged. */
+:is(.st-key-control_platform,.st-key-control_destination,
+    .st-key-control_attraction,.st-key-control_audience,
+    .st-key-control_creative_angle,.st-key-control_highlights,
+    .st-key-control_keywords)
+:is([data-testid="stSelectbox"],[data-testid="stTextInput"])
+:is(div,input,[role="combobox"],[data-baseweb="input"],[data-baseweb="select"]){
+  border:0!important;
+  outline:0!important;
+  box-shadow:none!important;
+}
+:is(.st-key-control_platform,.st-key-control_destination,
+    .st-key-control_attraction,.st-key-control_audience,
+    .st-key-control_creative_angle,.st-key-control_highlights,
+    .st-key-control_keywords)
+:is([data-testid="stSelectbox"],[data-testid="stTextInput"])
+:is(div,input,[role="combobox"]):is(:focus,:focus-visible,:focus-within){
+  border:0!important;
+  outline:0!important;
+  box-shadow:none!important;
+}
+:is(.st-key-control_platform,.st-key-control_destination,
+    .st-key-control_attraction,.st-key-control_audience,
+    .st-key-control_creative_angle,.st-key-control_highlights,
+    .st-key-control_keywords)
+:is([data-testid="stSelectbox"],[data-testid="stTextInput"])
+:is(div,input,[role="combobox"])::after,
+:is(.st-key-control_platform,.st-key-control_destination,
+    .st-key-control_attraction,.st-key-control_audience,
+    .st-key-control_creative_angle,.st-key-control_highlights,
+    .st-key-control_keywords)
+:is([data-testid="stSelectbox"],[data-testid="stTextInput"])
+:is(div,input,[role="combobox"])::before{
+  border:0!important;
+  outline:0!important;
+  box-shadow:none!important;
+}
+
 .studio-field-label{
   color:var(--charcoal);
   font-family:var(--font-ui);
