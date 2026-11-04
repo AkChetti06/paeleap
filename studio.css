@@ -134,23 +134,21 @@ h1{font-size:28px!important}h2{font-size:22px!important}h3{font-size:18px!import
 /* One complete outline around each *control*, using keyed Streamlit containers.
    Unlike input internals, these wrappers are stable and cannot lose top/bottom borders.
    Section headings and the category row stay unboxed. */
-:is(.st-key-control_platform,.st-key-control_destination,.st-key-control_attraction,
-    .st-key-control_audience,.st-key-control_creative_angle,.st-key-control_highlights,
-    .st-key-control_keywords){
+:is(.st-key-control_attraction,.st-key-control_audience,
+    .st-key-control_creative_angle,.st-key-control_highlights,.st-key-control_keywords){
   box-sizing:border-box!important;
   width:100%;
   min-height:52px;
   padding:4px 10px!important;
-  border:2px solid var(--field-line)!important;
+  border:1.5px solid var(--field-line)!important;
   border-radius:11px!important;
   background:var(--surface)!important;
-  box-shadow:0 1px 3px rgba(32,39,31,.04)!important;
+  box-shadow:none!important;
 }
-:is(.st-key-control_platform,.st-key-control_destination,.st-key-control_attraction,
-    .st-key-control_audience,.st-key-control_creative_angle,.st-key-control_highlights,
-    .st-key-control_keywords):focus-within{
+:is(.st-key-control_attraction,.st-key-control_audience,
+    .st-key-control_creative_angle,.st-key-control_highlights,.st-key-control_keywords):focus-within{
   border-color:var(--clay)!important;
-  box-shadow:0 0 0 3px color-mix(in srgb,var(--clay) 14%,transparent)!important;
+  box-shadow:none!important;
 }
 /* Native widgets live within the outlined containers; they should not add a
    second border or overflow the single enclosing rectangle. */
@@ -187,8 +185,39 @@ h1{font-size:28px!important}h2{font-size:22px!important}h3{font-size:18px!import
   font-size:14px!important;
   font-weight:500!important;
 }
+/* Dropdowns use the select's own one visible border, not a second container
+   border. Keep focused controls a single clay outline without extra halos. */
+:is(.st-key-control_platform,.st-key-control_destination){
+  box-sizing:border-box!important;
+  width:100%;
+  min-height:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:11px!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+:is(.st-key-control_platform,.st-key-control_destination):focus-within{
+  border:0!important;
+  box-shadow:none!important;
+}
 :is(.st-key-control_platform,.st-key-control_destination) [data-baseweb="select"]>div:first-child{
-  padding:0 8px!important;
+  min-height:50px!important;
+  padding:0 12px!important;
+  border:1.5px solid var(--field-line)!important;
+  border-radius:11px!important;
+  background:var(--surface)!important;
+  box-shadow:none!important;
+  outline:none!important;
+}
+:is(.st-key-control_platform,.st-key-control_destination) [data-baseweb="select"]>div:first-child:focus-within{
+  border-color:var(--clay)!important;
+  box-shadow:none!important;
+  outline:none!important;
+}
+:is(.st-key-control_platform,.st-key-control_destination) [data-baseweb="select"]{
+  box-shadow:none!important;
+  outline:none!important;
 }
 .studio-field-label{
   color:var(--charcoal);
@@ -196,7 +225,7 @@ h1{font-size:28px!important}h2{font-size:22px!important}h3{font-size:18px!import
   font-size:12.5px;
   font-weight:600;
   line-height:1.5;
-  margin:2px 0 1px;
+  margin:3px 0 12px;
   display:flex;
   justify-content:space-between;
   align-items:center;
@@ -213,8 +242,13 @@ h1{font-size:28px!important}h2{font-size:22px!important}h3{font-size:18px!import
   font-weight:700;
   cursor:help;
 }
-.st-key-brief_creative [data-testid="stColumn"] [data-testid="stVerticalBlock"]{gap:7px}
-.st-key-brief_details>[data-testid="stVerticalBlock"]{gap:10px}
+.st-key-brief_creative [data-testid="stColumn"] [data-testid="stVerticalBlock"]{gap:10px}
+.st-key-brief_details>[data-testid="stVerticalBlock"]{gap:13px}
+/* Explicit label-to-control gap: no heading should touch its input outline. */
+:is(.st-key-control_attraction,.st-key-control_audience,.st-key-control_creative_angle,
+    .st-key-control_highlights,.st-key-control_keywords){margin-top:7px!important}
+.st-key-brief_destination .brief-section{margin-bottom:16px!important}
+.st-key-brief_details .studio-field-label{margin-top:8px}
 .st-key-creator_grid [data-testid="stTextArea"] textarea{
   border:1.5px solid var(--field-line)!important;
   border-radius:11px!important;
