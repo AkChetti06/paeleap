@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap');
 /* Shared tokens mirror .streamlit/config.toml; keyed rules provide the app geometry. */
-:root{--sidebar:#435644;--ivory:#f7f5f0;--surface:#fffefc;--sand:#f0eee7;--preview-surface:#f4f3ed;--clay:#a45132;--charcoal:#292c27;--muted:#6d736b;--line:#dedcd4;--field-line:#b6bdb2;--sage:#81917b;--selected:#f9ece4;--font-ui:'Plus Jakarta Sans','Noto Sans SC',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color-scheme:light}
+:root{--sidebar:#435644;--ivory:#f7f5f0;--surface:#fffefc;--sand:#f0eee7;--preview-surface:#f4f3ed;--clay:#a45132;--charcoal:#292c27;--muted:#6d736b;--line:#dedcd4;--field-line:#96a393;--sage:#81917b;--selected:#f9ece4;--font-ui:'Plus Jakarta Sans','Noto Sans SC',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color-scheme:light}
 :root:has(.studio-theme-dark){--ivory:#181d18;--surface:#22241f;--sand:#2e352d;--preview-surface:#252d24;--charcoal:#f1eee7;--muted:#c4c8be;--line:#535e50;--field-line:#879587;--clay:#d38a6b;--selected:#47352c;color-scheme:dark}
 html,body,input,textarea,button,select,[data-testid="stApp"]{font-family:var(--font-ui);color:var(--charcoal)}
 [data-testid="stApp"],[data-testid="stAppViewContainer"],[data-testid="stMain"]{background:var(--ivory);color:var(--charcoal);color-scheme:inherit}
@@ -131,90 +131,95 @@ h1{font-size:28px!important}h2{font-size:22px!important}h3{font-size:18px!import
 }
 .st-key-brief_details{padding-bottom:2px!important}
 
-/* Control outlines live on the visible elements, not Streamlit's changing
-   BaseWeb inner div structure. Never outline labels or whole sections. */
-:is(.st-key-brief_card,.st-key-image_controls) [data-testid="stTextInput"] [data-baseweb="input"]{
-  display:flex!important;
-  align-items:center!important;
-  width:100%!important;
-  min-height:50px!important;
-  height:auto!important;
+/* One complete outline around each *control*, using keyed Streamlit containers.
+   Unlike input internals, these wrappers are stable and cannot lose top/bottom borders.
+   Section headings and the category row stay unboxed. */
+:is(.st-key-control_platform,.st-key-control_destination,.st-key-control_attraction,
+    .st-key-control_audience,.st-key-control_creative_angle,.st-key-control_highlights,
+    .st-key-control_keywords){
   box-sizing:border-box!important;
-  border:0!important;
-  border-radius:11px!important;
-  background:var(--surface)!important;
-  overflow:visible!important;
-  box-shadow:none!important;
-}
-:is(.st-key-brief_card,.st-key-image_controls) [data-testid="stTextInput"] input{
-  display:block!important;
-  flex:1 1 auto!important;
-  width:100%!important;
-  min-width:0!important;
-  height:50px!important;
-  min-height:50px!important;
-  padding:12px 16px!important;
-  box-sizing:border-box!important;
-  appearance:none!important;
-  border:1.5px solid var(--field-line)!important;
-  border-radius:11px!important;
-  outline:0!important;
-  background:var(--surface)!important;
-  color:var(--charcoal)!important;
-  box-shadow:inset 0 0 0 .5px var(--field-line)!important;
-  font-family:var(--font-ui)!important;
-  font-size:14px!important;
-  font-weight:500!important;
-  line-height:1.5!important;
-  text-align:left!important;
-}
-:is(.st-key-brief_card,.st-key-image_controls) [data-testid="stTextInput"] input:focus-visible,
-:is(.st-key-brief_card,.st-key-image_controls) [data-testid="stTextInput"] input:focus{
-  border-color:var(--clay)!important;
-  box-shadow:0 0 0 3px color-mix(in srgb,var(--clay) 16%,transparent)!important;
-}
-:is(.st-key-brief_card,.st-key-results_panel,.st-key-image_controls) [data-testid="stSelectbox"] [data-baseweb="select"]{
-  display:flex!important;
-  align-items:center!important;
-  width:100%!important;
-  min-height:50px!important;
-  box-sizing:border-box!important;
-  border:1.5px solid var(--field-line)!important;
-  border-radius:11px!important;
-  background:var(--surface)!important;
-  box-shadow:inset 0 0 0 .5px var(--field-line)!important;
-}
-:is(.st-key-brief_card,.st-key-results_panel,.st-key-image_controls) [data-testid="stSelectbox"] [data-baseweb="select"]>div:first-child{
   width:100%;
-  min-height:48px!important;
+  min-height:52px;
+  padding:4px 10px!important;
+  border:2px solid var(--field-line)!important;
+  border-radius:11px!important;
+  background:var(--surface)!important;
+  box-shadow:0 1px 3px rgba(32,39,31,.04)!important;
+}
+:is(.st-key-control_platform,.st-key-control_destination,.st-key-control_attraction,
+    .st-key-control_audience,.st-key-control_creative_angle,.st-key-control_highlights,
+    .st-key-control_keywords):focus-within{
+  border-color:var(--clay)!important;
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--clay) 14%,transparent)!important;
+}
+/* Native widgets live within the outlined containers; they should not add a
+   second border or overflow the single enclosing rectangle. */
+:is(.st-key-control_platform,.st-key-control_destination,.st-key-control_attraction,
+    .st-key-control_audience,.st-key-control_creative_angle,.st-key-control_highlights,
+    .st-key-control_keywords) :is([data-baseweb="input"],[data-baseweb="select"],
+    [data-baseweb="select"]>div:first-child){
   box-sizing:border-box!important;
+  width:100%!important;
+  min-height:40px!important;
+  height:auto!important;
   border:0!important;
-  border-radius:10px!important;
+  border-radius:0!important;
+  outline:0!important;
   background:transparent!important;
   box-shadow:none!important;
-  padding:0 8px!important;
+}
+:is(.st-key-control_platform,.st-key-control_destination,.st-key-control_attraction,
+    .st-key-control_audience,.st-key-control_creative_angle,.st-key-control_highlights,
+    .st-key-control_keywords) input{
+  box-sizing:border-box!important;
+  width:100%!important;
+  height:40px!important;
+  min-height:40px!important;
+  padding:8px 12px!important;
+  border:0!important;
+  border-radius:0!important;
+  outline:0!important;
+  background:transparent!important;
   color:var(--charcoal)!important;
+  box-shadow:none!important;
+  text-align:left!important;
   font-family:var(--font-ui)!important;
   font-size:14px!important;
   font-weight:500!important;
 }
-:is(.st-key-brief_card,.st-key-results_panel,.st-key-image_controls) [data-testid="stSelectbox"] [data-baseweb="select"]:focus-within{
-  border-color:var(--clay)!important;
-  box-shadow:0 0 0 3px color-mix(in srgb,var(--clay) 16%,transparent)!important;
+:is(.st-key-control_platform,.st-key-control_destination) [data-baseweb="select"]>div:first-child{
+  padding:0 8px!important;
 }
-:is(.st-key-brief_card,.st-key-results_panel,.st-key-image_controls) [data-testid="stSelectbox"] [data-baseweb="select"]>div:first-child>div:first-child{
-  justify-content:flex-start!important;
-  text-align:left!important;
+.studio-field-label{
+  color:var(--charcoal);
+  font-family:var(--font-ui);
+  font-size:12.5px;
+  font-weight:600;
+  line-height:1.5;
+  margin:2px 0 1px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
 }
-:is(.st-key-brief_card,.st-key-results_panel,.st-key-image_controls) [data-testid="stSelectbox"] [data-baseweb="select"]>div:first-child>div:first-child :is(span,div,input,p){
-  text-align:left!important;
+.studio-field-help{
+  display:inline-grid;
+  place-items:center;
+  width:18px;
+  height:18px;
+  border:1.5px solid var(--muted);
+  border-radius:50%;
+  color:var(--muted);
+  font-size:11px;
+  font-weight:700;
+  cursor:help;
 }
+.st-key-brief_creative [data-testid="stColumn"] [data-testid="stVerticalBlock"]{gap:7px}
+.st-key-brief_details>[data-testid="stVerticalBlock"]{gap:10px}
 .st-key-creator_grid [data-testid="stTextArea"] textarea{
-  background:var(--surface)!important;
   border:1.5px solid var(--field-line)!important;
   border-radius:11px!important;
   padding:12px 14px!important;
-  font-size:14px!important;
+  background:var(--surface)!important;
 }
 @media(max-width:760px){
   :is(.st-key-brief_destination,.st-key-brief_category,.st-key-brief_creative,.st-key-brief_details){padding:7px 0 17px!important}
