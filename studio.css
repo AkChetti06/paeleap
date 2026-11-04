@@ -170,7 +170,7 @@ h1{font-size:28px!important}h2{font-size:22px!important}h3{font-size:18px!import
 }
 :is(.st-key-control_platform,.st-key-control_destination,.st-key-control_attraction,
     .st-key-control_audience,.st-key-control_creative_angle,.st-key-control_highlights,
-    .st-key-control_keywords) input{
+    .st-key-control_keywords) [data-testid="stTextInput"] input{
   box-sizing:border-box!important;
   width:100%!important;
   height:40px!important;
