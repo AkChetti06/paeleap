@@ -204,7 +204,6 @@ with results_panel:
     platform, ratio = render_preview_header(field, label, lang, change_platform)
 with controls:
     st.markdown('## :material/description: ' + label('Content Brief', '创作简报'))
-    st.caption(label('Choose what you want to create.', '选择要创作的内容。'))
     workspace = render_navigation(cn)
     if 'result' in st.session_state:
         retain_legacy_plans(st.session_state['result'])
