@@ -24,7 +24,7 @@ def render_banner(t, lang):
             f'<figcaption><b>{escape(name)}</b><span>{"杭州" if lang == "中文" else "HANGZHOU"} · {index+1:02d} / 03</span>'
             f'<small><a href="{source}" target="_blank" rel="noopener noreferrer">{escape(author)} · {"维基共享资源" if lang == "中文" else "Wikimedia Commons"}</a> · '
             f'<a href="https://creativecommons.org/licenses/{license_id}/" target="_blank" rel="noopener noreferrer">CC {license_id.upper()}</a>'
-            f' · {"完整图片" if lang == "中文" else "full photograph"}</small></figcaption></figure>'
+            f' · {"横幅裁切" if lang == "中文" else "banner crop"}</small></figcaption></figure>'
         )
     return (f'<section class="tourism-gallery" tabindex="0" aria-label="{"旅行灵感图库（非生成结果）" if lang == "中文" else "Travel inspiration gallery (not generated content)"}">'
             f'<div class="gallery-fallback">{"旅行灵感 · 摄影图片暂不可用" if lang == "中文" else "Travel inspiration · Photography temporarily unavailable"}</div>'
