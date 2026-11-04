@@ -233,3 +233,16 @@ Image and makes no API request. The existing restriction on uploaded photos in
 the AI slideshow remains. Switching tabs preserves brief values, copy edits,
 images and videos. Saved videos remain downloadable after a format change, with
 a reminder that regeneration applies the new format.
+
+## Phase 1 green-sidebar foundation
+
+The current shell follows the green-sidebar reference, with a native 216px sage
+sidebar, terracotta `p.` branding and the requested palette and bilingual copy.
+Create retains the full Caption / Image / Video workflows. My Projects, Templates
+and Inspiration are explicitly marked Coming Soon; their features are not built.
+Navigation preserves the current brief, edited copy, images, video and format.
+Platform selection is now in the Live Preview header, and the visual and editable
+copy sit side by side on desktop and stack on mobile.
+
+See [Phase 1 scope and validation](docs/PHASE1_UI.md). Launch with
+`streamlit run app.py` from this directory using the existing virtual environment.

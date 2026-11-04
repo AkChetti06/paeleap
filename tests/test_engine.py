@@ -205,7 +205,7 @@ def test_simple_bilingual_ui_edits_and_video(monkeypatch,tmp_path):
  monkeypatch.setattr(engine,'render_slideshow',lambda *a,**kw:b'fake-video')
  app=AppTest.from_file(str(Path(__file__).resolve().parents[1]/'app.py')).run()
  assert not app.exception
- assert len(app.selectbox)==1
+ assert len(app.selectbox)==2
  assert len(app.text_input)==4
  assert app.selectbox(key='destination').options[0]=='West Lake, Hangzhou'
  assert not any(x.key=='visual_style_choice' for x in app.selectbox)
@@ -344,7 +344,7 @@ def test_server_secrets_used_without_provider_controls(monkeypatch,tmp_path):
  app.radio(key='workspace').set_value('image').run()
  app.button(key='generate_image').click().run()
  assert not app.exception and len(calls)==1
- assert len(app.selectbox)==3
+ assert len(app.selectbox)==4
  assert 'test-cf-secret' not in str(app.session_state['result'])
  assert 'test-text-secret' not in str(app.session_state['result'])
 

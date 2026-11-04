@@ -76,12 +76,12 @@ def test_platform_language_switch_retains_edits_and_presets(studio):
     app.text_input(key='draft_0_title').set_value('My edited title').run()
     app.text_area(key='draft_0_caption').set_value('My edited caption').run()
     for platform, ratio in [('douyin', '9:16'), ('weibo', '1:1'), ('xiaohongshu', '3:4')]:
-        app.radio(key='platform').set_value(platform).run()
+        app.selectbox(key='platform').select(platform).run()
         assert app.session_state['active_ratio'] == ratio
         for language in ['中文', 'English']:
             app.radio(key='language').set_value(language).run()
             assert not app.exception
-            assert app.radio(key='platform').value == platform
+            assert app.selectbox(key='platform').value == platform
             assert app.radio(key='workspace').value == 'text'
             assert app.text_input(key='draft_0_title').value == 'My edited title'
             assert app.text_area(key='draft_0_caption').value == 'My edited caption'
@@ -91,8 +91,8 @@ def test_platform_language_switch_retains_edits_and_presets(studio):
         assert any(f'{FORMATS[ratio][0]} × {FORMATS[ratio][1]}' in x.value for x in app.caption)
     assert calls == ['text', 'image']
     app.radio(key='preview_ratio').set_value('1:1').run()
-    app.radio(key='platform').set_value('douyin').run()
-    app.radio(key='platform').set_value('xiaohongshu').run()
+    app.selectbox(key='platform').select('douyin').run()
+    app.selectbox(key='platform').select('xiaohongshu').run()
     assert app.session_state['active_ratio'] == '3:4'
 
 

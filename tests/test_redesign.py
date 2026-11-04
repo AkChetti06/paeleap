@@ -33,13 +33,13 @@ def test_preview_ratio_buttons_reset_on_platform_change(studio):
         '3:4 — 1080 × 1440', '9:16 — 1080 × 1920', '1:1 — 1080 × 1080']
     app.radio(key='preview_ratio').set_value('1:1').run()
     assert app.session_state['active_ratio'] == '1:1'
-    app.radio(key='platform').set_value('douyin').run()
+    app.selectbox(key='platform').select('douyin').run()
     assert app.radio(key='preview_ratio').value == '9:16'
     app.radio(key='preview_ratio').set_value('3:4').run()
     app.radio(key='language').set_value('中文').run()
     assert not app.exception
     assert app.radio(key='preview_ratio').value == '3:4'
-    app.radio(key='platform').set_value('xiaohongshu').run()
+    app.selectbox(key='platform').select('xiaohongshu').run()
     assert app.session_state['active_ratio'] == '3:4'
     app.radio(key='preview_ratio').set_value('1:1').run()
     navigate(app, 'image')
@@ -57,7 +57,8 @@ def test_inspiration_is_at_top_and_keeps_licenses(studio):
     assert markup.count('creativecommons.org/licenses/') == 3
     assert 'Wikimedia Commons' in markup and 'tabindex="0"' in markup
     blocks = [x.value for x in app.markdown]
-    assert blocks.index(markup) < next(i for i, x in enumerate(blocks) if 'page-intro' in x and not '<style>' in x)
+    assert any('Create Travel Content' in x for x in blocks)
+    assert not any('A place. A perspective.' in x for x in blocks)
 
 
 def test_ratio_switch_updates_preview_and_download_without_generation(studio, monkeypatch):

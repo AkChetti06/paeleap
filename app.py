@@ -13,6 +13,7 @@ from ui_banner import render_gallery
 from ui_workspaces import render_navigation
 from ui_results import render_results, render_preview_header
 from ui_video import render_video_controls
+from ui_shell import render_sidebar, render_heading, render_coming_soon
 from platform_config import PLATFORM_CONFIG, FORMATS, TEMPLATE_LIBRARY
 from studio_state import save_caption_output, retain_legacy_plans
 from engine import (CATEGORY_CONFIG, DESTINATIONS, STYLES, plan, recommend_style,
@@ -20,7 +21,7 @@ from engine import (CATEGORY_CONFIG, DESTINATIONS, STYLES, plan, recommend_style
                     save_output, safe_error)
 
 load_dotenv(dotenv_path=Path(__file__).resolve().parent / '.env', override=False)
-st.set_page_config(page_title='PAELEAP | Creator Studio', page_icon='✦', layout='wide', initial_sidebar_state='collapsed')
+st.set_page_config(page_title='PAELEAP | Creator Studio', page_icon='✦', layout='wide', initial_sidebar_state='auto')
 
 COPY = {'English': {'eyebrow': 'A LITTLE WANDER. A GREAT STORY.',
              'headline': 'Turn places into stories.',
@@ -168,14 +169,13 @@ def change_language():
 theme_type = getattr(getattr(st.context, 'theme', None), 'type', None) or st.get_option('theme.base') or 'light'
 if theme_type == 'dark':
     st.markdown('<span class="studio-theme-dark" aria-hidden="true" style="display:none"></span>', unsafe_allow_html=True)
-st.markdown('<style>' + (Path(__file__).parent / 'studio.css').read_text() + '</style>', unsafe_allow_html=True)
+st.html('<style>' + (Path(__file__).parent / 'studio.css').read_text() + '</style>')
+header_cn = st.session_state.get('language', 'English') == '中文'
+section = render_sidebar(header_cn)
 header = st.container(key='studio_header')
-bar_left, bar_right = header.columns([5, 1.3], vertical_alignment='center')
+bar_left, bar_right = header.columns([0.86, 0.14], vertical_alignment='center')
 with bar_left:
-    header_cn = st.session_state.get('language', 'English') == '中文'
-    subtitle = '创作值得分享的视觉故事。' if header_cn else 'Create visual stories worth sharing.'
-    st.markdown('<div class="studio-header"><div class="brand"><span class="brand-mark">p.</span> PAELEAP <em>STUDIO</em></div>'
-                f'<div class="brand-subtitle">{subtitle}</div></div>', unsafe_allow_html=True)
+    render_heading(header_cn, section)
 with bar_right:
     # A native single-choice radio styled as segments cannot be toggled into an empty state.
     lang = st.radio('EN | 中文',
@@ -191,23 +191,20 @@ def label(en, zh):
     return zh if cn else en
 
 
+if section != 'create':
+    render_coming_soon(section, cn)
+    st.stop()
+
 render_gallery(t, lang)
-st.markdown('<div class="page-intro" lang="' + ('zh-CN' if cn else 'en') + '"><div class="eyebrow">' + label('YOUR CREATIVE WORKSPACE', '旅行内容创作空间') + '</div><h1>' +
-    label('A place. A perspective. Your story.', '从目的地出发，写下你的视角。') + '</h1><p>' +
-    label('Shape thoughtful travel content, from the first idea to the final frame.', '从第一份灵感到最后一帧，让旅行内容有自己的表达。') + '</p></div>', unsafe_allow_html=True)
-with st.container(key='platform_toolbar'):
-    platform = field(st.radio, 'platform', 'xiaohongshu', callback=change_platform,
-        label=label('Create for', '创作平台'), options=list(PLATFORM_CONFIG),
-        format_func=lambda key: PLATFORM_CONFIG[key]['labels'][lang], horizontal=True)
 with st.container(key='creator_grid'):
-    controls, preview = st.columns([0.42, 0.58], gap='large')
+    controls, preview = st.columns([0.5, 0.5], gap='large')
 # Render the preview selector first so this run's generation and video use its value.
 results_panel = preview.container(key='results_panel')
 with results_panel:
-    ratio = render_preview_header(field, label, lang)
+    platform, ratio = render_preview_header(field, label, lang, change_platform)
 with controls:
-    st.markdown('<div class="panel-heading"><h2>' + label('Content brief', '创作简报') + '</h2><span>' +
-        label('01 / CREATE', '01 / 创作') + '</span></div>', unsafe_allow_html=True)
+    st.markdown('## :material/description: ' + label('Content Brief', '创作简报'))
+    st.caption(label('Choose what you want to create.', '选择要创作的内容。'))
     workspace = render_navigation(cn)
     if 'result' in st.session_state:
         retain_legacy_plans(st.session_state['result'])
@@ -248,12 +245,12 @@ with controls:
                 angle = field(st.text_input, 'creative_angle', '', label=t['angle'],
                     placeholder=t['angle_placeholder'], max_chars=180)
             st.markdown('<div class="brief-section">' + label('Content details', '内容重点') + '</div>', unsafe_allow_html=True)
-            highlights_text = field(st.text_input, 'highlights', '', label=label('Key highlights (1–3, separated by ;)', '核心看点（1–3个，用；分隔）'), max_chars=302)
+            highlights_text = field(st.text_input, 'highlights', '', label=label('Key highlights (1–3)', '核心看点（1–3个）'), placeholder=label('Separate highlights with a semicolon', '请用分号分隔看点'), help=label('Enter one to three highlights, separated by ;', '请输入1–3个看点，用；分隔'), max_chars=302)
             st.caption(TEMPLATE_LIBRARY[category]['name'])
             keywords = field(st.text_input, 'keywords', '', label=label('Keywords (optional)', '关键词（可选）'),
                 placeholder=label('e.g. waterside, quiet textures', '例如：水岸、宁静质感'), max_chars=180)
             st.divider()
-            clicked = st.button(t['generate'], key='generate_caption', type='primary', use_container_width=False, disabled=not attraction.strip())
+            clicked = st.button(t['generate'], key='generate_caption', type='primary', width='stretch', disabled=not attraction.strip())
 
     if workspace == 'image':
         # A style chosen before opening the text brief is a deliberate user choice.
@@ -291,7 +288,7 @@ with controls:
                     except Exception as exc:
                         st.error(safe_error(exc, lang))
             clicked = st.button(label('Generate Image', '生成图片'), type='primary', key='generate_image',
-                                use_container_width=False,
+                                width='stretch',
                                 disabled=not st.session_state.get('form_attraction', DESTINATIONS['west_lake']['labels'][lang]).strip())
         attraction = st.session_state.get('form_attraction', DESTINATIONS['west_lake']['labels'][lang])
         category = st.session_state.get('form_category', 'natural_scenery')

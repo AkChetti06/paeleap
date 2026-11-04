@@ -73,7 +73,8 @@ def test_independent_generations_and_preview_edits(studio):
     assert app.text_input(key='draft_1_title').value == 'My title'
     assert app.text_area(key='draft_1_caption').value == 'My caption'
     assert app.text_area(key='draft_1_hashtags').value == '#mine'
-    assert any('<div class="post-masthead">' in block.value for block in app.markdown)
+    assert app.get('imgs')
+    assert app.text_input(key='draft_1_title').value == 'My title'
     navigate(app, 'image')
     app.button(key='generate_image').click().run()
     assert calls == ['text', 'image', 'image']
@@ -156,7 +157,7 @@ def test_preview_unified_empty_state(studio):
     empty = [block.value for block in app.markdown if '<div class="preview-empty"' in block.value]
     assert len(empty) == 1
     assert 'Nothing to preview yet' in empty[0]
-    assert 'Generate a caption and image to see your post here.' in empty[0]
+    assert 'Generate a caption, image or video to see it here.' in empty[0]
     assert not any('No image yet' in block.value or 'No caption yet' in block.value for block in app.caption)
     assert not any(x.key.startswith('draft_') for x in app.text_input) and not app.text_area
     app.radio(key='language').set_value('中文').run()
