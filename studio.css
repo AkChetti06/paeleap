@@ -73,16 +73,19 @@ h1{font-size:28px!important}h2{font-size:22px!important}h3{font-size:18px!import
 .st-key-creator_grid>[data-testid="stLayoutWrapper"]>[data-testid="stHorizontalBlock"]{gap:16px}
 .st-key-creator_grid>[data-testid="stLayoutWrapper"]>[data-testid="stHorizontalBlock"]>[data-testid="stColumn"]{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:24px 26px 28px;align-self:flex-start}
 .st-key-creator_grid h2{margin:0;padding:0;font-size:22px!important}
-/* Distinct headings, labels and controls, with generous vertical rhythm. */
-.brief-section{font-size:17px;font-weight:700;color:var(--charcoal);border-top:1px solid var(--line);padding-top:22px;margin-top:14px;margin-bottom:12px;line-height:1.5}
-.st-key-brief_card [data-testid="stElementContainer"]:first-child .brief-section{border-top:0;padding-top:8px;margin-top:0}
-.st-key-brief_card [data-testid="stVerticalBlock"],.st-key-image_controls [data-testid="stVerticalBlock"]{gap:14px}
+/* Editorial form hierarchy: section titles, labels and values each have a clear role. */
+.st-key-creator_grid h2{font-size:23px!important;font-weight:700!important;letter-spacing:-.035em}
+.st-key-workspace{margin:14px 0 20px}
+.st-key-brief_card [data-testid="stVerticalBlock"]{gap:14px}
+.st-key-brief_card [data-testid="stHorizontalBlock"]{gap:18px}
 .st-key-results_panel [data-testid="stVerticalBlock"]{gap:12px}
-.st-key-brief_card [data-testid="stHorizontalBlock"]{gap:20px}
 .st-key-brief_card hr{display:none}
-.st-key-workspace{margin-bottom:8px}
-.st-key-brief_card [data-testid="stWidgetLabel"],.st-key-image_controls [data-testid="stWidgetLabel"]{margin-bottom:8px}
-.st-key-brief_card [data-testid="stWidgetLabel"] p,.st-key-image_controls [data-testid="stWidgetLabel"] p{font-size:13px!important;line-height:1.65!important}
+.brief-section{margin:0 0 12px!important;padding:0!important;border:0!important;color:var(--charcoal);font-size:18px;font-weight:700;line-height:1.45;letter-spacing:-.025em}
+.st-key-brief_card [data-testid="stWidgetLabel"],.st-key-image_controls [data-testid="stWidgetLabel"]{margin-bottom:7px}
+.st-key-brief_card [data-testid="stWidgetLabel"] p,.st-key-image_controls [data-testid="stWidgetLabel"] p{font-size:12.5px!important;font-weight:600!important;line-height:1.5!important;letter-spacing:0}
+.st-key-brief_category [data-testid="stWidgetLabel"] p{font-size:18px!important;font-weight:700!important;letter-spacing:-.025em}
+.st-key-brief_card [data-testid="stCaptionContainer"] p{font-size:11px!important;font-weight:400!important;color:var(--muted)!important;line-height:1.5}
+.st-key-image_controls .brief-section{margin-top:4px!important}
 
 /* Retain native radio semantics and focus, customize only the keyed option groups. */
 :is(.st-key-language,.st-key-workspace,.st-key-category,.st-key-preview_ratio) [role="radiogroup"] label>div:first-child,
@@ -108,130 +111,94 @@ h1{font-size:28px!important}h2{font-size:22px!important}h3{font-size:18px!import
 .st-key-preview_ratio [role="radiogroup"] label:nth-child(3):before{width:14px;height:14px}
 .st-key-preview_ratio [role="radiogroup"] label:has(input:checked){border-color:var(--clay);background:var(--selected);color:var(--clay)}
 
-/* Inputs and actions: one compact scale, with native theme colors as fallback. */
-[data-testid="stWidgetLabel"] p{font-size:12px!important;font-weight:600!important;line-height:1.6!important;letter-spacing:normal;margin-bottom:2px}
+/* Inputs are the only outlined controls. Keep sections flat and use fine separators. */
+[data-testid="stWidgetLabel"] p{font-weight:600!important}
 [data-testid="stCaptionContainer"],[data-testid="stCaptionContainer"] p{font-size:11px!important;line-height:1.6;color:var(--muted)!important;margin:0}
-[data-testid="stTextInput"] input,[data-testid="stTextArea"] textarea,[data-baseweb="select"]>div{font-family:var(--font-ui)!important;font-size:13px!important;background:var(--surface)!important;color:var(--charcoal)!important;border-radius:8px!important;line-height:1.6;color-scheme:inherit}
-[data-baseweb="input"],[data-baseweb="textarea"],[data-baseweb="select"]>div{border:1px solid var(--line)!important;border-radius:8px!important;box-shadow:none!important}
-[data-baseweb="input"]:focus-within,[data-baseweb="textarea"]:focus-within,[data-baseweb="select"]:focus-within{border-color:var(--clay)!important;outline:2px solid #a4513226;outline-offset:1px}
-/* Outline text fields and dropdowns even when the native Streamlit theme is borderless. */
-.st-key-creator_grid [data-testid="stTextInput"] [data-baseweb="input"],
-.st-key-creator_grid [data-testid="stTextArea"] [data-baseweb="textarea"],
-.st-key-creator_grid [data-testid="stSelectbox"] [data-baseweb="select"]>div:first-child{
-  background:var(--surface)!important;
+:is(.st-key-brief_destination,.st-key-brief_category,.st-key-brief_creative,.st-key-brief_details){
+  width:100%;
+  box-sizing:border-box;
+  background:transparent!important;
+  border:0!important;
+  border-radius:0!important;
+  padding:7px 0 20px!important;
+  margin:0!important;
+}
+:is(.st-key-brief_destination,.st-key-brief_category,.st-key-brief_creative){
+  border-bottom:1px solid var(--line)!important;
+  margin-bottom:13px!important;
+}
+.st-key-brief_details{padding-bottom:2px!important}
+.st-key-brief_card [data-testid="stTextInput"] [data-baseweb="input"],
+.st-key-image_controls [data-testid="stTextInput"] [data-baseweb="input"]{
+  display:flex!important;
+  align-items:center!important;
+  min-height:48px!important;
+  width:100%!important;
+  box-sizing:border-box!important;
   border:1.5px solid var(--field-line)!important;
   border-radius:10px!important;
-  min-height:48px;
+  background:var(--sand)!important;
   box-shadow:none!important;
-  transition:border-color .15s ease,box-shadow .15s ease;
+  overflow:hidden;
 }
-.st-key-creator_grid [data-testid="stTextInput"] [data-baseweb="input"]:focus-within,
-.st-key-creator_grid [data-testid="stTextArea"] [data-baseweb="textarea"]:focus-within,
-.st-key-creator_grid [data-testid="stSelectbox"] [data-baseweb="select"]>div:first-child:focus-within{
+.st-key-brief_card [data-testid="stTextInput"] input,
+.st-key-image_controls [data-testid="stTextInput"] input{
+  flex:1 1 auto;
+  width:100%!important;
+  min-width:0!important;
+  height:46px!important;
+  min-height:0!important;
+  box-sizing:border-box!important;
+  padding:11px 14px!important;
+  border:0!important;
+  border-radius:0!important;
+  outline:0!important;
+  box-shadow:none!important;
+  background:transparent!important;
+  color:var(--charcoal)!important;
+  text-align:left!important;
+  font-family:var(--font-ui)!important;
+  font-size:14px!important;
+  font-weight:500!important;
+  line-height:1.5!important;
+}
+.st-key-brief_card [data-testid="stTextInput"] [data-baseweb="input"]:focus-within,
+.st-key-image_controls [data-testid="stTextInput"] [data-baseweb="input"]:focus-within{
   border-color:var(--clay)!important;
   box-shadow:0 0 0 3px color-mix(in srgb,var(--clay) 16%,transparent)!important;
 }
-.st-key-creator_grid [data-testid="stTextInput"] input,
-.st-key-creator_grid [data-testid="stTextArea"] textarea{
-  min-height:46px;
-  padding-inline:14px!important;
-  background:transparent!important;
-  color:var(--charcoal)!important;
-}
-.st-key-creator_grid [data-testid="stSelectbox"] [data-baseweb="select"]>div:first-child{padding-inline:6px}
-
-/* Center visible input and dropdown values, leaving arrows in their control slots.
-   Preserve left alignment for long caption editors in the preview. */
-.st-key-brief_card [data-testid="stTextInput"] input,
-.st-key-image_controls [data-testid="stTextInput"] input{
-  text-align:center!important;
-}
-.st-key-creator_grid [data-testid="stSelectbox"] [data-baseweb="select"]>div:first-child>div:first-child{
-  flex:1 1 auto;
-  min-width:0;
-  text-align:center!important;
-  justify-content:center!important;
-}
-.st-key-creator_grid [data-testid="stSelectbox"] [data-baseweb="select"]>div:first-child>div:first-child :is(div,span,p,input){
-  text-align:center!important;
-}
-.st-key-creator_grid [data-testid="stSelectbox"] [data-baseweb="select"]>div:first-child>div:first-child [data-testid="stMarkdownContainer"]{
-  width:100%;
-}
-
-
-
-/* Stable section cards: the visual grouping does not rely on Streamlit input internals. */
-.st-key-brief_card .st-key-brief_destination,
-.st-key-brief_card .st-key-brief_category,
-.st-key-brief_card .st-key-brief_creative,
-.st-key-brief_card .st-key-brief_details{
-  background:var(--surface)!important;
-  border:1.5px solid var(--line)!important;
-  border-radius:14px!important;
-  padding:18px 20px 20px!important;
-  box-sizing:border-box;
-  width:100%;
-}
-.st-key-brief_card :is(.st-key-brief_destination,.st-key-brief_category,.st-key-brief_creative,.st-key-brief_details) .brief-section{
-  border:0!important;
-  margin:0 0 10px!important;
-  padding:0!important;
-  font-size:17px!important;
-  line-height:1.5;
-}
-.st-key-brief_card :is(.st-key-brief_destination,.st-key-brief_category,.st-key-brief_creative,.st-key-brief_details) [data-testid="stVerticalBlock"]{gap:14px}
-/* Explicit outlines on native input boxes, independent of BaseWeb wrappers. */
-.st-key-brief_card [data-testid="stTextInput"] [data-baseweb="input"],
-.st-key-image_controls [data-testid="stTextInput"] [data-baseweb="input"]{
-  border:0!important;
-  background:transparent!important;
-  box-shadow:none!important;
-}
-.st-key-brief_card [data-testid="stTextInput"] input,
-.st-key-image_controls [data-testid="stTextInput"] input{
-  display:block!important;
-  width:100%!important;
-  min-height:50px!important;
+:is(.st-key-brief_card,.st-key-results_panel,.st-key-image_controls) [data-baseweb="select"]>div:first-child{
+  min-height:48px!important;
   box-sizing:border-box!important;
-  border:2px solid var(--field-line)!important;
-  border-radius:11px!important;
-  background:var(--surface)!important;
+  border:1.5px solid var(--field-line)!important;
+  border-radius:10px!important;
+  padding:0 8px!important;
+  background:var(--sand)!important;
   color:var(--charcoal)!important;
-  padding:10px 16px!important;
-  text-align:center!important;
-  outline:none!important;
-  box-shadow:0 1px 2px #0000000a!important;
+  box-shadow:none!important;
+  font-family:var(--font-ui)!important;
+  font-size:14px!important;
+  font-weight:500!important;
 }
-.st-key-brief_card [data-testid="stTextInput"] input:focus,
-.st-key-image_controls [data-testid="stTextInput"] input:focus{
+:is(.st-key-brief_card,.st-key-results_panel,.st-key-image_controls) [data-baseweb="select"]>div:first-child:focus-within{
   border-color:var(--clay)!important;
-  box-shadow:0 0 0 3px color-mix(in srgb,var(--clay) 18%,transparent)!important;
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--clay) 16%,transparent)!important;
 }
-.st-key-brief_card [data-testid="stSelectbox"] [data-baseweb="select"]>div,
-.st-key-results_panel [data-testid="stSelectbox"] [data-baseweb="select"]>div,
-.st-key-image_controls [data-testid="stSelectbox"] [data-baseweb="select"]>div{
-  min-height:50px!important;
-  border:2px solid var(--field-line)!important;
-  border-radius:11px!important;
-  background:var(--surface)!important;
-  box-shadow:0 1px 2px #0000000a!important;
+:is(.st-key-brief_card,.st-key-results_panel,.st-key-image_controls) [data-baseweb="select"]>div:first-child>div:first-child{
+  justify-content:flex-start!important;
+  text-align:left!important;
 }
-.st-key-brief_card [data-testid="stSelectbox"] [data-baseweb="select"]>div:focus-within,
-.st-key-results_panel [data-testid="stSelectbox"] [data-baseweb="select"]>div:focus-within,
-.st-key-image_controls [data-testid="stSelectbox"] [data-baseweb="select"]>div:focus-within{
-  border-color:var(--clay)!important;
+:is(.st-key-brief_card,.st-key-results_panel,.st-key-image_controls) [data-baseweb="select"]>div:first-child>div:first-child :is(span,div,input,p){text-align:left!important}
+.st-key-creator_grid [data-testid="stTextArea"] textarea{
+  background:var(--sand)!important;
+  border:1.5px solid var(--field-line)!important;
+  border-radius:10px!important;
+  padding:12px 14px!important;
+  font-size:14px!important;
 }
-.st-key-brief_card [data-testid="stSelectbox"] [data-baseweb="select"]>div>div:first-child{
-  flex:1 1 auto;
-  justify-content:center!important;
-  text-align:center!important;
-}
-.st-key-brief_card [data-testid="stSelectbox"] [data-baseweb="select"]>div>div:first-child :is(span,div,input,p){text-align:center!important}
 @media(max-width:760px){
-  .st-key-brief_card :is(.st-key-brief_destination,.st-key-brief_category,.st-key-brief_creative,.st-key-brief_details){padding:14px 14px 16px!important}
+  :is(.st-key-brief_destination,.st-key-brief_category,.st-key-brief_creative,.st-key-brief_details){padding:7px 0 17px!important}
 }
-
 input::placeholder,textarea::placeholder{color:var(--muted)!important;opacity:.85}
 [data-baseweb="popover"],[data-baseweb="menu"],[role="listbox"],[role="option"]{background:var(--surface)!important;color:var(--charcoal)!important;font-family:var(--font-ui)}
 [role="option"]:hover,[role="option"][aria-selected="true"]{background:var(--sand)!important}
@@ -295,7 +262,7 @@ hr{border-color:var(--line)!important}
   .st-key-language [role="radiogroup"] label{padding:5px 10px}
   .tourism-gallery{height:320px}.gallery-slide:after{bottom:48px}.tourism-gallery .gallery-slide>img{height:calc(100% - 48px)!important}.gallery-slide figcaption{height:48px}.gallery-slide figcaption b{left:16px;bottom:92px;font-size:20px}.gallery-slide figcaption span{left:16px;bottom:70px;font-size:11px}.gallery-slide figcaption small{font-size:9px}
   .st-key-creator_grid>[data-testid="stLayoutWrapper"]>[data-testid="stHorizontalBlock"]>[data-testid="stColumn"]{padding:18px}
-  .brief-section{padding-top:18px;margin-top:12px;margin-bottom:10px}
+  .brief-section{font-size:17px!important}
   .st-key-brief_card [data-testid="stHorizontalBlock"]{flex-wrap:wrap}.st-key-brief_card [data-testid="stColumn"]{width:100%;flex:1 1 100%}
   .panel-heading h2,.preview-toolbar h2{font-size:20px!important}
   .preview-empty{min-height:260px;padding:24px 16px}
