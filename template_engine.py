@@ -2,7 +2,11 @@
 import json
 import re
 from pathlib import Path
-from engine import CaptionError, generate_with_fallback, safe_error
+from engine import CaptionError, safe_error
+
+def generate_with_fallback(*args, **kwargs):
+    raise CaptionError('Legacy image generation is unavailable; use Creator Studio Image workspace.')
+
 
 ROOT = Path(__file__).resolve().parent
 TEMPLATES = {

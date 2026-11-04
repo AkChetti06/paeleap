@@ -191,7 +191,8 @@ def test_saved_outputs(tmp_path):
 
 def test_simple_bilingual_ui_edits_and_video(monkeypatch,tmp_path):
  from streamlit.testing.v1 import AppTest
- import engine,streamlit as st,dotenv
+ import engine,streamlit as st,dotenv,studio_state
+ monkeypatch.setattr(studio_state,'save_caption_output',lambda *a:tmp_path)
  from PIL import Image
  monkeypatch.setattr(dotenv,'load_dotenv',lambda **kw:None)
  calls=[]
@@ -207,31 +208,43 @@ def test_simple_bilingual_ui_edits_and_video(monkeypatch,tmp_path):
  assert len(app.selectbox)==2
  assert len(app.text_input)==4
  assert app.selectbox(key='destination').options[0]=='West Lake, Hangzhou'
- assert app.selectbox(key='visual_style_choice').options==['Cinematic Landscape','Traditional Editorial','Cyberpunk Neon','Vibrant & Playful']
+ assert not any(x.key=='visual_style_choice' for x in app.selectbox)
  assert app.radio(key='language').value=='English'
  assert app.radio(key='category').options==['Ancient Town','Natural Scenery','Theme Park']
  assert app.radio(key='language').options==['EN','中文']
- app.button[0].click().run()
- assert not app.exception and len(app.tabs)==3
+ app.text_input(key='highlights').set_value('Shoreline scenery').run()
+ app.button(key='generate_caption').click().run()
+ assert not app.exception and app.text_area
+ app.radio(key='workspace').set_value('text').run()
  app.text_input(key='draft_0_title').set_value('Edited title').run()
  assert app.text_input(key='draft_0_title').value=='Edited title'
  app.radio(key='language').set_value('中文').run()
  assert not app.exception and len(app.warning)==1
  assert app.text_input(key='draft_0_title').value=='Edited title'
+ app.radio(key='workspace').set_value('text').run()
  assert app.selectbox(key='destination').value=='west_lake'
  assert app.selectbox(key='destination').options[0]=='杭州西湖'
  assert app.radio(key='category').options==['古镇','自然风光','主题乐园']
- assert app.selectbox(key='visual_style_choice').options==['电影感风光','传统人文纪实','赛博朋克霓虹','活力趣味']
- app.button[0].click().run()
+ assert not any(x.key=='visual_style_choice' for x in app.selectbox)
+ app.text_input(key='highlights').set_value('Shoreline scenery').run()
+ app.button(key='generate_caption').click().run()
  assert calls[-1]['language']=='中文'
+ app.radio(key='workspace').set_value('text').run()
  assert app.text_input(key='draft_0_title').value=='中文 0'
+ app.radio(key='workspace').set_value('image').run()
+ app.button(key='generate_image').click().run()
+ app.radio(key='workspace').set_value('text').run()
+ app.radio(key='workspace').set_value('video').run()
  app.button(key='generate_video').click().run()
  assert not app.exception and (tmp_path/'slideshow.mp4').exists()
+ app.radio(key='workspace').set_value('text').run()
  # A failed new generation retains the prior editable output.
  def fail(*a,**kw):raise engine.CaptionError('Text service unavailable')
  monkeypatch.setattr(engine,'generate_caption_variants',fail)
- app.button[0].click().run()
+ app.text_input(key='highlights').set_value('Shoreline scenery').run()
+ app.button(key='generate_caption').click().run()
  assert not app.exception and len(app.error)==1
+ app.radio(key='workspace').set_value('text').run()
  assert app.text_input(key='draft_0_title').value=='中文 0'
 
 
@@ -266,12 +279,14 @@ def test_form_values_survive_translation_and_manual_style(monkeypatch):
  app=AppTest.from_file(str(Path(__file__).resolve().parents[1]/'app.py')).run()
  assert not app.exception
  app.selectbox(key='destination').select('songcheng').run()
- assert app.text_input(key='attraction').value=='Songcheng, Hangzhou'
+ assert app.session_state['form_attraction']=='Songcheng, Hangzhou'
  assert app.radio(key='category').value=='theme_park'
- assert app.selectbox(key='visual_style_choice').value=='vibrant_playful'
+ assert app.session_state['form_visual_style_choice']=='vibrant_playful'
  app.radio(key='category').set_value('ancient_town').run()
  app.text_input(key='creative_angle').set_value('Original user angle').run()
+ app.radio(key='workspace').set_value('image').run()
  app.selectbox(key='visual_style_choice').select('cyberpunk_neon').run()
+ app.radio(key='workspace').set_value('text').run()
  app.text_input(key='audience').set_value('My own audience').run()
  app.text_input(key='keywords').set_value('My own keywords').run()
  for language in ['中文','English','中文','English']:
@@ -281,13 +296,14 @@ def test_form_values_survive_translation_and_manual_style(monkeypatch):
   assert app.radio(key='language').options==['EN','中文']
   assert app.selectbox(key='destination').value=='songcheng'
   assert app.radio(key='category').value=='ancient_town'
-  assert app.selectbox(key='visual_style_choice').value=='cyberpunk_neon'
+  assert app.session_state['form_visual_style_choice']=='cyberpunk_neon'
   assert app.text_input(key='creative_angle').value=='Original user angle'
   assert app.text_input(key='audience').value=='My own audience'
   assert app.text_input(key='keywords').value=='My own keywords'
-  assert app.text_input(key='attraction').value==engine.DESTINATIONS['songcheng']['labels'][language]
+  assert app.session_state['form_attraction']==engine.DESTINATIONS['songcheng']['labels'][language]
   expected=engine.CATEGORY_CONFIG['ancient_town']['style']
-  assert any(engine.STYLES[expected]['labels'][language] in cap.value for cap in app.caption)
+  assert not any(x.key=='visual_style_choice' for x in app.selectbox)
+ app.selectbox(key='destination').select('custom').run()
  app.text_input(key='attraction').set_value('User-entered 名称').run()
  app.radio(key='language').set_value('中文').run()
  assert app.text_input(key='attraction').value=='User-entered 名称'
@@ -301,7 +317,8 @@ def test_form_values_survive_translation_and_manual_style(monkeypatch):
 def test_server_secrets_used_without_provider_controls(monkeypatch,tmp_path):
  from streamlit.testing.v1 import AppTest
  from PIL import Image
- import engine,dotenv
+ import engine,dotenv,studio_state
+ monkeypatch.setattr(studio_state,'save_caption_output',lambda *a:tmp_path)
  monkeypatch.setattr(dotenv,'load_dotenv',lambda **kw:None)
  for name in ['CLOUDFLARE_ACCOUNT_ID','CLOUDFLARE_API_TOKEN','TEXT_API_KEY','TEXT_BASE_URL']:
   monkeypatch.delenv(name,raising=False)
@@ -321,9 +338,13 @@ def test_server_secrets_used_without_provider_controls(monkeypatch,tmp_path):
  app.secrets.update(dict(CLOUDFLARE_ACCOUNT_ID='a'*32,CLOUDFLARE_API_TOKEN='test-cf-secret',
                         TEXT_API_KEY='test-text-secret',TEXT_BASE_URL='https://text.example/v1'))
  app.run()
- app.button[0].click().run()
+ app.text_input(key='highlights').set_value('Shoreline scenery').run()
+ app.button(key='generate_caption').click().run()
+ assert not app.exception and len(calls)==0
+ app.radio(key='workspace').set_value('image').run()
+ app.button(key='generate_image').click().run()
  assert not app.exception and len(calls)==1
- assert len(app.selectbox)==2
+ assert len(app.selectbox)==4
  assert 'test-cf-secret' not in str(app.session_state['result'])
  assert 'test-text-secret' not in str(app.session_state['result'])
 
@@ -351,5 +372,5 @@ def test_all_destination_labels_translate_without_changing_ids(monkeypatch):
    app.radio(key='language').set_value(language).run()
    assert not app.exception
    assert app.selectbox(key='destination').value==destination
-   assert app.text_input(key='attraction').value==item['labels'][language]
+   assert app.session_state['form_attraction']==item['labels'][language]
    assert app.selectbox(key='destination').options==[d['labels'][language] for d in engine.DESTINATIONS.values()]+[('自定义景点' if language=='中文' else 'Custom destination')]

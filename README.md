@@ -152,3 +152,97 @@ The original `app.py` is retained for comparison; the new entry point reuses its
 ### Beginner workflow refinement
 
 `week2_app.py` now exposes place + selectable focus topics, friendly version names, one-click title suggestions and a selected-version TXT download. Each version retains independent edits when switching. Regeneration explicitly offers to keep edits or replace both versions. Technical prompts and JSON export are confined to the developer-record expander. This local entry point is offline-only and does not load keys or invoke text/image APIs; image status is clearly shown as not connected. The original provider engine remains available for a later integration stage.
+
+## Multi-platform Creator Studio (Week 3 library / Week 4 preparation)
+
+Run the current studio from this directory:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+streamlit run app.py
+```
+
+Set `TEXT_API_KEY`, `TEXT_BASE_URL`, optionally `TEXT_MODEL`, and
+`CLOUDFLARE_ACCOUNT_ID` / `CLOUDFLARE_API_TOKEN` in the local `.env` (see
+`.env.example`). Caption and image generation remain independent; uploads and
+export composition run locally. No platform login or publishing is implemented.
+
+Select Xiaohongshu, Douyin or Weibo above the existing workspace tabs. Defaults
+are 1080 × 1440, 1080 × 1920 and 1080 × 1080 respectively. The three ratio buttons at the top of Live Preview override the active format;
+changing platforms resets it to that platform's recommended ratio.
+`platform_config.py` centralizes platform caption guidance, formats, still export
+and video settings. Plans retain platform, ratio, visual style and highlight for
+future image-to-video integration. Existing slideshows now render the selected
+format; older direct calls without a ratio retain their 720 × 960 output.
+
+The supplied `docs/Template_Library_V1.pdf` identifies itself as V1.1. Its three
+category structures live in `TEMPLATE_LIBRARY`: Traditional Editorial / 人文纪实,
+Natural Fresh / 自然清新 and Vibrant Experience / 活力体验. Enter an attraction,
+audience and one to three highlights separated by semicolons. The first highlight
+anchors the title, opening and generated cover. Missing-image highlights remain
+in the caption. This studio retains its single-image workflow: it never clones a
+cover to create carousel pages. You can instead upload one original photo in
+Image and identify its corresponding highlight.
+
+Preview edits titles, captions, hashtags and two alternate titles per variant.
+Platform/language changes preserve edits; regenerate explicitly to adapt wording
+or change the draft language. JSON includes both generated originals and edited
+variants plus the active export format. Image downloads use the exact selected
+canvas, fit the complete image without cropping/stretching, and preserve a
+separate original download. The saved `outputs/` generation snapshots retain
+original images and original copy; preview downloads reflect current edits.
+
+Run checks with `python -m pytest -q`. Tests use mocked API responses and real
+local FFmpeg encoding/decoding. They do not spend generation credits or validate
+live provider availability. Supplied highlights remain unverified claims; prompts
+forbid fabricated logistics and activities, but factual review of model output
+remains necessary. AI image-to-video is future work; the current video feature
+continues to be a slideshow. The old offline Week 2 entry point remains available;
+its obsolete image hook now reports unavailable rather than failing on import.
+
+## Professional studio UI redesign
+
+The current interface uses a 42/58 desktop creator workspace with grouped brief
+controls and a shared live post canvas. Caption and Image remain independent
+generation actions; Live Preview always edits the title, caption and hashtags. All workspaces
+show the latest edited post and offer caption, image and JSON exports.
+
+Plus Jakarta Sans and Noto Sans SC share one type scale with system fallbacks.
+Platform selection uses keyboard-accessible native radio segments with a clay
+active state. The three ratio buttons in Live Preview control composition and export resolution
+without regenerating content. Platform changes apply the platform default ratio;
+language changes and other reruns preserve the selected ratio. The automatic
+280–360px destination gallery sits below the header and retains the original
+photographs, crossfades and photography licensing links.
+Smaller screens stack the controls above the preview, and export actions reflow
+to avoid wrapped, oversized buttons.
+
+See [the UI verification record](docs/UI_REDESIGN_QA.md) for regression coverage,
+responsive browser checks and the remaining manual review steps.
+
+## Video workspace
+
+Content Brief now has three equal-width tabs: Caption, Image and Video (文案、图片、视频).
+Video reuses the existing generated cover, requests only the two additional
+slideshow frames after an explicit click, and uses the existing FFmpeg renderer.
+Its controls live only in Content Brief; playback and MP4 download appear in
+Live Preview when Video is selected. Without an image, the tab directs users to
+Image and makes no API request. The existing restriction on uploaded photos in
+the AI slideshow remains. Switching tabs preserves brief values, copy edits,
+images and videos. Saved videos remain downloadable after a format change, with
+a reminder that regeneration applies the new format.
+
+## Phase 1 green-sidebar foundation
+
+The current shell follows the green-sidebar reference, with a native 216px sage
+sidebar, terracotta `p.` branding and the requested palette and bilingual copy.
+Create retains the full Caption / Image / Video workflows. My Projects, Templates
+and Inspiration are explicitly marked Coming Soon; their features are not built.
+Navigation preserves the current brief, edited copy, images, video and format.
+Platform selection is now in the Live Preview header, and the visual and editable
+copy sit side by side on desktop and stack on mobile.
+
+See [Phase 1 scope and validation](docs/PHASE1_UI.md). Launch with
+`streamlit run app.py` from this directory using the existing virtual environment.

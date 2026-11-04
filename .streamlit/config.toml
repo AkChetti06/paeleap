@@ -1,8 +1,20 @@
-# Keep the editorial palette consistent with the custom studio CSS.
+# PAELEAP Phase 1 theme. These colors are also the shared structural CSS tokens.
 [theme]
 base = "light"
-primaryColor = "#a34f30"
-backgroundColor = "#f8f6f1"
-secondaryBackgroundColor = "#eae4d9"
-textColor = "#33332f"
-font = "sans serif"
+primaryColor = "#A45132"
+backgroundColor = "#F7F5F0"
+secondaryBackgroundColor = "#FFFEFC"
+textColor = "#292C27"
+borderColor = "#DEDCD4"
+font = "Plus Jakarta Sans:https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+baseRadius = "10px"
+buttonRadius = "10px"
+headingFontSizes = ["28px", "22px", "18px", "16px", "14px", "12px"]
+headingFontWeights = [600, 600, 600, 600, 600, 600]
+
+[theme.sidebar]
+backgroundColor = "#435644"
+secondaryBackgroundColor = "#50624F"
+primaryColor = "#FFFEFC"
+textColor = "#F7F5F0"
+borderColor = "#435644"
