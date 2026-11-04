@@ -53,11 +53,12 @@ h1{font-size:28px!important}h2{font-size:22px!important}h3{font-size:18px!import
 
 /* A single continuous destination reel: original images, timing and attribution. */
 .st-key-gallery{margin-bottom:4px}
-.tourism-gallery{position:relative;height:224px;border-radius:16px;overflow:hidden;background:var(--sidebar);isolation:isolate}
+.tourism-gallery{position:relative;height:clamp(350px,32vw,475px);border-radius:16px;overflow:hidden;background:var(--sidebar);isolation:isolate}
 .gallery-fallback{position:absolute;inset:0;display:grid;place-items:center;font-size:13px;padding:20px;color:#e2e8dc}
 .gallery-slide{position:absolute;inset:0;margin:0;background:var(--sidebar);opacity:0;visibility:hidden;animation:gallery-cycle 15s linear infinite}
 .gallery-slide-0{animation-delay:0s}.gallery-slide-1{animation-delay:-10s}.gallery-slide-2{animation-delay:-5s}
-.gallery-slide img{display:block;width:100%;height:calc(100% - 32px);object-fit:cover;object-position:center}
+.gallery-slide:before{content:'';position:absolute;inset:0 0 32px;background-image:var(--gallery-image);background-position:center;background-size:cover;filter:blur(18px) brightness(.76);transform:scale(1.08);opacity:.56;pointer-events:none}
+.gallery-slide img{display:block;position:relative;width:100%;height:calc(100% - 32px);object-fit:contain;object-position:center;z-index:1}
 .gallery-slide figcaption{background:var(--surface);height:32px;display:flex;align-items:center;justify-content:flex-end;padding:4px 12px;box-sizing:border-box}
 .gallery-slide figcaption b{position:absolute;left:24px;bottom:76px;font-size:23px;font-weight:600;color:#fff;text-shadow:0 1px 4px #0008}
 .gallery-slide figcaption span{position:absolute;left:24px;bottom:55px;font-size:12px;color:#fff;text-shadow:0 1px 4px #0008}
@@ -69,13 +70,18 @@ h1{font-size:28px!important}h2{font-size:22px!important}h3{font-size:18px!import
 
 /* Two equal work surfaces match the supplied reference. */
 .st-key-creator_grid>[data-testid="stLayoutWrapper"]>[data-testid="stHorizontalBlock"]{gap:16px}
-.st-key-creator_grid>[data-testid="stLayoutWrapper"]>[data-testid="stHorizontalBlock"]>[data-testid="stColumn"]{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;align-self:flex-start}
+.st-key-creator_grid>[data-testid="stLayoutWrapper"]>[data-testid="stHorizontalBlock"]>[data-testid="stColumn"]{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:24px 26px 28px;align-self:flex-start}
 .st-key-creator_grid h2{margin:0;padding:0;font-size:22px!important}
-.brief-section{font-size:15px;font-weight:600;color:var(--charcoal);border-top:1px solid var(--line);padding-top:14px;margin-top:2px;line-height:1.5}
-.st-key-brief_card [data-testid="stElementContainer"]:first-child .brief-section{border-top:0;padding-top:4px}
-.st-key-brief_card [data-testid="stVerticalBlock"],.st-key-image_controls [data-testid="stVerticalBlock"],.st-key-results_panel [data-testid="stVerticalBlock"]{gap:10px}
-.st-key-brief_card [data-testid="stHorizontalBlock"]{gap:12px}
+/* Distinct headings, labels and controls, with generous vertical rhythm. */
+.brief-section{font-size:17px;font-weight:700;color:var(--charcoal);border-top:1px solid var(--line);padding-top:22px;margin-top:14px;margin-bottom:12px;line-height:1.5}
+.st-key-brief_card [data-testid="stElementContainer"]:first-child .brief-section{border-top:0;padding-top:8px;margin-top:0}
+.st-key-brief_card [data-testid="stVerticalBlock"],.st-key-image_controls [data-testid="stVerticalBlock"]{gap:14px}
+.st-key-results_panel [data-testid="stVerticalBlock"]{gap:12px}
+.st-key-brief_card [data-testid="stHorizontalBlock"]{gap:20px}
 .st-key-brief_card hr{display:none}
+.st-key-workspace{margin-bottom:8px}
+.st-key-brief_card [data-testid="stWidgetLabel"],.st-key-image_controls [data-testid="stWidgetLabel"]{margin-bottom:8px}
+.st-key-brief_card [data-testid="stWidgetLabel"] p,.st-key-image_controls [data-testid="stWidgetLabel"] p{font-size:13px!important;line-height:1.65!important}
 
 /* Retain native radio semantics and focus, customize only the keyed option groups. */
 :is(.st-key-language,.st-key-workspace,.st-key-category,.st-key-preview_ratio) [role="radiogroup"] label>div:first-child,
@@ -107,6 +113,32 @@ h1{font-size:28px!important}h2{font-size:22px!important}h3{font-size:18px!import
 [data-testid="stTextInput"] input,[data-testid="stTextArea"] textarea,[data-baseweb="select"]>div{font-family:var(--font-ui)!important;font-size:13px!important;background:var(--surface)!important;color:var(--charcoal)!important;border-radius:8px!important;line-height:1.6;color-scheme:inherit}
 [data-baseweb="input"],[data-baseweb="textarea"],[data-baseweb="select"]>div{border:1px solid var(--line)!important;border-radius:8px!important;box-shadow:none!important}
 [data-baseweb="input"]:focus-within,[data-baseweb="textarea"]:focus-within,[data-baseweb="select"]:focus-within{border-color:var(--clay)!important;outline:2px solid #a4513226;outline-offset:1px}
+/* Outline text fields and dropdowns even when the native Streamlit theme is borderless. */
+.st-key-creator_grid [data-testid="stTextInput"] [data-baseweb="input"],
+.st-key-creator_grid [data-testid="stTextArea"] [data-baseweb="textarea"],
+.st-key-creator_grid [data-testid="stSelectbox"] [data-baseweb="select"]>div:first-child{
+  background:var(--surface)!important;
+  border:1.5px solid var(--line)!important;
+  border-radius:10px!important;
+  min-height:48px;
+  box-shadow:none!important;
+  transition:border-color .15s ease,box-shadow .15s ease;
+}
+.st-key-creator_grid [data-testid="stTextInput"] [data-baseweb="input"]:focus-within,
+.st-key-creator_grid [data-testid="stTextArea"] [data-baseweb="textarea"]:focus-within,
+.st-key-creator_grid [data-testid="stSelectbox"] [data-baseweb="select"]>div:first-child:focus-within{
+  border-color:var(--clay)!important;
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--clay) 16%,transparent)!important;
+}
+.st-key-creator_grid [data-testid="stTextInput"] input,
+.st-key-creator_grid [data-testid="stTextArea"] textarea{
+  min-height:46px;
+  padding-inline:14px!important;
+  background:transparent!important;
+  color:var(--charcoal)!important;
+}
+.st-key-creator_grid [data-testid="stSelectbox"] [data-baseweb="select"]>div:first-child{padding-inline:6px}
+
 input::placeholder,textarea::placeholder{color:var(--muted)!important;opacity:.85}
 [data-baseweb="popover"],[data-baseweb="menu"],[role="listbox"],[role="option"]{background:var(--surface)!important;color:var(--charcoal)!important;font-family:var(--font-ui)}
 [role="option"]:hover,[role="option"][aria-selected="true"]{background:var(--sand)!important}
@@ -168,8 +200,9 @@ hr{border-color:var(--line)!important}
   .st-key-studio_header [data-testid="stColumn"]:last-child{flex:0 0 96px;width:96px;min-width:96px}
   .shell-heading{display:block}.shell-heading h1{font-size:23px!important;white-space:normal;line-height:1.4!important}.shell-heading p{font-size:11px;border:0;padding:6px 0 0;line-height:1.7}
   .st-key-language [role="radiogroup"] label{padding:5px 10px}
-  .tourism-gallery{height:240px}.gallery-slide img{height:calc(100% - 48px)}.gallery-slide figcaption{height:48px}.gallery-slide figcaption b{left:16px;bottom:92px;font-size:20px}.gallery-slide figcaption span{left:16px;bottom:70px;font-size:11px}.gallery-slide figcaption small{font-size:9px}
-  .st-key-creator_grid>[data-testid="stLayoutWrapper"]>[data-testid="stHorizontalBlock"]>[data-testid="stColumn"]{padding:16px}
+  .tourism-gallery{height:320px}.gallery-slide:before{bottom:48px}.gallery-slide img{height:calc(100% - 48px)}.gallery-slide figcaption{height:48px}.gallery-slide figcaption b{left:16px;bottom:92px;font-size:20px}.gallery-slide figcaption span{left:16px;bottom:70px;font-size:11px}.gallery-slide figcaption small{font-size:9px}
+  .st-key-creator_grid>[data-testid="stLayoutWrapper"]>[data-testid="stHorizontalBlock"]>[data-testid="stColumn"]{padding:18px}
+  .brief-section{padding-top:18px;margin-top:12px;margin-bottom:10px}
   .st-key-brief_card [data-testid="stHorizontalBlock"]{flex-wrap:wrap}.st-key-brief_card [data-testid="stColumn"]{width:100%;flex:1 1 100%}
   .panel-heading h2,.preview-toolbar h2{font-size:20px!important}
   .preview-empty{min-height:260px;padding:24px 16px}
