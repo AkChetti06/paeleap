@@ -185,39 +185,47 @@ h1{font-size:28px!important}h2{font-size:22px!important}h3{font-size:18px!import
   font-size:14px!important;
   font-weight:500!important;
 }
-/* Dropdowns use the select's own one visible border, not a second container
-   border. Keep focused controls a single clay outline without extra halos. */
+/* One border only: place it on the known keyed container rather than an
+   implementation-dependent BaseWeb child. This also provides a focus indicator. */
 :is(.st-key-control_platform,.st-key-control_destination){
   box-sizing:border-box!important;
-  width:100%;
-  min-height:0!important;
-  padding:0!important;
-  border:0!important;
-  border-radius:11px!important;
-  background:transparent!important;
-  box-shadow:none!important;
-}
-:is(.st-key-control_platform,.st-key-control_destination):focus-within{
-  border:0!important;
-  box-shadow:none!important;
-}
-:is(.st-key-control_platform,.st-key-control_destination) [data-baseweb="select"]>div:first-child{
-  min-height:50px!important;
-  padding:0 12px!important;
+  width:100%!important;
+  min-height:52px!important;
+  padding:4px 10px!important;
   border:1.5px solid var(--field-line)!important;
   border-radius:11px!important;
   background:var(--surface)!important;
   box-shadow:none!important;
   outline:none!important;
 }
-:is(.st-key-control_platform,.st-key-control_destination) [data-baseweb="select"]>div:first-child:focus-within{
+:is(.st-key-control_platform,.st-key-control_destination):focus-within{
   border-color:var(--clay)!important;
   box-shadow:none!important;
   outline:none!important;
 }
-:is(.st-key-control_platform,.st-key-control_destination) [data-baseweb="select"]{
+/* Suppress Streamlit's independent inset/focus border, including the combobox.
+   The external control outline stays visible in both resting and focused states. */
+:is(.st-key-control_platform,.st-key-control_destination)
+:is([data-baseweb="select"],[data-baseweb="select"]>div,
+    [data-baseweb="select"]>div:first-child,
+    [role="combobox"],[aria-haspopup="listbox"]){
+  border:0!important;
+  outline:0!important;
   box-shadow:none!important;
-  outline:none!important;
+  background:transparent!important;
+  border-radius:0!important;
+}
+:is(.st-key-control_platform,.st-key-control_destination)
+:is([data-baseweb="select"],[data-baseweb="select"]>div,
+    [data-baseweb="select"]>div:first-child,
+    [role="combobox"],[aria-haspopup="listbox"]):is(:focus,:focus-within,:focus-visible){
+  border:0!important;
+  outline:0!important;
+  box-shadow:none!important;
+}
+:is(.st-key-control_platform,.st-key-control_destination) [data-baseweb="select"]>div:first-child{
+  min-height:42px!important;
+  padding:0 8px!important;
 }
 .studio-field-label{
   color:var(--charcoal);
