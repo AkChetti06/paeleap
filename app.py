@@ -210,44 +210,48 @@ with controls:
     clicked = False
     if workspace == 'text':
         with st.container(key='brief_card'):
-            st.markdown('<div class="brief-section">' + label('Destination', '目的地') + '</div>', unsafe_allow_html=True)
-            # Preserve names edited in older sessions when migrating to one selector.
-            if not st.session_state.get('name_is_preset', True) and st.session_state.get('form_destination', 'west_lake') in DESTINATIONS:
-                st.session_state['form_destination'] = 'custom'
-            destination = field(st.selectbox, 'destination', 'west_lake', callback=use_preset,
-                label=t['destination'], label_visibility='collapsed', options=[*DESTINATIONS, 'custom'],
-                format_func=lambda value: DESTINATIONS[value]['labels'][lang] if value in DESTINATIONS else t['custom'],
-                help=t['destination_help'])
-            if destination == 'custom':
-                attraction = field(st.text_input, 'attraction', '', callback=edited_name,
-                    label=t['name'], placeholder=label('Enter an attraction name', '请输入景点名称'), max_chars=100)
-            else:
-                attraction = DESTINATIONS[destination]['labels'][lang]
-                st.session_state['form_attraction'] = attraction
-            category = field(st.radio, 'category', 'natural_scenery', label=t['scene'],
-                options=list(CATEGORY_CONFIG), format_func=lambda value: CATEGORY_CONFIG[value]['labels'][lang], horizontal=True)
-            angle_value = st.session_state.get('form_creative_angle', '')
-            recommendation = recommend_style(attraction, category, angle_value)
-            # Only meaningful brief changes update the suggestion. Translation is not a brief change.
-            name_context = destination if st.session_state.get('name_is_preset', True) else attraction
-            context = (name_context, category, angle_value)
-            if st.session_state.get('style_context') != context:
-                st.session_state['form_visual_style_choice'] = recommendation
-                st.session_state['style_context'] = context
-            st.markdown('<div class="brief-section">' + label('Creative direction', '创作方向') + '</div>', unsafe_allow_html=True)
-            style = st.session_state.get('form_visual_style_choice', recommendation)
-            audience_column, angle_column = st.columns(2)
-            with audience_column:
-                audience = field(st.text_input, 'audience', t['audience_default'], callback=edited_audience,
-                    label=t['audience'], max_chars=100)
-            with angle_column:
-                angle = field(st.text_input, 'creative_angle', '', label=t['angle'],
-                    placeholder=t['angle_placeholder'], max_chars=180)
-            st.markdown('<div class="brief-section">' + label('Content details', '内容重点') + '</div>', unsafe_allow_html=True)
-            highlights_text = field(st.text_input, 'highlights', '', label=label('Key highlights (1–3)', '核心看点（1–3个）'), placeholder=label('Separate highlights with a semicolon', '请用分号分隔看点'), help=label('Enter one to three highlights, separated by ;', '请输入1–3个看点，用；分隔'), max_chars=302)
-            st.caption(TEMPLATE_LIBRARY[category]['name'])
-            keywords = field(st.text_input, 'keywords', '', label=label('Keywords (optional)', '关键词（可选）'),
-                placeholder=label('e.g. waterside, quiet textures', '例如：水岸、宁静质感'), max_chars=180)
+            with st.container(key='brief_destination'):
+                st.markdown('<div class="brief-section">' + label('Destination', '目的地') + '</div>', unsafe_allow_html=True)
+                # Preserve names edited in older sessions when migrating to one selector.
+                if not st.session_state.get('name_is_preset', True) and st.session_state.get('form_destination', 'west_lake') in DESTINATIONS:
+                    st.session_state['form_destination'] = 'custom'
+                destination = field(st.selectbox, 'destination', 'west_lake', callback=use_preset,
+                    label=t['destination'], label_visibility='collapsed', options=[*DESTINATIONS, 'custom'],
+                    format_func=lambda value: DESTINATIONS[value]['labels'][lang] if value in DESTINATIONS else t['custom'],
+                    help=t['destination_help'])
+                if destination == 'custom':
+                    attraction = field(st.text_input, 'attraction', '', callback=edited_name,
+                        label=t['name'], placeholder=label('Enter an attraction name', '请输入景点名称'), max_chars=100)
+                else:
+                    attraction = DESTINATIONS[destination]['labels'][lang]
+                    st.session_state['form_attraction'] = attraction
+            with st.container(key='brief_category'):
+                category = field(st.radio, 'category', 'natural_scenery', label=t['scene'],
+                    options=list(CATEGORY_CONFIG), format_func=lambda value: CATEGORY_CONFIG[value]['labels'][lang], horizontal=True)
+                angle_value = st.session_state.get('form_creative_angle', '')
+                recommendation = recommend_style(attraction, category, angle_value)
+                # Only meaningful brief changes update the suggestion. Translation is not a brief change.
+                name_context = destination if st.session_state.get('name_is_preset', True) else attraction
+                context = (name_context, category, angle_value)
+                if st.session_state.get('style_context') != context:
+                    st.session_state['form_visual_style_choice'] = recommendation
+                    st.session_state['style_context'] = context
+            with st.container(key='brief_creative'):
+                st.markdown('<div class="brief-section">' + label('Creative direction', '创作方向') + '</div>', unsafe_allow_html=True)
+                style = st.session_state.get('form_visual_style_choice', recommendation)
+                audience_column, angle_column = st.columns(2)
+                with audience_column:
+                    audience = field(st.text_input, 'audience', t['audience_default'], callback=edited_audience,
+                        label=t['audience'], max_chars=100)
+                with angle_column:
+                    angle = field(st.text_input, 'creative_angle', '', label=t['angle'],
+                        placeholder=t['angle_placeholder'], max_chars=180)
+            with st.container(key='brief_details'):
+                st.markdown('<div class="brief-section">' + label('Content details', '内容重点') + '</div>', unsafe_allow_html=True)
+                highlights_text = field(st.text_input, 'highlights', '', label=label('Key highlights (1–3)', '核心看点（1–3个）'), placeholder=label('Separate highlights with a semicolon', '请用分号分隔看点'), help=label('Enter one to three highlights, separated by ;', '请输入1–3个看点，用；分隔'), max_chars=302)
+                st.caption(TEMPLATE_LIBRARY[category]['name'])
+                keywords = field(st.text_input, 'keywords', '', label=label('Keywords (optional)', '关键词（可选）'),
+                    placeholder=label('e.g. waterside, quiet textures', '例如：水岸、宁静质感'), max_chars=180)
             st.divider()
             clicked = st.button(t['generate'], key='generate_caption', type='primary', width='stretch', disabled=not attraction.strip())
 
