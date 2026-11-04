@@ -215,13 +215,17 @@ with controls:
                 # Preserve names edited in older sessions when migrating to one selector.
                 if not st.session_state.get('name_is_preset', True) and st.session_state.get('form_destination', 'west_lake') in DESTINATIONS:
                     st.session_state['form_destination'] = 'custom'
-                destination = field(st.selectbox, 'destination', 'west_lake', callback=use_preset,
-                    label=t['destination'], label_visibility='collapsed', options=[*DESTINATIONS, 'custom'],
-                    format_func=lambda value: DESTINATIONS[value]['labels'][lang] if value in DESTINATIONS else t['custom'],
-                    help=t['destination_help'])
+                with st.container(key='control_destination'):
+                    destination = field(st.selectbox, 'destination', 'west_lake', callback=use_preset,
+                        label=t['destination'], label_visibility='collapsed', options=[*DESTINATIONS, 'custom'],
+                        format_func=lambda value: DESTINATIONS[value]['labels'][lang] if value in DESTINATIONS else t['custom'],
+                        help=t['destination_help'])
                 if destination == 'custom':
-                    attraction = field(st.text_input, 'attraction', '', callback=edited_name,
-                        label=t['name'], placeholder=label('Enter an attraction name', '请输入景点名称'), max_chars=100)
+                    st.markdown('<div class="studio-field-label">' + t['name'] + '</div>', unsafe_allow_html=True)
+                    with st.container(key='control_attraction'):
+                        attraction = field(st.text_input, 'attraction', '', callback=edited_name,
+                            label=t['name'], label_visibility='collapsed',
+                            placeholder=label('Enter an attraction name', '请输入景点名称'), max_chars=100)
                 else:
                     attraction = DESTINATIONS[destination]['labels'][lang]
                     st.session_state['form_attraction'] = attraction
@@ -241,17 +245,29 @@ with controls:
                 style = st.session_state.get('form_visual_style_choice', recommendation)
                 audience_column, angle_column = st.columns(2)
                 with audience_column:
-                    audience = field(st.text_input, 'audience', t['audience_default'], callback=edited_audience,
-                        label=t['audience'], max_chars=100)
+                    st.markdown('<div class="studio-field-label">' + t['audience'] + '</div>', unsafe_allow_html=True)
+                    with st.container(key='control_audience'):
+                        audience = field(st.text_input, 'audience', t['audience_default'], callback=edited_audience,
+                            label=t['audience'], label_visibility='collapsed', max_chars=100)
                 with angle_column:
-                    angle = field(st.text_input, 'creative_angle', '', label=t['angle'],
-                        placeholder=t['angle_placeholder'], max_chars=180)
+                    st.markdown('<div class="studio-field-label">' + t['angle'] + '</div>', unsafe_allow_html=True)
+                    with st.container(key='control_creative_angle'):
+                        angle = field(st.text_input, 'creative_angle', '', label=t['angle'],
+                            label_visibility='collapsed', placeholder=t['angle_placeholder'], max_chars=180)
             with st.container(key='brief_details'):
                 st.markdown('<div class="brief-section">' + label('Content details', '内容重点') + '</div>', unsafe_allow_html=True)
-                highlights_text = field(st.text_input, 'highlights', '', label=label('Key highlights (1–3)', '核心看点（1–3个）'), placeholder=label('Separate highlights with a semicolon', '请用分号分隔看点'), help=label('Enter one to three highlights, separated by ;', '请输入1–3个看点，用；分隔'), max_chars=302)
+                st.markdown('<div class="studio-field-label">' + label('Key highlights (1–3)', '核心看点（1–3个）') +
+                    '<span class="studio-field-help" title="' + label('Enter one to three highlights, separated by semicolons', '请输入1–3个看点，用分号分隔') +
+                    '" aria-label="' + label('Help', '帮助') + '">?</span></div>', unsafe_allow_html=True)
+                with st.container(key='control_highlights'):
+                    highlights_text = field(st.text_input, 'highlights', '', label=label('Key highlights (1–3)', '核心看点（1–3个）'),
+                        label_visibility='collapsed', placeholder=label('Separate highlights with a semicolon', '请用分号分隔看点'),
+                        help=label('Enter one to three highlights, separated by ;', '请输入1–3个看点，用；分隔'), max_chars=302)
                 st.caption(TEMPLATE_LIBRARY[category]['name'])
-                keywords = field(st.text_input, 'keywords', '', label=label('Keywords (optional)', '关键词（可选）'),
-                    placeholder=label('e.g. waterside, quiet textures', '例如：水岸、宁静质感'), max_chars=180)
+                st.markdown('<div class="studio-field-label">' + label('Keywords (optional)', '关键词（可选）') + '</div>', unsafe_allow_html=True)
+                with st.container(key='control_keywords'):
+                    keywords = field(st.text_input, 'keywords', '', label=label('Keywords (optional)', '关键词（可选）'),
+                        label_visibility='collapsed', placeholder=label('e.g. waterside, quiet textures', '例如：水岸、宁静质感'), max_chars=180)
             st.divider()
             clicked = st.button(t['generate'], key='generate_caption', type='primary', width='stretch', disabled=not attraction.strip())
 
