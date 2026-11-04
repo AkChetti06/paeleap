@@ -11,9 +11,10 @@ def render_preview_header(field, label, lang, change_platform):
     with heading:
         st.markdown('## :material/visibility: ' + label('Live Preview', '内容预览'))
     with platform_slot:
-        platform = field(st.selectbox, 'platform', 'xiaohongshu', callback=change_platform,
-            label=label('Platform', '发布平台'), label_visibility='collapsed',
-            options=list(PLATFORM_CONFIG), format_func=lambda key: PLATFORM_CONFIG[key]['labels'][lang])
+        with st.container(key='control_platform'):
+            platform = field(st.selectbox, 'platform', 'xiaohongshu', callback=change_platform,
+                label=label('Platform', '发布平台'), label_visibility='collapsed',
+                options=list(PLATFORM_CONFIG), format_func=lambda key: PLATFORM_CONFIG[key]['labels'][lang])
     st.caption(label('Review and edit your content before exporting.', '导出前，请检查并编辑内容。'))
     default = st.session_state.get('active_ratio', PLATFORM_CONFIG[platform]['ratio'])
     ratio = field(st.radio, 'preview_ratio', st.session_state.get('form_preview_ratio', default),

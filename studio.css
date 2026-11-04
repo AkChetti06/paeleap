@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap');
 /* Shared tokens mirror .streamlit/config.toml; keyed rules provide the app geometry. */
-:root{--sidebar:#435644;--ivory:#f7f5f0;--surface:#fffefc;--sand:#f0eee7;--preview-surface:#f4f3ed;--clay:#a45132;--charcoal:#292c27;--muted:#6d736b;--line:#dedcd4;--sage:#81917b;--selected:#f9ece4;--font-ui:'Plus Jakarta Sans','Noto Sans SC',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color-scheme:light}
-:root:has(.studio-theme-dark){--ivory:#181d18;--surface:#22241f;--sand:#2e352d;--preview-surface:#252d24;--charcoal:#f1eee7;--muted:#c4c8be;--line:#535e50;--clay:#d38a6b;--selected:#47352c;color-scheme:dark}
+:root{--sidebar:#435644;--ivory:#f7f5f0;--surface:#fffefc;--sand:#f0eee7;--preview-surface:#f4f3ed;--clay:#a45132;--charcoal:#292c27;--muted:#6d736b;--line:#dedcd4;--field-line:#96a393;--sage:#81917b;--selected:#f9ece4;--font-ui:'Plus Jakarta Sans','Noto Sans SC',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color-scheme:light}
+:root:has(.studio-theme-dark){--ivory:#181d18;--surface:#22241f;--sand:#2e352d;--preview-surface:#252d24;--charcoal:#f1eee7;--muted:#c4c8be;--line:#535e50;--field-line:#879587;--clay:#d38a6b;--selected:#47352c;color-scheme:dark}
 html,body,input,textarea,button,select,[data-testid="stApp"]{font-family:var(--font-ui);color:var(--charcoal)}
 [data-testid="stApp"],[data-testid="stAppViewContainer"],[data-testid="stMain"]{background:var(--ivory);color:var(--charcoal);color-scheme:inherit}
 .block-container{max-width:1720px;padding:20px 24px 28px}
@@ -53,29 +53,39 @@ h1{font-size:28px!important}h2{font-size:22px!important}h3{font-size:18px!import
 
 /* A single continuous destination reel: original images, timing and attribution. */
 .st-key-gallery{margin-bottom:4px}
-.tourism-gallery{position:relative;height:224px;border-radius:16px;overflow:hidden;background:var(--sidebar);isolation:isolate}
+.tourism-gallery{position:relative;height:clamp(350px,32vw,475px);border-radius:16px;overflow:hidden;background:var(--sidebar);isolation:isolate}
 .gallery-fallback{position:absolute;inset:0;display:grid;place-items:center;font-size:13px;padding:20px;color:#e2e8dc}
-.gallery-slide{position:absolute;inset:0;margin:0;background:var(--sidebar);opacity:0;visibility:hidden;animation:gallery-cycle 15s linear infinite}
+.gallery-slide{position:absolute;inset:0;width:100%;height:100%;margin:0;background-color:var(--sidebar);background-image:var(--gallery-image);background-position:center;background-size:cover;background-repeat:no-repeat;opacity:0;visibility:hidden;animation:gallery-cycle 15s linear infinite}
 .gallery-slide-0{animation-delay:0s}.gallery-slide-1{animation-delay:-10s}.gallery-slide-2{animation-delay:-5s}
-.gallery-slide img{display:block;width:100%;height:calc(100% - 32px);object-fit:cover;object-position:center}
-.gallery-slide figcaption{background:var(--surface);height:32px;display:flex;align-items:center;justify-content:flex-end;padding:4px 12px;box-sizing:border-box}
+.gallery-slide:after{content:'';position:absolute;inset:0 0 32px;background:linear-gradient(90deg,rgba(19,32,20,.58) 0%,rgba(19,32,20,.18) 28%,transparent 58%);z-index:1;pointer-events:none}
+.tourism-gallery .gallery-slide>img{display:block!important;position:absolute!important;inset:0 auto auto 0;width:100%!important;height:calc(100% - 32px)!important;max-width:none!important;object-fit:cover!important;object-position:center!important;}
+.gallery-slide figcaption{position:absolute;bottom:0;left:0;right:0;background:var(--surface);height:32px;display:flex;align-items:center;justify-content:flex-end;padding:4px 12px;box-sizing:border-box;z-index:2}
 .gallery-slide figcaption b{position:absolute;left:24px;bottom:76px;font-size:23px;font-weight:600;color:#fff;text-shadow:0 1px 4px #0008}
 .gallery-slide figcaption span{position:absolute;left:24px;bottom:55px;font-size:12px;color:#fff;text-shadow:0 1px 4px #0008}
 .gallery-slide figcaption small{font-size:9px;color:var(--muted);line-height:1.5;text-align:right}
 .gallery-slide figcaption a{color:inherit;text-underline-offset:2px}
 .st-key-gallery>[data-testid="stElementContainer"]:last-child [data-testid="stCaptionContainer"] p{font-size:10px!important}
 .tourism-gallery:hover .gallery-slide,.tourism-gallery:focus-within .gallery-slide{animation-play-state:paused}
-@keyframes gallery-cycle{0%,28%{opacity:1;visibility:visible}33.333%,94%{opacity:0;visibility:hidden}94.001%{opacity:0;visibility:visible}100%{opacity:1;visibility:visible}}
+/* Each slide stays visible for its entire five-second slot; never expose an empty frame. */
+@keyframes gallery-cycle{0%,33.333%{opacity:1;visibility:visible}33.334%,99.999%{opacity:0;visibility:hidden}100%{opacity:1;visibility:visible}}
 
 /* Two equal work surfaces match the supplied reference. */
 .st-key-creator_grid>[data-testid="stLayoutWrapper"]>[data-testid="stHorizontalBlock"]{gap:16px}
-.st-key-creator_grid>[data-testid="stLayoutWrapper"]>[data-testid="stHorizontalBlock"]>[data-testid="stColumn"]{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;align-self:flex-start}
+.st-key-creator_grid>[data-testid="stLayoutWrapper"]>[data-testid="stHorizontalBlock"]>[data-testid="stColumn"]{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:24px 26px 28px;align-self:flex-start}
 .st-key-creator_grid h2{margin:0;padding:0;font-size:22px!important}
-.brief-section{font-size:15px;font-weight:600;color:var(--charcoal);border-top:1px solid var(--line);padding-top:14px;margin-top:2px;line-height:1.5}
-.st-key-brief_card [data-testid="stElementContainer"]:first-child .brief-section{border-top:0;padding-top:4px}
-.st-key-brief_card [data-testid="stVerticalBlock"],.st-key-image_controls [data-testid="stVerticalBlock"],.st-key-results_panel [data-testid="stVerticalBlock"]{gap:10px}
-.st-key-brief_card [data-testid="stHorizontalBlock"]{gap:12px}
+/* Editorial form hierarchy: section titles, labels and values each have a clear role. */
+.st-key-creator_grid h2{font-size:23px!important;font-weight:700!important;letter-spacing:-.035em}
+.st-key-workspace{margin:14px 0 20px}
+.st-key-brief_card [data-testid="stVerticalBlock"]{gap:14px}
+.st-key-brief_card [data-testid="stHorizontalBlock"]{gap:18px}
+.st-key-results_panel [data-testid="stVerticalBlock"]{gap:12px}
 .st-key-brief_card hr{display:none}
+.brief-section{margin:0 0 12px!important;padding:0!important;border:0!important;color:var(--charcoal);font-size:18px;font-weight:700;line-height:1.45;letter-spacing:-.025em}
+.st-key-brief_card [data-testid="stWidgetLabel"],.st-key-image_controls [data-testid="stWidgetLabel"]{margin-bottom:7px}
+.st-key-brief_card [data-testid="stWidgetLabel"] p,.st-key-image_controls [data-testid="stWidgetLabel"] p{font-size:12.5px!important;font-weight:600!important;line-height:1.5!important;letter-spacing:0}
+.st-key-brief_category [data-testid="stWidgetLabel"] p{font-size:18px!important;font-weight:700!important;letter-spacing:-.025em}
+.st-key-brief_card [data-testid="stCaptionContainer"] p{font-size:11px!important;font-weight:400!important;color:var(--muted)!important;line-height:1.5}
+.st-key-image_controls .brief-section{margin-top:4px!important}
 
 /* Retain native radio semantics and focus, customize only the keyed option groups. */
 :is(.st-key-language,.st-key-workspace,.st-key-category,.st-key-preview_ratio) [role="radiogroup"] label>div:first-child,
@@ -101,12 +111,201 @@ h1{font-size:28px!important}h2{font-size:22px!important}h3{font-size:18px!import
 .st-key-preview_ratio [role="radiogroup"] label:nth-child(3):before{width:14px;height:14px}
 .st-key-preview_ratio [role="radiogroup"] label:has(input:checked){border-color:var(--clay);background:var(--selected);color:var(--clay)}
 
-/* Inputs and actions: one compact scale, with native theme colors as fallback. */
-[data-testid="stWidgetLabel"] p{font-size:12px!important;font-weight:600!important;line-height:1.6!important;letter-spacing:normal;margin-bottom:2px}
-[data-testid="stCaptionContainer"],[data-testid="stCaptionContainer"] p{font-size:11px!important;line-height:1.6;color:var(--muted)!important;margin:0}
-[data-testid="stTextInput"] input,[data-testid="stTextArea"] textarea,[data-baseweb="select"]>div{font-family:var(--font-ui)!important;font-size:13px!important;background:var(--surface)!important;color:var(--charcoal)!important;border-radius:8px!important;line-height:1.6;color-scheme:inherit}
-[data-baseweb="input"],[data-baseweb="textarea"],[data-baseweb="select"]>div{border:1px solid var(--line)!important;border-radius:8px!important;box-shadow:none!important}
-[data-baseweb="input"]:focus-within,[data-baseweb="textarea"]:focus-within,[data-baseweb="select"]:focus-within{border-color:var(--clay)!important;outline:2px solid #a4513226;outline-offset:1px}
+/* Flat brief sections with editorial headings and light separators only. */
+[data-testid="stWidgetLabel"] p{font-weight:600!important}
+[data-testid="stCaptionContainer"],[data-testid="stCaptionContainer"] p{
+  font-size:11px!important;line-height:1.6;color:var(--muted)!important;margin:0
+}
+:is(.st-key-brief_destination,.st-key-brief_category,.st-key-brief_creative,.st-key-brief_details){
+  width:100%;
+  box-sizing:border-box;
+  background:transparent!important;
+  border:0!important;
+  border-radius:0!important;
+  padding:7px 0 20px!important;
+  margin:0!important;
+}
+:is(.st-key-brief_destination,.st-key-brief_category,.st-key-brief_creative){
+  border-bottom:1px solid var(--line)!important;
+  margin-bottom:13px!important;
+}
+.st-key-brief_details{padding-bottom:2px!important}
+
+/* One complete outline around each *control*, using keyed Streamlit containers.
+   Unlike input internals, these wrappers are stable and cannot lose top/bottom borders.
+   Section headings and the category row stay unboxed. */
+:is(.st-key-control_attraction,.st-key-control_audience,
+    .st-key-control_creative_angle,.st-key-control_highlights,.st-key-control_keywords){
+  box-sizing:border-box!important;
+  width:100%;
+  min-height:52px;
+  padding:4px 10px!important;
+  border:1.5px solid var(--field-line)!important;
+  border-radius:11px!important;
+  background:var(--surface)!important;
+  box-shadow:none!important;
+}
+:is(.st-key-control_attraction,.st-key-control_audience,
+    .st-key-control_creative_angle,.st-key-control_highlights,.st-key-control_keywords):focus-within{
+  border-color:var(--clay)!important;
+  box-shadow:none!important;
+}
+/* Native widgets live within the outlined containers; they should not add a
+   second border or overflow the single enclosing rectangle. */
+:is(.st-key-control_platform,.st-key-control_destination,.st-key-control_attraction,
+    .st-key-control_audience,.st-key-control_creative_angle,.st-key-control_highlights,
+    .st-key-control_keywords) :is([data-baseweb="input"],[data-baseweb="select"],
+    [data-baseweb="select"]>div:first-child){
+  box-sizing:border-box!important;
+  width:100%!important;
+  min-height:40px!important;
+  height:auto!important;
+  border:0!important;
+  border-radius:0!important;
+  outline:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+:is(.st-key-control_platform,.st-key-control_destination,.st-key-control_attraction,
+    .st-key-control_audience,.st-key-control_creative_angle,.st-key-control_highlights,
+    .st-key-control_keywords) [data-testid="stTextInput"] input{
+  box-sizing:border-box!important;
+  width:100%!important;
+  height:40px!important;
+  min-height:40px!important;
+  padding:8px 12px!important;
+  border:0!important;
+  border-radius:0!important;
+  outline:0!important;
+  background:transparent!important;
+  color:var(--charcoal)!important;
+  box-shadow:none!important;
+  text-align:left!important;
+  font-family:var(--font-ui)!important;
+  font-size:14px!important;
+  font-weight:500!important;
+}
+/* One border only: place it on the known keyed container rather than an
+   implementation-dependent BaseWeb child. This also provides a focus indicator. */
+:is(.st-key-control_platform,.st-key-control_destination){
+  box-sizing:border-box!important;
+  width:100%!important;
+  min-height:52px!important;
+  padding:4px 10px!important;
+  border:1.5px solid var(--field-line)!important;
+  border-radius:11px!important;
+  background:var(--surface)!important;
+  box-shadow:none!important;
+  outline:none!important;
+}
+:is(.st-key-control_platform,.st-key-control_destination):focus-within{
+  border-color:var(--clay)!important;
+  box-shadow:none!important;
+  outline:none!important;
+}
+/* Suppress Streamlit's independent inset/focus border, including the combobox.
+   The external control outline stays visible in both resting and focused states. */
+:is(.st-key-control_platform,.st-key-control_destination)
+:is([data-baseweb="select"],[data-baseweb="select"]>div,
+    [data-baseweb="select"]>div:first-child,
+    [role="combobox"],[aria-haspopup="listbox"]){
+  border:0!important;
+  outline:0!important;
+  box-shadow:none!important;
+  background:transparent!important;
+  border-radius:0!important;
+}
+:is(.st-key-control_platform,.st-key-control_destination)
+:is([data-baseweb="select"],[data-baseweb="select"]>div,
+    [data-baseweb="select"]>div:first-child,
+    [role="combobox"],[aria-haspopup="listbox"]):is(:focus,:focus-within,:focus-visible){
+  border:0!important;
+  outline:0!important;
+  box-shadow:none!important;
+}
+:is(.st-key-control_platform,.st-key-control_destination) [data-baseweb="select"]>div:first-child{
+  min-height:42px!important;
+  padding:0 8px!important;
+}
+
+/* Suppress Streamlit/BaseWeb's second (inner) focus rectangle.
+   Outer .st-key-control_* borders and their focus colours are unchanged. */
+:is(.st-key-control_platform,.st-key-control_destination,
+    .st-key-control_attraction,.st-key-control_audience,
+    .st-key-control_creative_angle,.st-key-control_highlights,
+    .st-key-control_keywords)
+:is([data-testid="stSelectbox"],[data-testid="stTextInput"])
+:is(div,input,[role="combobox"],[data-baseweb="input"],[data-baseweb="select"]){
+  border:0!important;
+  outline:0!important;
+  box-shadow:none!important;
+}
+:is(.st-key-control_platform,.st-key-control_destination,
+    .st-key-control_attraction,.st-key-control_audience,
+    .st-key-control_creative_angle,.st-key-control_highlights,
+    .st-key-control_keywords)
+:is([data-testid="stSelectbox"],[data-testid="stTextInput"])
+:is(div,input,[role="combobox"]):is(:focus,:focus-visible,:focus-within){
+  border:0!important;
+  outline:0!important;
+  box-shadow:none!important;
+}
+:is(.st-key-control_platform,.st-key-control_destination,
+    .st-key-control_attraction,.st-key-control_audience,
+    .st-key-control_creative_angle,.st-key-control_highlights,
+    .st-key-control_keywords)
+:is([data-testid="stSelectbox"],[data-testid="stTextInput"])
+:is(div,input,[role="combobox"])::after,
+:is(.st-key-control_platform,.st-key-control_destination,
+    .st-key-control_attraction,.st-key-control_audience,
+    .st-key-control_creative_angle,.st-key-control_highlights,
+    .st-key-control_keywords)
+:is([data-testid="stSelectbox"],[data-testid="stTextInput"])
+:is(div,input,[role="combobox"])::before{
+  border:0!important;
+  outline:0!important;
+  box-shadow:none!important;
+}
+
+.studio-field-label{
+  color:var(--charcoal);
+  font-family:var(--font-ui);
+  font-size:12.5px;
+  font-weight:600;
+  line-height:1.5;
+  margin:3px 0 12px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.studio-field-help{
+  display:inline-grid;
+  place-items:center;
+  width:18px;
+  height:18px;
+  border:1.5px solid var(--muted);
+  border-radius:50%;
+  color:var(--muted);
+  font-size:11px;
+  font-weight:700;
+  cursor:help;
+}
+.st-key-brief_creative [data-testid="stColumn"] [data-testid="stVerticalBlock"]{gap:10px}
+.st-key-brief_details>[data-testid="stVerticalBlock"]{gap:13px}
+/* Explicit label-to-control gap: no heading should touch its input outline. */
+:is(.st-key-control_attraction,.st-key-control_audience,.st-key-control_creative_angle,
+    .st-key-control_highlights,.st-key-control_keywords){margin-top:7px!important}
+.st-key-brief_destination .brief-section{margin-bottom:16px!important}
+.st-key-brief_details .studio-field-label{margin-top:8px}
+.st-key-creator_grid [data-testid="stTextArea"] textarea{
+  border:1.5px solid var(--field-line)!important;
+  border-radius:11px!important;
+  padding:12px 14px!important;
+  background:var(--surface)!important;
+}
+@media(max-width:760px){
+  :is(.st-key-brief_destination,.st-key-brief_category,.st-key-brief_creative,.st-key-brief_details){padding:7px 0 17px!important}
+}
 input::placeholder,textarea::placeholder{color:var(--muted)!important;opacity:.85}
 [data-baseweb="popover"],[data-baseweb="menu"],[role="listbox"],[role="option"]{background:var(--surface)!important;color:var(--charcoal)!important;font-family:var(--font-ui)}
 [role="option"]:hover,[role="option"][aria-selected="true"]{background:var(--sand)!important}
@@ -168,8 +367,9 @@ hr{border-color:var(--line)!important}
   .st-key-studio_header [data-testid="stColumn"]:last-child{flex:0 0 96px;width:96px;min-width:96px}
   .shell-heading{display:block}.shell-heading h1{font-size:23px!important;white-space:normal;line-height:1.4!important}.shell-heading p{font-size:11px;border:0;padding:6px 0 0;line-height:1.7}
   .st-key-language [role="radiogroup"] label{padding:5px 10px}
-  .tourism-gallery{height:240px}.gallery-slide img{height:calc(100% - 48px)}.gallery-slide figcaption{height:48px}.gallery-slide figcaption b{left:16px;bottom:92px;font-size:20px}.gallery-slide figcaption span{left:16px;bottom:70px;font-size:11px}.gallery-slide figcaption small{font-size:9px}
-  .st-key-creator_grid>[data-testid="stLayoutWrapper"]>[data-testid="stHorizontalBlock"]>[data-testid="stColumn"]{padding:16px}
+  .tourism-gallery{height:320px}.gallery-slide:after{bottom:48px}.tourism-gallery .gallery-slide>img{height:calc(100% - 48px)!important}.gallery-slide figcaption{height:48px}.gallery-slide figcaption b{left:16px;bottom:92px;font-size:20px}.gallery-slide figcaption span{left:16px;bottom:70px;font-size:11px}.gallery-slide figcaption small{font-size:9px}
+  .st-key-creator_grid>[data-testid="stLayoutWrapper"]>[data-testid="stHorizontalBlock"]>[data-testid="stColumn"]{padding:18px}
+  .brief-section{font-size:17px!important}
   .st-key-brief_card [data-testid="stHorizontalBlock"]{flex-wrap:wrap}.st-key-brief_card [data-testid="stColumn"]{width:100%;flex:1 1 100%}
   .panel-heading h2,.preview-toolbar h2{font-size:20px!important}
   .preview-empty{min-height:260px;padding:24px 16px}
