@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap');
 /* Shared tokens mirror .streamlit/config.toml; keyed rules provide the app geometry. */
-:root{--sidebar:#435644;--ivory:#f7f5f0;--surface:#fffefc;--sand:#f0eee7;--preview-surface:#f4f3ed;--clay:#a45132;--charcoal:#292c27;--muted:#6d736b;--line:#dedcd4;--sage:#81917b;--selected:#f9ece4;--font-ui:'Plus Jakarta Sans','Noto Sans SC',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color-scheme:light}
-:root:has(.studio-theme-dark){--ivory:#181d18;--surface:#22241f;--sand:#2e352d;--preview-surface:#252d24;--charcoal:#f1eee7;--muted:#c4c8be;--line:#535e50;--clay:#d38a6b;--selected:#47352c;color-scheme:dark}
+:root{--sidebar:#435644;--ivory:#f7f5f0;--surface:#fffefc;--sand:#f0eee7;--preview-surface:#f4f3ed;--clay:#a45132;--charcoal:#292c27;--muted:#6d736b;--line:#dedcd4;--field-line:#b6bdb2;--sage:#81917b;--selected:#f9ece4;--font-ui:'Plus Jakarta Sans','Noto Sans SC',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color-scheme:light}
+:root:has(.studio-theme-dark){--ivory:#181d18;--surface:#22241f;--sand:#2e352d;--preview-surface:#252d24;--charcoal:#f1eee7;--muted:#c4c8be;--line:#535e50;--field-line:#879587;--clay:#d38a6b;--selected:#47352c;color-scheme:dark}
 html,body,input,textarea,button,select,[data-testid="stApp"]{font-family:var(--font-ui);color:var(--charcoal)}
 [data-testid="stApp"],[data-testid="stAppViewContainer"],[data-testid="stMain"]{background:var(--ivory);color:var(--charcoal);color-scheme:inherit}
 .block-container{max-width:1720px;padding:20px 24px 28px}
@@ -118,7 +118,7 @@ h1{font-size:28px!important}h2{font-size:22px!important}h3{font-size:18px!import
 .st-key-creator_grid [data-testid="stTextArea"] [data-baseweb="textarea"],
 .st-key-creator_grid [data-testid="stSelectbox"] [data-baseweb="select"]>div:first-child{
   background:var(--surface)!important;
-  border:1.5px solid var(--line)!important;
+  border:1.5px solid var(--field-line)!important;
   border-radius:10px!important;
   min-height:48px;
   box-shadow:none!important;
