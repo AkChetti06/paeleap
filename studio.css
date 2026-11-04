@@ -160,6 +160,78 @@ h1{font-size:28px!important}h2{font-size:22px!important}h3{font-size:18px!import
 }
 
 
+
+/* Stable section cards: the visual grouping does not rely on Streamlit input internals. */
+.st-key-brief_card .st-key-brief_destination,
+.st-key-brief_card .st-key-brief_category,
+.st-key-brief_card .st-key-brief_creative,
+.st-key-brief_card .st-key-brief_details{
+  background:var(--surface)!important;
+  border:1.5px solid var(--line)!important;
+  border-radius:14px!important;
+  padding:18px 20px 20px!important;
+  box-sizing:border-box;
+  width:100%;
+}
+.st-key-brief_card :is(.st-key-brief_destination,.st-key-brief_category,.st-key-brief_creative,.st-key-brief_details) .brief-section{
+  border:0!important;
+  margin:0 0 10px!important;
+  padding:0!important;
+  font-size:17px!important;
+  line-height:1.5;
+}
+.st-key-brief_card :is(.st-key-brief_destination,.st-key-brief_category,.st-key-brief_creative,.st-key-brief_details) [data-testid="stVerticalBlock"]{gap:14px}
+/* Explicit outlines on native input boxes, independent of BaseWeb wrappers. */
+.st-key-brief_card [data-testid="stTextInput"] [data-baseweb="input"],
+.st-key-image_controls [data-testid="stTextInput"] [data-baseweb="input"]{
+  border:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+.st-key-brief_card [data-testid="stTextInput"] input,
+.st-key-image_controls [data-testid="stTextInput"] input{
+  display:block!important;
+  width:100%!important;
+  min-height:50px!important;
+  box-sizing:border-box!important;
+  border:2px solid var(--field-line)!important;
+  border-radius:11px!important;
+  background:var(--surface)!important;
+  color:var(--charcoal)!important;
+  padding:10px 16px!important;
+  text-align:center!important;
+  outline:none!important;
+  box-shadow:0 1px 2px #0000000a!important;
+}
+.st-key-brief_card [data-testid="stTextInput"] input:focus,
+.st-key-image_controls [data-testid="stTextInput"] input:focus{
+  border-color:var(--clay)!important;
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--clay) 18%,transparent)!important;
+}
+.st-key-brief_card [data-testid="stSelectbox"] [data-baseweb="select"]>div,
+.st-key-results_panel [data-testid="stSelectbox"] [data-baseweb="select"]>div,
+.st-key-image_controls [data-testid="stSelectbox"] [data-baseweb="select"]>div{
+  min-height:50px!important;
+  border:2px solid var(--field-line)!important;
+  border-radius:11px!important;
+  background:var(--surface)!important;
+  box-shadow:0 1px 2px #0000000a!important;
+}
+.st-key-brief_card [data-testid="stSelectbox"] [data-baseweb="select"]>div:focus-within,
+.st-key-results_panel [data-testid="stSelectbox"] [data-baseweb="select"]>div:focus-within,
+.st-key-image_controls [data-testid="stSelectbox"] [data-baseweb="select"]>div:focus-within{
+  border-color:var(--clay)!important;
+}
+.st-key-brief_card [data-testid="stSelectbox"] [data-baseweb="select"]>div>div:first-child{
+  flex:1 1 auto;
+  justify-content:center!important;
+  text-align:center!important;
+}
+.st-key-brief_card [data-testid="stSelectbox"] [data-baseweb="select"]>div>div:first-child :is(span,div,input,p){text-align:center!important}
+@media(max-width:760px){
+  .st-key-brief_card :is(.st-key-brief_destination,.st-key-brief_category,.st-key-brief_creative,.st-key-brief_details){padding:14px 14px 16px!important}
+}
+
 input::placeholder,textarea::placeholder{color:var(--muted)!important;opacity:.85}
 [data-baseweb="popover"],[data-baseweb="menu"],[role="listbox"],[role="option"]{background:var(--surface)!important;color:var(--charcoal)!important;font-family:var(--font-ui)}
 [role="option"]:hover,[role="option"][aria-selected="true"]{background:var(--sand)!important}
