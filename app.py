@@ -41,6 +41,7 @@ COPY = {'English': {'eyebrow': 'A LITTLE WANDER. A GREAT STORY.',
              'style_custom': 'You can choose any other style.',
              'audience': 'Target audience',
              'audience_default': 'First-time visitors',
+             'audience_placeholder': 'e.g. first-time visitors',
              'angle': 'Creative angle',
              'angle_placeholder': 'e.g. a peaceful lakeside afternoon',
              'generate': 'Generate Caption',
@@ -83,6 +84,7 @@ COPY = {'English': {'eyebrow': 'A LITTLE WANDER. A GREAT STORY.',
         'style_custom': '也可以自由选择其他风格。',
         'audience': '目标受众',
         'audience_default': '首次到访游客',
+         'audience_placeholder': '例如：首次到访游客',
         'angle': '创作角度',
         'angle_placeholder': '例如：悠闲的湖边午后',
         'generate': '生成文案',
@@ -162,9 +164,17 @@ def change_language():
     destination = st.session_state.get('form_destination', 'west_lake')
     if st.session_state.get('name_is_preset', True) and destination in DESTINATIONS:
         st.session_state['form_attraction'] = DESTINATIONS[destination]['labels'][lang]
-    if st.session_state.get('audience_is_default', True):
-        st.session_state['form_audience'] = COPY[lang]['audience_default']
+    # Audience examples are placeholders, not automatically translated input.
+    # Preserve only what the visitor has actually typed.
 
+
+# Clear only the historical auto-filled audience, not user-entered values.
+# Keep this one-time migration scoped to the active Streamlit session.
+if not st.session_state.get('audience_placeholder_migrated'):
+    if st.session_state.get('audience_is_default', True) and st.session_state.get('form_audience', '') in (
+            '', 'First-time visitors', '首次到访游客'):
+        st.session_state['form_audience'] = ''
+    st.session_state['audience_placeholder_migrated'] = True
 
 theme_type = getattr(getattr(st.context, 'theme', None), 'type', None) or st.get_option('theme.base') or 'light'
 if theme_type == 'dark':
@@ -247,8 +257,9 @@ with controls:
                 with audience_column:
                     st.markdown('<div class="studio-field-label">' + t['audience'] + '</div>', unsafe_allow_html=True)
                     with st.container(key='control_audience'):
-                        audience = field(st.text_input, 'audience', t['audience_default'], callback=edited_audience,
-                            label=t['audience'], label_visibility='collapsed', max_chars=100)
+                        audience = field(st.text_input, 'audience', '', callback=edited_audience,
+                            label=t['audience'], label_visibility='collapsed',
+                            placeholder=t['audience_placeholder'], max_chars=100)
                 with angle_column:
                     st.markdown('<div class="studio-field-label">' + t['angle'] + '</div>', unsafe_allow_html=True)
                     with st.container(key='control_creative_angle'):
@@ -312,7 +323,7 @@ with controls:
         attraction = st.session_state.get('form_attraction', DESTINATIONS['west_lake']['labels'][lang])
         category = st.session_state.get('form_category', 'natural_scenery')
         keywords = st.session_state.get('form_keywords', '')
-        audience = st.session_state.get('form_audience', t['audience_default'])
+        audience = st.session_state.get('form_audience', '')
         angle = st.session_state.get('form_creative_angle', '')
 
     if clicked:
