@@ -380,3 +380,8 @@ hr{border-color:var(--line)!important}
   .footer{flex-direction:column;gap:8px}.footer>span:last-child{text-align:left}
 }
 @media(prefers-reduced-motion:reduce){.gallery-slide{animation:none;opacity:0;visibility:hidden}.gallery-slide-0{opacity:1;visibility:visible}button,[role="radiogroup"] label{transition:none!important}}
+
+/* Hide Streamlit's Enter-to-apply helper only; keep the character count visible. */
+[data-testid="InputInstructions"] > span:first-child{
+  display:none!important;
+}
